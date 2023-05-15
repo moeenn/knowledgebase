@@ -37,6 +37,12 @@ CREATE TABLE
 ```
 
 
+##### Delete all tables
+```sql
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+```
+
 ---
 
 #### Column Data types
