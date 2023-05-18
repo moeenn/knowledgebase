@@ -311,6 +311,26 @@ def main() -> None:
 
 ---
 
+#### Counter
+Counter is a built-in class which can help keep track of item occurrences in lists. 
+
+```python
+from collections import Counter
+
+c = Counter(["Python", "PHP"])
+c.update(["Go", "JS"])
+c.update(["PHP", "JS", "TS"])
+
+print(c)
+# Counter({'PHP': 2, 'JS': 2, 'Python': 1, 'Go': 1, 'TS': 1})
+
+print(c.most_common(3))
+# [('PHP', 2), ('JS', 2), ('Python', 1)]
+```
+
+
+---
+
 #### Taking Input from User
 ```python
 # interactive input
@@ -879,4 +899,3 @@ if __name__ == "__main__":
     args = Args(parsed.name, parsed.year)
     main(args)
 ```
-

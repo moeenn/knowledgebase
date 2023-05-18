@@ -26,16 +26,27 @@ File `jsconfig.json`
 ```json
 {
   "compilerOptions": {
-    "strict": true,
     "checkJs": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
     "target": "ES2015",
     "moduleResolution": "node",
+    "noImplicitOverride": false,
     "paths": {
-      "#src/*": ["./src/*"]
+      "#src/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*"
   ]
 }
 ```
@@ -97,7 +108,10 @@ class Point {
 }
 
 class Entity {
-  /** @type {string} */
+  /**
+   * @readonly
+   * @type {string}
+  */
   name
 
   /** @type {Point} */
@@ -117,9 +131,35 @@ class Entity {
     this.#area = x * y
   }
 
-  /** @returns {number} */
+  /**
+   * @public
+   * @returns {number} 
+  */
   get area() {
     return this.#area
+  }
+}
+```
+
+**Note**: Access modifiers i.e. `@public`,  `@private`,  `@protected` can be used with properties and methods. 
+
+
+##### Extends and Implements
+```js
+/**
+ * @template T
+ * @extends {Set<T>}
+ */
+class SortableSet extends Set {
+  // ...
+}
+```
+
+```js
+/** @implements {Print} */
+class TextBook {
+  print() {
+    // TODO
   }
 }
 ```
@@ -171,6 +211,26 @@ main().catch(console.error)
 
 ---
 
+#### Generics
+```js
+/**
+ * @template T
+ * @param {T} x - A generic parameter that flows through to the return type
+ * @returns {T}
+ */
+function id(x) {
+  return x
+}
+ 
+const a = id("string")
+const b = id(123)
+const c = id({})
+```
+
+**Note**: Generic classes can also be defined this way.
+
+---
+
 #### Cast to specific Data type
 ```javascript
 /** @type {unknown} */
@@ -183,7 +243,7 @@ const rawData = {
 const data = /** @type {{ id: number, name: string, email: string}} */ (rawData)
 ```
 
-**Note**: The placement of the parentheses during casting is important.
+**Note**: The comment style and the placement of the parentheses during casting is important.
 
 
 ---
@@ -204,9 +264,6 @@ const schema = /** @type {const} */ (anotherVariable)
 ```javascript
 import Ajv from "ajv"
 
-/* eslint-ignore-next-line no-unused-vars */
-import jsonSchema from "json-schema-to-ts" 
-
 const schema = /** @type {const} */ ({
   type: "object",
   properties: {
@@ -218,7 +275,7 @@ const schema = /** @type {const} */ ({
   additionalProperties: false,
 })
 
-/** @typedef {jsonSchema.FromSchema<typeof schema>} Schema */
+/** @typedef {import(""json-schema-to-ts"").FromSchema<typeof schema>} Schema */
 
 /** @returns {Promise<void>} */
 export async function main() {
@@ -237,7 +294,7 @@ export async function main() {
     return console.log({ isValid })
   }
 
-  const body = (/** @type {Schema} */ (rawData))
+  const body = /** @type {Schema} */ (rawData)
   console.log(body)
 }
 

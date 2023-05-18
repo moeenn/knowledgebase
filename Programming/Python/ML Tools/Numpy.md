@@ -2,6 +2,7 @@
 $ pip3 install numpy
 ```
 
+
 #### Common Attributes
 ```python
 import numpy as np
