@@ -3,7 +3,7 @@ $ pip3 install matplotlib
 ```
 
 
-##### Usage with Jupyter notebook
+##### Usage with `Jupyter` notebook
 ```python
 from matplotlib import pyplot as plt
 
@@ -74,6 +74,71 @@ plt.plot(
     developers["age"],
     developers["py_median_salary"],
     label="Python dev"
+)
+```
+
+
+---
+
+#### Applying fill betweens
+
+```python
+import pandas as pd
+from matplotlib import pyplot as plt
+
+data = pd.read_csv("data.csv")
+
+ages = data["Age"]
+salaries_all = data["All_Devs"]
+salaries_python = data["Python"]
+salaries_js = data["JavaScript"]
+
+plt.plot(ages, salaries_all, label="All Developers")
+plt.plot(ages, salaries_python, label="Python developers")
+
+plt.fill_between(
+    ages,
+    salaries_python,
+    salaries_all,
+    where=(salaries_python > salaries_all),
+    interpolate=True,
+    alpha=0.25,
+    label="Above Avg."
+)
+
+plt.fill_between(
+    ages,
+    salaries_python,
+    salaries_all,
+    where=(salaries_python <= salaries_all),
+    interpolate=True,
+    color="red",
+    alpha=0.25,
+    label="Below Avg."
+)
+
+plt.title("Median developer salaries by Age")
+plt.xlabel("Age")
+plt.ylabel("Median salary")
+
+plt.legend(loc="lower right")
+plt.grid(True)
+plt.show()
+```
+
+**Note**: In this example we are applying fill between the two plot lines. However, we can also apply fill between line and a fixed y-position. 
+
+```python
+median = 55000
+
+plt.fill_between(
+    ages,
+    salaries_python,
+    median,
+    where=(salaries_python > median),
+    interpolate=True,
+    alpha=0.25,
+    label="Above median"
 )
 ```
 
@@ -155,4 +220,77 @@ plt.show()
 ```
 
 **Note**: If we need to draw a horizontal bar chart, we can use `plt.barh` method instead of `plt.bar`.
+
+
+---
+
+#### Stack plots
+
+```python
+from matplotlib import pyplot as plt
+
+minutes = [i for i in range(1, 10)]
+scores = {
+    "player_one": [1, 2, 3, 3, 4, 4, 4, 4, 5],
+    "player_two": [1, 1, 1, 1, 2, 2, 2, 3, 4],
+    "player_thr": [1, 1, 1, 2, 2, 2, 3, 3, 3],
+}
+
+labels = ["Player One", "Player Two", "Player Three"]
+
+plt.stackplot(minutes, scores["player_one"], scores["player_two"], scores["player_thr"], labels=labels)
+
+plt.title("Player scores")
+plt.xlabel("Minutes")
+plt.ylabel("Scores")
+plt.legend(loc="upper left")
+
+plt.show()
+```
+
+
+---
+
+#### Histograms
+Data is grouped together in bins. Bins are displayed as vertical bars. In the following example a histogram is better than a bar plot because drawing ~100 bars would be very confusing.
+
+```python
+from matplotlib import pyplot as plt
+
+ages = [18, 19, 21, 25, 26, 26, 30, 32, 38, 45, 55]
+bins = [20, 30, 40, 50, 60]
+
+plt.hist(ages, bins=bins, edgecolor="black")
+plt.grid(True)
+plt.show()
+```
+
+**Note**: The data includes ages between 10-20, but we haven't defined a bin for it. Ages in this range will be excluded from the histogram.
+
+
+---
+
+#### Scatter plots
+Scatter plots are very useful in visualizing correlations and outliers.
+
+```python
+from matplotlib import pyplot as plt
+
+plt.style.use("ggplot")
+
+x = [5, 7, 8, 5, 6, 7, 9, 2, 3, 4, 4, 4, 2, 6, 3, 6, 8, 6, 4, 1]
+y = [7, 4, 3, 9, 1, 3, 2, 5, 2, 4, 8, 7, 1, 6, 4, 9, 7, 7, 5, 1]
+colors = [7, 5, 9, 7, 5, 7, 2, 5, 3, 7, 1, 2, 8, 1, 9, 2, 5, 6, 7, 5]
+
+plt.scatter(x, y, s=50, c=colors, cmap="Greens")
+
+cbar = plt.colorbar()
+cbar.set_label("Satisfaction")
+
+plt.grid(True)
+plt.show()
+```
+
+
+---
 
