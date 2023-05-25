@@ -72,8 +72,8 @@ fn main() {
 | Character | `char (used with single-quotes)` |
 
 ##### Compound types
-| Description | Type |  
-| -------: | :------ |  
+| Description | Type | 
+| -------: | :------ | 
 | Array | `Fixed-sized collection of one data type` |  
 | Tuple | `Fixed-sized array of related data of different types` |
 

@@ -294,3 +294,102 @@ plt.show()
 
 ---
 
+#### Time series data
+```python
+from datetime import datetime
+import pandas as pd
+
+plt.style.use("ggplot")
+
+dates = [
+    datetime(2019, 5, 24),
+    datetime(2019, 5, 25),
+    datetime(2019, 5, 26),
+    datetime(2019, 5, 27),
+    datetime(2019, 5, 28),
+    datetime(2019, 5, 29),
+    datetime(2019, 5, 30)
+]
+
+y = [0, 1, 3, 4, 6, 5, 7]
+
+plt.plot_date(dates, y, linestyle="solid")
+plt.show()
+```
+
+Note: When reading dates from CSV files, they will not be automatically converted to `Datetime` objects. We can do it manually as follows.
+
+```python
+data = pd.read_csv("data.csv")
+data["date"] = pd.to_datetime(data["date"])
+data.sort("date", inplace=True)
+```
+
+
+---
+
+#### Live plots
+
+```python
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import pandas as pd
+from itertools import count
+import random
+
+plt.style.use("ggplot")
+
+x_vals = []
+y_vals = []
+
+index = count()
+
+def animate(i):
+    x_vals.append(next(index))
+    y_vals.append(random.randint(0, 5))
+
+    # clean previous lines and draw new one
+    plt.cla()
+    plt.plot(x_vals, y_vals)
+
+
+fig = plt.gcf()
+anim = FuncAnimation(fig, animate, interval=2000)
+
+plt.plot(x_vals, y_vals)
+plt.show()
+```
+
+
+---
+
+#### Subplots
+
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+
+plt.style.use("ggplot")
+
+data = pd.read_csv("data.csv")
+age = data["Age"]
+all_devs = data["All_Devs"]
+js_devs = data["JavaScript"]
+py_devs = data["Python"]
+
+
+fig, (axis_one, axis_two) = plt.subplots(nrows=2, ncols=1, sharex=True)
+
+axis_one.plot(age, all_devs, linestyle="--", label="All Developers")
+axis_one.set_title("All developers")
+axis_one.set_ylabel("Median salary")
+axis_one.legend()
+
+axis_two.plot(age, js_devs, label="JS")
+axis_two.plot(age, py_devs, label="Python")
+axis_two.set_xlabel("Age")
+axis_two.set_ylabel("Median salary")
+axis_two.legend()
+
+plt.show()
+```

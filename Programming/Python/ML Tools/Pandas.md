@@ -33,7 +33,7 @@ pd.set_option("display.max_rows", 85)
 
 ---
 
-#### Custom dataframes
+#### Custom `dataframes`
 ```python
 people = {
     "name": ["Mr. Admin", "Ms. Customer"],
@@ -218,8 +218,10 @@ df.applymap(str.lower)
 
 ##### Series Map function
 ```python
-# This method will replace all instances of "John" with "Date" in column "first". 
-# Values not matched will be converted to NaN. If this is not the desired behavior, use replace method
+# This method will replace all instances of "John" with "Date" 
+# in column "first". 
+# Values not matched will be converted to NaN. If this is not the 
+# desired behavior, use replace method
 df["first"] = df["first"].map({ "John": "Dale" })
 ```
 
@@ -271,7 +273,6 @@ df["ConvertedComp"].median()
 # get general stats about the dataframe
 df.describe()
 
-
 # get all unique values in column
 df["YearsCode"].unique()
 
@@ -321,6 +322,7 @@ people = {
 }
 
 df = pd.DataFrame(people)
+
 # check which rows and columns contain NA values
 df.isna()
 
