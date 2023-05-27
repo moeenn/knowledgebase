@@ -1,4 +1,4 @@
-##### Class without Lombok
+##### Class without `Lombok`
 ```java
 public class Customer {
   private Long id;
@@ -55,7 +55,7 @@ public class Customer {
 ```
 
 
-##### Using Lombok
+##### Using `Lombok`
 ```java
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
