@@ -385,3 +385,14 @@ public class Main {
 }
 ```
 
+
+---
+
+#### UUID
+UUID can be generated in Java without requiring any third party libraries. 
+
+```java
+import java.util.UUID;
+...
+UUID uuid = UUID.randomUUID();
+```

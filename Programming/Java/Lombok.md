@@ -57,14 +57,12 @@ public class Customer {
 
 ##### Using `Lombok`
 ```java
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 @ToString
-@AllArgsConstructor
 @EqualsAndHashCode
 public class Customer {
   @Getter @Setter private Long id;
@@ -78,8 +76,10 @@ public class Customer {
 ##### Even further code reduction
 ```java
 import lombok.Data;
+import lombok.AllArgsConstructor;
 
 @Data
+@AllArgsConstructor
 public class Customer {
   private Long id;
   private String name;

@@ -65,7 +65,7 @@ async def main() -> None:
 
 ---
 
-#### Convert synchronous functions to async
+#### Convert synchronous functions to `async`
 
 ```python
 # sync function e.g. could be sending out requests
