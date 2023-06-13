@@ -1,3 +1,9 @@
+```bash
+# add lsp support to the system
+$ rustup component add rust-analyzer
+```
+
+
 #### Getting started
 ```rust
 /* file: main.rs */  
