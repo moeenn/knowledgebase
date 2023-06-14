@@ -3,7 +3,7 @@
 $ sudo apt-get install elixir erlang erlang-dialyzer
 ```
 
-**Note**: Instal `ElixirLS` plugin in VSCode for better IDE Support.
+**Note**: Install `ElixirLS` plugin in `VSCode` for better IDE Support.
 
 
 ##### Hello world
