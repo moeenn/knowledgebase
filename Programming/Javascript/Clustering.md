@@ -78,3 +78,31 @@ $ npx pm2 start ecosystem.config.cjs
 $ npx pm2 delete <cluster_name>
 ```
 
+
+---
+
+#### Schedule periodic jobs
+
+```js
+/* file: ecosystem.config.js */
+module.exports = {
+  apps: [
+    {
+      name: "dms_backend",
+      instances: 0,
+      exec_mode: "cluster",
+      script: "./build/index.js"
+    },
+    {
+      name: "cron",
+      script: "./build/app/jobs/processMissedDeliveries.js",
+      instances: 1,
+      exec_mode: "fork",
+      cron_restart: "0 * * * *", // "0 */3 * * *" mean every three hours    
+      watch: false,
+      autorestart: false
+    }
+  ]
+}
+```
+

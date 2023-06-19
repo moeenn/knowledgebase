@@ -106,3 +106,15 @@ $ docker run --rm -it --tty -v $(pwd):/app -w /app composer:latest composer --ig
 - Composer image will use the latest version of PHP when running composer. This is not a problem because we are only managing packages using composer 
 - `ignore-platform-requirements` means that we ignore the PHP version specified in the `composer.json` file.
 
+
+---
+
+#### Docker and Python
+
+```bash
+# pull docker image
+$ docker pull python:3.11.4-alpine
+
+# start the temporary image
+$ docker run --rm -it -v $(pwd):/app -w /app --tty python:<version> sh
+```
