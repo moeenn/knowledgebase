@@ -9,8 +9,8 @@ import (
 )
 
 type JWTPayload struct {
-	UserId   string
-	UserRole string
+	UserId    string
+	UserRoles []string
 }
 
 type TokenResult struct {
@@ -22,8 +22,8 @@ func GenerateToken(secret string, expMinutes uint, payload JWTPayload) (*TokenRe
 	expiry := time.Now().Add(time.Minute * time.Duration(expMinutes)).Unix()
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss": payload.UserId,
-		"sub": payload.UserRole,
+		"sub": payload.UserId,
+		"aud": payload.UserRoles,
 		"exp": expiry,
 	})
 
@@ -35,29 +35,30 @@ func GenerateToken(secret string, expMinutes uint, payload JWTPayload) (*TokenRe
 	return &TokenResult{Token: s, Expiry: expiry}, nil
 }
 
-func ValidateToken(secret string, token string) (JWTPayload, error) {
+func ValidateToken(secret string, token string) (*JWTPayload, error) {
+	errMessage := errors.New("invalid or expired JWT")
+	payload := &JWTPayload{}
+
 	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
 
 	if err != nil || !parsed.Valid {
-		return JWTPayload{}, errors.New("Invalid or expired JWT")
+		return payload, errMessage
 	}
 
-	userId, err := parsed.Claims.GetIssuer()
+	userId, err := parsed.Claims.GetSubject()
+	if err != nil || userId == "" {
+		return payload, errMessage
+	}
+
+	userRoles, err := parsed.Claims.GetAudience()
 	if err != nil {
-		return JWTPayload{}, errors.New("Invalid or expired JWT")
+		return payload, errMessage
 	}
 
-	userRole, err := parsed.Claims.GetSubject()
-	if err != nil {
-		return JWTPayload{}, errors.New("Invalid or expired JWT")
-	}
-
-	payload := JWTPayload{
-		UserId:   userId,
-		UserRole: userRole,
-	}
+	payload.UserId = userId
+	payload.UserRoles = userRoles
 
 	return payload, nil
 }
@@ -67,6 +68,7 @@ func ValidateToken(secret string, token string) (JWTPayload, error) {
 package jwt
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -77,14 +79,16 @@ func TestGenerateAndValidate(t *testing.T) {
 	var expMinutes uint = 15
 
 	payload := JWTPayload{
-		UserId:   uuid.New().String(),
-		UserRole: "ADMIN",
+		UserId:    uuid.New().String(),
+		UserRoles: []string{"ADMIN"},
 	}
 
 	token, err := GenerateToken(key, expMinutes, payload)
 	if err != nil {
 		t.Errorf("failed to generate token")
 	}
+
+	fmt.Printf("token: %v\n", token)
 
 	decodedPayload, err := ValidateToken(key, token.Token)
 	if err != nil {
@@ -98,10 +102,15 @@ func TestGenerateAndValidate(t *testing.T) {
 		)
 	}
 
-	if decodedPayload.UserRole != payload.UserRole {
+	numRoles := len(decodedPayload.UserRoles)
+	if numRoles != 1 {
+		t.Errorf("invalid number of decoded userRoles. Expected: %d, Got: %d", 1, numRoles)
+	}
+
+	if decodedPayload.UserRoles[0] != payload.UserRoles[0] {
 		t.Errorf("unexpected user role in payload. Expected: %s, Got: %s",
-			payload.UserRole,
-			decodedPayload.UserRole,
+			payload.UserRoles,
+			decodedPayload.UserRoles,
 		)
 	}
 }

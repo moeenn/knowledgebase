@@ -12,6 +12,7 @@ class Direction(Enum):
 
 
 class Entity:
+    # __ means private member
     __x: int
     __y: int
     __protected_step: int = 10

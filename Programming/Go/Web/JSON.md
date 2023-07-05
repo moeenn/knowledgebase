@@ -10,7 +10,7 @@ type User struct {
   Id    uint   `json:"id"`
   Name  string `json:"name"`
   Email string `json:"email"`
-  Age   uint   `json:"age"`
+  Age   uint   `json:"age,omitempty"`
 }
 
 func main() {
@@ -64,6 +64,27 @@ func main() {
   }
 
   fmt.Printf("%+v\n", user)
+}
+```
+
+
+---
+
+#### Check validity of JSON string
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+func main() {
+	raw := []byte("{ \"message\": \"hello world\"}")
+	isValid := json.Valid(raw)
+
+	fmt.Printf("%v\n", isValid)
 }
 ```
 

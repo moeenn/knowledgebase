@@ -862,7 +862,7 @@ print(f"{time: %H:%M:%S}")
 ```
 
 
-##### Datetime
+##### Date-time
 ```python
 time = datetime.datetime(2016, 9, 13, 22, 10, 50, 1000 )	
 # year, month, date, hour, minutes, seconds, milliseconds

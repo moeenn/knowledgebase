@@ -58,10 +58,10 @@ custom_df.iloc[0]
 # access first two rows by index
 custom_df.iloc[[0, 1]]
 
-# access email address of first two rows, columns cannot be referenced by name (hence index 2)
+# access email address of first two rows, *columns cannot be referenced by name* # hence index 2)
 custom_df.iloc[[0, 1], 2]
 
-# access first two rows by multiple labels
+# access first two rows by multiple labels, *columns can be accessed by names*
 custom_df.loc[[0, 1], ["email", "role"]]
 
 # range slicing, start and end indices are inclusive
@@ -81,7 +81,7 @@ people = {
 
 custom_df = pd.DataFrame(people)
 
-# set email column as index (temporarily)
+# set email column as index (temporarily, i.e. returns new Dataframe)
 custom_df.set_index('email')
 
 # set email column as index (modify actual dataframe)
@@ -264,7 +264,8 @@ df.nsmallest(10, "ConvertedComp")
 ---
 
 #### Aggregate Functions
-Note: Mean value is too heavily affected by the outliers. Generally we should use median value as it is a better representative of the data
+
+**Note**: Mean value is too heavily affected by the outliers. Generally we should use median value as it is a better representative of the data.
 
 ```python
 # get median for a single column
@@ -310,7 +311,7 @@ python_df.sort_values(by="pctKnowsPython", ascending=False, inplace=True)
 
 ---
 
-#### Cleaning Date
+#### Cleaning Data
 ```python
 import numpy as np
 
@@ -337,11 +338,16 @@ df.dropna()
 na_values = ["NA", "Missing"]
 df = pd.read_csv("./path/to/data.csv", index_col="Respondent", na_values=na_values)
 
-# the default args for the above method are as follows
-# index simply means rows. Alternatively it can be "columns" which will drop any columns that 
-# don't have any values
-# any means a row will be dropped if it has any missing values. Alternatively, it can be "all"
-df.dropna(axis="index", how="any")
+# the default args for the following method are as follows
+#
+# index simply means rows. Alternatively it can be "columns" which will drop any # columns that don't have any values
+#
+# axis=0 means row
+# axis=1 means columns
+#
+# any means a row will be dropped if it has any missing values. Alternatively, 
+# it can be "all"
+df1na(axis="index", how="any")
 
 # drop row if values are missing in provided columns
 df.dropna(axis="index", how="any", subset=["last", "email"], inplace=True)
@@ -349,8 +355,10 @@ df.dropna(axis="index", how="any", subset=["last", "email"], inplace=True)
 # provide default value for all NA fields
 df.fillna("MISSING")
 
-# cast column values to specific data types. If the column has NA values then casting to int will fail
-# because np.nan is of type float and all values in column must be of same data type
+# cast column values to specific data types. If the column has NA values then 
+# casting to int will fail
+# because np.nan is of type float and all values in column must be of same 
+# data type
 df["age"] = df["age"].astype(float)
 ```
 
@@ -397,7 +405,6 @@ df.loc["2019-01":"2019-02"]
 df.loc["2020-01-01", "High"].max()
 
 # get highest values for all days
-# resample args: Link
 highs = df["High"].resample("D").max()
 
 # Tip: quickly plot inside jupyter notebooks
@@ -411,7 +418,7 @@ df.resample("W").agg({ "Close": "mean", "High": "max", "Low": "min", "Volume": "
 
 ---
 
-#### Writing output files - CSV / TSV
+#### Writing output files - `CSV` / `TSV`
 ```python
 # generate CSV file from dataframe
 custom_df.to_csv("survey/modified.csv")
