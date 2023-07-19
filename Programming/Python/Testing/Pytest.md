@@ -16,10 +16,12 @@ def multiply(x: int, y: int) -> int:
 # file: test_utilities.py
 import utilities
 
+
 def test_add() -> None:
   assert utilities.add(10, 20) == 30
   assert utilities.add(10, -10) == 0
   assert utilities.add(100, 0) == 100
+
 
 def test_multiply() -> None:
   assert utilities.multiply(10, 20) == 200

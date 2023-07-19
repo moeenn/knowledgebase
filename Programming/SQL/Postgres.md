@@ -24,7 +24,7 @@ CREATE TABLE
   );
 ```
 
-UUID can be used as Primary key as follows.
+`UUID` can be used as Primary key as follows.
 
 ```sql
 CREATE TABLE

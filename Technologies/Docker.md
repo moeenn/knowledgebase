@@ -62,11 +62,11 @@ $ docker container run -p 80:80 -v $(pwd):/usr/share/nginx/html nginx
 
 ---
 
-#### Working inside running container
+#### Entering running container
 
 ```bash
 # drop to container shell
-$ docker container exec -it ubuntu sh
+$ docker container exec -it <container-name> sh
 ```
 
 
@@ -113,7 +113,7 @@ $ docker run --rm -it --tty -v $(pwd):/app -w /app composer:latest composer --ig
 
 ```bash
 # pull docker image
-$ docker pull python:3.11.4-alpine
+$ docker pull python:3.11-alpine
 
 # start the temporary image
 $ docker run --rm -it -v $(pwd):/app -w /app --tty python:<version> sh
