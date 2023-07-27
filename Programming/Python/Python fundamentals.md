@@ -342,7 +342,7 @@ import sys
 
 # command-line arguments
 for arg in sys.argv:
-    print(arg)
+	    print(arg)
 ```
 
 
