@@ -8,6 +8,10 @@ CREATE DATABASE sample;
 DROP DATABASE sample;
 ```
 
+```bash
+# create new db using PostgreSQL shell
+$ psql -h <Host> -p <Port> -U <User> <database> --command="CREATE DATABASE <db_name> WITH OWNER <User>"
+```
 
 ---
 

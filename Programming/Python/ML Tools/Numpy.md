@@ -36,6 +36,17 @@ list(oned_array)
 b = oned_array.copy()
 ```
 
+```python
+# create one-d array with known start and end
+a = np.array([i for i in range(10)])
+
+# or more easily
+a = np.arange(10)
+
+# create array of provided size, with all values filled in
+b = np.full((3, 3), fill_value=True, dtype=bool)
+```
+
 
 ---
 
@@ -205,11 +216,26 @@ print(a[bool_array])
 # do the same operation in one step
 print(a[a > 3])
 
+# replace all elements in an array with a given value
+# e.g. replace all odd numbers with -1
+a[a % 2 == 1] = -1
+
 # get elements which specify a condition, while retaining the shape of the
-# original matrix
+# original matrix. original array is not modified
 # -1 will be put in place of the elements which don't satisfy our condition
 b = np.where(a > 3, a, -1)
 print(b)
+
+# replace all items in an array which match a condition
+arr = np.arange(10)
+a = np.where(arr % 2 == 1, -1, arr)
+
+
+# find common elements between two arrays
+a = np.array([1,2,3,2,3,4,3,4,5,6])
+b = np.array([7,2,10,2,7,4,9,4,9,8])
+np.intersect1d(a,b)
+# array([2, 4])
 ```
 
 
@@ -369,8 +395,8 @@ print(b)
 c = np.full((3,5), 2.5)
 print(c)
 
-# generate identity matrix of provided with num rows and cols equal to provided value
-# shape will be (5, 5)
+# generate identity matrix of provided with num rows and cols equal to 
+# provided value. shape will be (5, 5)
 d = np.eye(5)
 print(d)
 ```
@@ -385,8 +411,8 @@ a = np.random.random((2, 4))
 print(a)
 
 # generate numbers in normal / gaussian distribution
-# mean ~0
-# variance ~1
+# mean: 0
+# variance: 1 (i.e. unit variance)
 b = np.random.randn(2, 4)
 print(b)
 
@@ -412,9 +438,17 @@ eigenvalues, eigenvectors = np.linalg.eig(a)
 
 ---
 
+#### Calculate Euclidean Distance
+
+```python
+
+```
+
+---
+
 #### Solving linear systems
 
-**Question**: Admisssion fee at a fair is $1.50 for children and $4.00 for adults. On a certain day 2,200 people entered the fair and $5,050 is collected. How many children and how many adults attended. 
+**Question**: Admission fee at a fair is $1.50 for children and $4.00 for adults. On a certain day 2,200 people entered the fair and $5,050 is collected. How many children and how many adults attended. 
 
 $$
 x_{1} + x_{2} = 2200

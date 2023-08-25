@@ -9,7 +9,6 @@ Java: 11
 Dependencies: [
 	"Spring Web",
 	"Validation",
-	"Lombok", 
 	"Spring Data JPA", 
 	"PostgreSQL Driver"
 ]

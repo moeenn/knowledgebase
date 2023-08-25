@@ -11,6 +11,10 @@
             - Entity.java
 ```
 
+```bash
+$ mkdir -p ./src/main/java/com/example
+```
+
 ##### POM File
 ```xml
 <!-- file: pom.xml -->
@@ -54,6 +58,8 @@
 </project>
 ```
 
+
+---
 
 #### Project Code
 ```java
