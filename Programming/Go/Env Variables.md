@@ -25,7 +25,6 @@ func main() {
     fmt.Println("SYSTEM: ", system)
   }
 
-
   /* get all environment variables */
   for _, e := range os.Environ() {
     var pair []string = strings.Split(e, "=")

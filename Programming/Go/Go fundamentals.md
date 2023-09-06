@@ -1,5 +1,5 @@
 ##### Modules
-It is no longer compulsory to place your project files inside the directories specified above. Current versions of GoLang have introduced Go Modules. Inside any normal folder in the system, we can execute the following command to create a Go Module.
+It is no longer compulsory to place your project files inside the directories specified above. Current versions of Go have introduced Go Modules. Inside any normal folder in the system, we can execute the following command to create a Go Module.
 
 ```bash
 $ go mod init <program_name>
