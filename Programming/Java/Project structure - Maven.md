@@ -12,7 +12,7 @@
 ```
 
 ```bash
-$ mkdir -p ./src/main/java/com/example
+$ mkdir -p ./src/main/java/com/sandbox
 ```
 
 ##### POM File

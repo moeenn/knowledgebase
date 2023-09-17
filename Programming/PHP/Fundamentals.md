@@ -227,7 +227,7 @@ function total(int ...$nums): float {
   return (float) $result;
 }
 
-function main(): void{
+function main(): void {
   $sum = total(12, 34, 45, 56, 67);
   Document::Write((string) $sum);
 }
