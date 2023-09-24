@@ -3,61 +3,90 @@ $ npm i react-query
 ```
 
 
-#### Fetch Records
-```ts
-import { useQuery } from "react-query"
-import { BaseLayout } from "@/layouts/BaseLayout"
-import { Users } from "@/lib/api"
-import { IUser } from "@/lib/types"
+---
 
-export default function About() {
-  const users = useQuery<IUser[], Error>("users", Users.GetAll)
+#### Basic setup
+
+```ts
+import { QueryClient, QueryClientProvider } from "react-query"
+
+const queryClient = new QueryClient()
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </React.StrictMode>,
+)
+```
+
+
+---
+
+#### Simple GET Request
+
+```tsx
+import { useQuery } from "react-query"
+import { Todo } from "@/lib/types"
+import { TodosAPI } from "@/lib/api/todos"
+import { TodoItem } from "@/components/TodoItem"
+
+export function TodoList() {
+  // execute request at component mount
+  const todos = useQuery<Todo[], Error>("todos", TodosAPI.getAllTodos)
 
   return (
-    <BaseLayout>
-      <h1 className="text-xl mb-2">About Us</h1>
-      <>
-        {users.isLoading && <span className="text-sm">Loading...</span>}
-      </>
+    <div>
+      <h3>Todos</h3>
+      {todos.isLoading && <span>Loading...</span>}
+      {todos.isError && <span>{todos.error.message}</span>}
+      {todos.data && todos.data.map(todo => <TodoItem todo={todo} key={todo.id} />)}
+    </div>
+  )
+}
+```
 
-      <>
-        {users.isError && <span className="text-sm text-red-400">
-	        {users.error.message}
-	    </span>}
-      </>
+```tsx
+import { FC } from "react"
+import { Todo } from "@/lib/types"
 
-      <>
-        {users.data?.map(user => (
-          <div className="flex flex-row space-x-5 text-sm py-2" key={user.id}>
-            <div className="flex-1">{user.name}</div>
-            <div>{user.email}</div>
-          </div>
-        ))}
-      </>
-    </BaseLayout>
+type Props = { 
+  todo: Todo
+} 
+
+export const TodoItem: FC<Props> = ({ todo }) => {
+  return (
+    <div className="p-3 flex flex-col space-y-1 bg-gray-200 my-2">
+      <span>ID: {todo.id}</span>
+      <span>Title: {todo.title}</span>
+      <span>Completed: {todo.completed}</span>
+    </div>
   )
 }
 ```
 
 ```ts
-const GetAll = async () => {
-  const res = await fetch("https://jsonplaceholder.typicode.com/users")
-  if (!res.ok) {
-    throw new Error("Failed to fetch users")
-  }
-
-  return res.json()
-}
-
-export const Users = {
-  GetAll,
+export type Todo = {
+  userId: number
+  id: number
+  title: string
+  completed: boolean
 }
 ```
 
 ```ts
-export interface IUser {
-  id: string
-  name: string
-  email: string
+import { Todo } from "@/lib/types"
+
+export const TodosAPI = {
+  async getAllTodos(): Promise<Todo[]> {
+    const res = await fetch("https://jsonplaceholder.typicode.com/todos")
+    if (!res.ok) {
+      throw new Error("Failed to fetch todos")
+    }
+
+	// TODO: use ajv / zod to validate json data shape
+    return await res.json() as Todo[]
+  }
 }
 ```

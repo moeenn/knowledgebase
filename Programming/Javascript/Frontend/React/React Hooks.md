@@ -1,32 +1,31 @@
 #### `useState`
-```js
-import { useState } from "react";
+```tsx
+import { useState } from "react"
 
-const App = () => {
-  const [count, setCount] = useState(0);
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+  const increment = () => setCount(count => ++count)
+  const decrement = () => setCount(count => --count)
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <button 
-        className="bg-gray-100 hover:bg-gray-200 rounded px-4 py-2 text-sm"
-        onClick={() => setCount(count + 1)}
-      >Count: {count}</button>
+    <div className="text-sm">
+      <button className="bg-gray-100 p-3" onClick={decrement}>Decrement</button>
+      <span className="bg-gray-200 px-3 py-3">{count}</span>
+      <button className="bg-gray-100 p-3" onClick={increment}>Increment</button>
     </div>
   )
-};
-
-export default App
+}
 ```
 
 Any time the value of a state variable changes, React does a re-render. In the following case, React will not perform any re-renders when value for count changes.
 
 ```js
-const App = () => {
-  let count = 0;
+export const App = () => {
+  let count = 0
 
   const handleClick = () => {
-    count++;
-    console.log("Count: ", count);
+    count++
+    console.log("Count: ", count)
   };
 
   return (
@@ -36,10 +35,8 @@ const App = () => {
         onClick={handleClick}
       >Count: {count}</button>
     </div>
-  );
-};
-
-export default App
+  )
+}
 ```
 
 
@@ -50,32 +47,36 @@ export default App
 ##### Run Effects on every update
 The following code will fire our callback every time the component updates / re-renders.
 
-```js
-import { useState, useEffect } from "react";
+```tsx
+import { useState, useEffect } from "react"
 
-const App = () => {
-  const [count, setCount] = useState(0);
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+  const increment = () => setCount(count => ++count)
+  const decrement = () => setCount(count => --count)
 
+  // callback will run every time component re-renders
   useEffect(() => {
-    console.log("Updating component");
-  });
+    console.log("rendering...")
+  })
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <button 
-        className="bg-gray-100 hover:bg-gray-200 rounded px-4 py-2 text-sm"
-        onClick={() => setCount(count + 1)}
-      >Count: {count}</button>
+    <div className="text-sm">
+      <button className="bg-gray-100 p-3" onClick={decrement}>Decrement</button>
+      <span className="bg-gray-200 px-3 py-3">{count}</span>
+      <button className="bg-gray-100 p-3" onClick={increment}>Increment</button>
     </div>
   )
-};
-
-export default App
+}
 ```
 
 
 ##### Run Effects on specific state updates
 ```js
+/**
+ * callback will run every time reactive values inside the dependency array
+ * updates, in this case "count"
+ */ 
 useEffect(() => {
   console.log("Updating count");
 }, [count]);
@@ -84,55 +85,64 @@ useEffect(() => {
 
 ##### Run Effects only on Mount
 ```js
+/**
+ * callback will execute only once during first render of the component  
+ * (in production). The component will render twice in development mode.
+ */
 useEffect(() => {
   console.log("Component mounted");
 }, []);
 ```
 
 
-##### Run Effects on Un-mount
-```js
-import { useState, useEffect } from "react";
+##### Run Effects on component unmount 
+```tsx
+import { useState } from "react"
+import { Counter } from "@/components/Counter"
 
-const App = () => {
-  const [basic, setBasic] = useState(false);
-
-  if (basic) {
-    return (
-      <h1 className="text-xl my-2">You selected basic</h1>
-    );
-  }
+export function App() {
+  const [showCounter, setShowCounter] = useState(false)
+  const toggleShowCounter = () => setShowCounter(show => !show)
 
   return (
-    <Child setBasic={setBasic} />
-  );
-};
+    <div className="container mx-auto p-4">
+      <button 
+        className="bg-gray-200 text-sm px-3 py-2" 
+        onClick={toggleShowCounter}>Toggle Counter
+	  </button>
+        
+      {showCounter && <Counter />}
+    </div>
+  )
+}
+```
 
-const Child = ({ setBasic }) => {
-  const [count, setCount] = useState(0);
+```tsx
+import { useState, useEffect } from "react"
+
+export const Counter = () => {
+  const [count, setCount] = useState(0)
+  const increment = () => setCount(count => ++count)
+  const decrement = () => setCount(count => --count)
 
   useEffect(() => {
+    // run on mount
+    console.log("mounting counter")
+
+	// run on unmount
     return () => {
-      console.log("Component unmounted");
-    };
-  }, []);
+      console.log("counter removed from DOM")
+    }
+  }, [])
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <button
-        className="bg-gray-100 hover:bg-gray-200 rounded px-4 py-2 text-sm"
-        onClick={() => setCount(count + 1)}
-      >Count: {count}</button>
-
-      <button
-        className="bg-gray-100 hover:bg-gray-200 rounded px-4 py-2 text-sm"
-        onClick={() => setBasic(true)}
-      >Set Basic</button>
+    <div className="text-sm">
+      <button className="bg-gray-100 p-3" onClick={decrement}>Decrement</button>
+      <span className="bg-gray-200 px-3 py-3">{count}</span>
+      <button className="bg-gray-100 p-3" onClick={increment}>Increment</button>
     </div>
-  );
-};
-
-export default App
+  )
+}
 ```
 
 **Note**: Any time you update state inside the `useEffect` hook, this can lead to infinite re-render cycles. Update runs `useEffect` which then again causes an update. Be careful to avoid this situation.
@@ -141,180 +151,161 @@ export default App
 ---
 
 #### `useContext`
-We can define a context on a parent Component. All components within the provider of the context will have access to value provided using the UseContext Hook. We will no longer need to pass values / functions down through multiple levels of components.
 
-```js
-/* file: App.jsx */
-import { useState, useContext } from "react";
-import MessageContext from "../providers/MessageContext";
+We can define a context on a parent Component. All components within the provider of the context will have access to value provided using the `useContext` Hook. We will no longer need to pass values / functions down through multiple levels of components.
 
-import Navbar from "./Navbar";
-import Banner from "./Banner";
+```tsx
+import { useState } from "react"
+import { ThemeContext, Theme } from "@/lib/context/themeContext"
+import { Form } from "@/components/Form"
 
-const App = () => {
-  const [message, setMessage] = useState("Hello from context");
-
-  return (
-    <div className="container mx-auto px-4">
-      <UserContext.Provider value={{message, setMessage}}>
-        <Navbar />
-        <Banner />
-      </UserContext.Provider>
-    </div>
-  );
-};
-
-export default App
-```
-
-```js
-/* file: MessageContext.js */ 
-import { createContext } from "react";
-
-const MessageContext = createContext(null);
-export default MessageContext;
-```
-
-```js
-/* file: Navbar.jsx */ 
-import { useContext } from "react";
-import MessageContext from "../providers/MessageContext";
-
-const Navbar = () => {
-  const { message } = useContext(MessageContext);
+export function App() {
+  const [theme, setTheme] = useState<Theme>("light")
+  const toggleDark = () => setTheme(theme => theme === "light" ? "dark" : "light")
 
   return (
-    <div className="border-b border-gray-100 py-5">
-      <span>Logo</span>
-      <span>{message}</span>
-    </div>
-  );
-};
+    <ThemeContext.Provider value={theme}>
+      <div className="container mx-auto p-4">
+        <div>
+          <button
+            className="block px-3 py-2 bg-gray-200 text-sm"
+            onClick={toggleDark}
+          >Toggle Dark theme</button>
 
-export default Navbar;
+          <div>
+            <Form />
+          </div>
+        </div>
+      </div>
+    </ThemeContext.Provider>
+  )
+}
 ```
 
-```js
-/* file: Banner.jsx */ 
-import { useContext } from "react";
-import MessageContext from "../providers/MessageContext";
+```ts
+import { createContext } from "react"
 
-const Banner = () => {
-  const { message, setMessage } = useContext(MessageContext);
+export type Theme = "light" | "dark"
+export const ThemeContext = createContext<Theme>("light")
+```
 
-  const handleClick = () => {
-    setMessage("A new message");
-  };
+```tsx
+import { useContext } from "react"
+import { ThemeContext } from "@/lib/context/themeContext"
+
+export const Form = () => {
+  const theme = useContext(ThemeContext)
 
   return (
-    <div className="bg-gray-100 py-10 flex flex-col justify-center">
-      <h1 className="inline-block text-2-xl m-auto">{message}</h1>
-      <button
-        className="bg-gray-200 hover:bg-gray-300 px-4 py-2 text-sm rounded"
-        onClick={handleClick}
-      >Update Message</button>
+    <div className="p-5">
+      {theme === "light" && <span className="bg-gray-100 text-gray-800">Light theme variant</span>}
+      {theme === "dark" && <span className="bg-gray-800 text-gray-100">Dark theme variant</span>}
     </div>
-  );
-};
-
-export default Banner;
+  )
+}
 ```
 
 
 ---
 
 #### `useRef`
-```js
-import { useRef } from "react";
 
-const App = () => {
-  const btn = useRef(null);
+This hook lets us store information which isn't used for rendering e.g. `DOM` elements, timeout Ids etc.  Updating the current value of this hook **does not** trigger a re-render.
+
+```js
+import { useRef } from "react"
+
+export function App() {
+  const buttonRef = useRef(null)
 
   const handleClick = () => {
-    console.log("Button", btn.current);
-  };
+    // access element from DOM
+    console.log("button clicked", buttonRef.current)
+  }
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div className="container mx-auto p-4">
+      <h1>Hello world</h1>
       <button
-        ref={btn}
-        className="bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm rounded"
+        className="bg-gray-200 text-sm px-3 py-2"
+        ref={buttonRef}
         onClick={handleClick}
-      >Click</button>
+      >Click Me</button>
     </div>
-  );
-};
+  )
+}
 
-export default App
 ```
 
 
 ---
 
 #### `useReducer`
-```js
-import { useReducer } from "react";
 
-const reducer = (state, action) => {
+```ts
+import { produce } from "immer"
+
+export type State = {
+  count: number
+}
+
+export type Action = 
+  | { type: "increment", payload: number }
+  | { type: "decrement" }
+
+export const initState: State = {
+  count: 0,
+}
+
+export function reducer(state: State, action: Action) {
   switch (action.type) {
     case "increment":
-      return state + 1;
+      return produce(state, draft => {
+        draft.count += action.payload
+      })
 
     case "decrement":
-      return state - 1;
-
-    default:
-      throw new Error("Invalid action type provided");
+      return produce(state, draft => {
+        draft.count -= 1
+      })
   }
-};
-
-const App = () => {
-  const [count, dispatch] = useReducer(reducer, 0);
-
-  const handleIncrement = () => {
-    dispatch({
-      type: "increment"
-    });
-  }
-
-  const handleDecrement = () => {
-    dispatch({
-      type: "decrement"
-    });
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-10">
-      <button
-        className="bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm rounded"
-        onClick={handleIncrement}
-      >+</button>
-
-      <span className="bg-gray-100 px-5 py-2">{count}</span>
-
-      <button
-        className="bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm rounded"
-        onClick={handleDecrement}
-      >-</button>
-    </div>
-  );
-};
-
-export default App
+}
 ```
 
+```tsx
+import { useReducer } from "react"
+import { reducer, initState } from "@/lib/reducers/counterReducer"
+
+export const Counter = () => {
+  const [state, dispatch] = useReducer(reducer, initState)
+
+  return (
+    <div className="text-sm">
+      <button
+        className="bg-gray-100 p-3"
+        onClick={() => dispatch({ type: "decrement" })}>Decrement</button>
+
+      <span className="bg-gray-200 px-3 py-3">{state.count}</span>
+      <button
+        className="bg-gray-100 p-3"
+        onClick={() => dispatch({ type: "increment", payload: 2 })}>Increment</button>
+    </div>
+  )
+}
+```
 
 ---
 
 #### `useMemo`
-```js
-import { useState, useMemo } from "react";
 
-const App = () => {
-  const [count, setCount] = useState(0);
+```tsx
+import { useState, useMemo } from "react"
+
+export const App = () => {
+  const [count, setCount] = useState(0)
   const expensiveCount = useMemo(() => {
-    return count ** 2;
-  }, [count]);
+    return count ** 2
+  }, [count])
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -325,44 +316,51 @@ const App = () => {
 
       <span className="bg-gray-100 px-5 py-2">{expensiveCount}</span>
     </div>
-  );
-};
-
-export default App
+  )
+}
 ```
 
 
 ---
 
 #### `useCallback`
-```js
-import { useState, useCallback } from "react";
 
-const App = () => {
-  const [count, setCount] = useState(0);
+```tsx
+import { useState, useCallback } from "react"
+import { Button } from "@/components/Button"
+
+export function App() {
+  const [count, setCount] = useState(0)
 
   const updateCount = useCallback(() => {
-    console.log(`Count ${count} updated to ${count + 1}`);
-    setCount(count => count + 1);
-  });
+    console.log(`Count ${count} updated to ${count + 1}`)
+    setCount(count => count + 1)
+  }, [setCount])
 
   return (
     <div className="container mx-auto px-4 py-10">
       <Button count={count} setCount={updateCount} />
     </div>
-  );
-};
+  )
+}
+```
 
-const Button = ({ count, setCount }) => {
+```tsx
+import { FC } from "react"
+
+type Props = {
+  count: number
+  setCount: (callback: (count: number) => void) => void
+}
+
+export const Button: FC<Props> = ({ count, setCount }) => {
   return (
     <button
       className="bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm rounded"
-      onClick={() => setCount(count + 1)}
+      onClick={() => setCount(c => ++c)}
     >Count {count}</button>
-  );
-};
-
-export default App
+  )
+}
 ```
 
 
@@ -370,30 +368,56 @@ export default App
 
 #### Custom React Hooks
 
-```js
-import { useState, useEffect } from "react";
-import getUser from "../api/getUser";
+```tsx
+import { useState } from "react"
 
-const useDisplayName = () => {
-  const [displayName, setDisplayName] = useState();
+type UseLocalstorageState = {
+  userId: string
+  token: string
+}
 
-  useEffect(async () => {
-    const user = await getUser();
-    setDisplayName(user.name);
-  }, []);
+const initState: () => UseLocalstorageState = () => ({
+  userId: localStorage.getItem("app.userId") ?? "",
+  token: localStorage.getItem("app.token") ?? "",
+})
 
-  return displayName;
-};
+export function useLocalstorage() {
+  const [localState, setLocalStateBasic] = useState<UseLocalstorageState>(initState())
+  const setLocalState = (state: Required<UseLocalstorageState>) => {
+    setLocalStateBasic(state)
 
-const App = () => {
-  const displayName = useDisplayName();
+    /**
+     * dont need to use useEffect here because this inner function is not a 
+     * react component
+     */
+    localStorage.setItem("app.userId", state.userId)
+    localStorage.setItem("app.token", state.token)
+  }
+
+  return { localState, setLocalState }
+}
+```
+
+```tsx
+import { useLocalstorage } from "@/lib/hooks/useLocalstorage"
+
+export function App() {
+  const { localState, setLocalState } = useLocalstorage()
+  const populate = () => setLocalState({ userId: "100", token: "abc123" })
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <p className="text-xl">{displayName}</p>
+      <div>
+        <button 
+          className="bg-gray-200 px-3 py-2 text-sm"
+          onClick={populate}  
+        >Populate</button>
+      </div>
+      <div>
+        <h1>UserId: {localState.userId} </h1>
+        <h2>Token: {localState.token}</h2>
+      </div>
     </div>
-  );
-};
-
-export default App
+  )
+}
 ```
