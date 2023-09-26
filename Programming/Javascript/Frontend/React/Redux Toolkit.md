@@ -13,7 +13,7 @@ export const store = configureStore({
 })
 ```
 
-Provide the Redux Store to React
+Provide the `Redux` Store to React
 
 ```js
 /* file: src/main.js */
