@@ -139,10 +139,11 @@ CREATE TYPE
 
 CREATE TABLE
   users (
-    id BIGSERIAL PRIMARY KEY NOT NULL,
+    user_id SERIAL,
     email VARCHAR(255) UNIQUE NOT NULL,
     role user_role NOT NULL,
-    password VARCHAR(255)
+    password VARCHAR(255),
+    PRIMARY KEY (user_id)
   );
 
 INSERT INTO
@@ -156,6 +157,144 @@ VALUES
 
 #### Relationships
 
+##### One-to-one
+
+```sql
+-- table schema
+CREATE TABLE
+  profiles (
+    profile_id SERIAL,
+    name VARCHAR(255),
+    PRIMARY KEY (profile_id)
+  );
+
+CREATE TABLE
+  users (
+    user_id SERIAL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    -- notice the unique constraint (1:1)
+    profile_id SERIAL UNIQUE NOT NULL,
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
+  );
+
+-- insert dummy data
+WITH
+  profile_insert AS (
+    INSERT INTO
+      profiles (name)
+    VALUES
+      ('User One')
+    RETURNING
+      profile_id
+  )
+INSERT INTO
+  users (email, profile_id)
+VALUES
+  (
+    'user@site.com',
+    (
+      SELECT
+        profile_id
+      FROM
+        profile_insert
+    )
+  );
+
+-- fetch data through users table
+SELECT
+  users.user_id,
+  users.email,
+  profiles.name
+FROM
+  users
+  JOIN profiles ON users.profile_id = profiles.profile_id;
+
+-- fetch data through profiles table
+SELECT
+  profiles.profile_id,
+  users.user_id,
+  users.email,
+  profiles.name
+FROM
+  profiles
+  JOIN users ON profiles.profile_id = users.profile_id
+WHERE
+  profiles.profile_id = 2;
+```
+
+
+##### One-to-many
+
+```sql
+-- table schema
+CREATE TABLE
+  users (
+    user_id SERIAL,
+    email VARCHAR(100),
+    PRIMARY KEY (user_id)
+  );
+
+CREATE TABLE
+  posts (
+    post_id SERIAL,
+    title VARCHAR(100) UNIQUE,
+    -- notice user_id has no unique constraint (1:M)
+    user_id SERIAL NOT NULL,
+    PRIMARY KEY (post_id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+  );
+
+-- insert dummy data
+INSERT INTO
+  users (email)
+VALUES
+  ('admin@site.com');
+
+WITH
+  user_insert AS (
+    INSERT INTO
+      users (email)
+    VALUES
+      ('user@site.com')
+    RETURNING
+      user_id
+  )
+INSERT INTO
+  posts (title, user_id)
+VALUES
+  (
+    'post one',
+    (
+      SELECT
+        user_id
+      FROM
+        user_insert
+    )
+  ),
+  (
+    'post two',
+    (
+      SELECT
+        user_id
+      FROM
+        user_insert
+    )
+  );
+
+-- fetch related records
+SELECT
+  users.user_id,
+  users.email,
+  posts.title
+FROM
+  users
+  JOIN posts ON users.user_id = posts.user_id
+WHERE
+  users.user_id = 2;
+```
+
+
 ##### Many-to-many
 
 ```sql
@@ -164,7 +303,6 @@ CREATE TABLE
   roles (
     role_id SERIAL NOT NULL,
     role_name VARCHAR (100) NOT NULL,
-    
     PRIMARY KEY (role_id)
   );
 
@@ -173,7 +311,6 @@ CREATE TABLE
     user_id SERIAL NOT NULL,
     email VARCHAR (255) UNIQUE NOT NULL,
     password VARCHAR (255),
-    
     PRIMARY KEY (user_id)
   );
 
@@ -182,7 +319,6 @@ CREATE TABLE
     user_role_id SERIAL NOT NULL,
     user_id SERIAL NOT NULL,
     role_id SERIAL NOT NULL,
-    
     PRIMARY KEY (user_role_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (role_id) REFERENCES roles (role_id)
