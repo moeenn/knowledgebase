@@ -1,4 +1,5 @@
 #### `useState`
+
 ```tsx
 import { useState } from "react"
 
@@ -257,7 +258,7 @@ export const initState: State = {
   count: 0,
 }
 
-export function reducer(state: State, action: Action) {
+export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "increment":
       return produce(state, draft => {

@@ -9,9 +9,9 @@ Preprocessing is used for gathering the resources that are required for our code
 
 
 ###### Object Files
-After the preprocessing is done. The code is converted into Object files. For every Translation unit a new object file is created. This object file contains binary instructions. If we need to view the exact content of this binary data, we can convert the object file into ASM file (i.e. Assembly File). 
+After the preprocessing is done. The code is converted into Object files. For every Translation unit a new object file is created. This object file contains binary instructions. If we need to view the exact content of this binary data, we can convert the object file into `ASM` file (i.e. Assembly File). 
 
-Translation Units:  A translation unit is the basic unit of compilation. Generally, a cpp file and its header form a single translation unit. But if we include multiple cpp files inside a main cpp file, they will form a single translation unit.
+Translation Units:  A translation unit is the basic unit of compilation. Generally, a `cpp` file and its header form a single translation unit. But if we include multiple `cpp` files inside a main `cpp` file, they will form a single translation unit.
 
 ###### Linking
 During the compilation stage several object files may have been created. The linker combines these object files into a single executable file. 

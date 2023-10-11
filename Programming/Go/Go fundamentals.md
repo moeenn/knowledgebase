@@ -1,3 +1,8 @@
+```bash
+# language server
+$ go install golang.org/x/tools/gopls@latest
+```
+
 ##### Modules
 It is no longer compulsory to place your project files inside the directories specified above. Current versions of Go have introduced Go Modules. Inside any normal folder in the system, we can execute the following command to create a Go Module.
 

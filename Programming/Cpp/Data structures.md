@@ -426,7 +426,7 @@ int main() {
 
 	// remove an element (iterator is not required)
 	// in sequence containers e.g. vectors, iterator is required
-      // by erase() method
+    // by erase() method
 	primes.erase(2);
 
 	std::cout << primes << std::endl;
