@@ -292,47 +292,41 @@ fn main() {
 ```
 
 ```rust
-struct User {  
-  username: String,  
-  email: String,  
-  signin_count: u64,  
-  active: bool,  
-}  
-  
-fn build_user(username: String, email: String) -> User {  
-  User{  
-    username,  
-    email,  
-    signin_count: 0,  
-    active: true,  
-  }  
-}  
-  
-fn print_user(user: &User) {  
-  println!("{}, {}, {}, {}", user.username, user.email, user.signin_count, user.active);  
-}  
-  
-fn main() {  
-  let user = User{  
-    email: String::from("sample@site.com"),  
-    username: String::from("sample"),  
-    signin_count: 0,  
-    active: true,  
-  };  
-  
-  let user_two = build_user(  
-    String::from("admin"),  
-    String::from("admin@site.com")  
-  );  
-  
-  let user_three = User{  
-    active: false,  
-    signin_count: 10,  
-    ..user_two  
-  };  
-  
-  print_user(&user);  
-  print_user(&user_three);  
+#[derive(Debug)]
+struct User {
+    username: String,
+    email: String,
+    signin_count: u64,
+    active: bool,
+}
+
+fn build_user(username: String, email: String) -> User {
+    User {
+        username,
+        email,
+        signin_count: 0,
+        active: true,
+    }
+}
+
+fn main() {
+    let user = User {
+        email: String::from("sample@site.com"),
+        username: String::from("sample"),
+        signin_count: 0,
+        active: true,
+    };
+
+    let user_two = build_user(String::from("admin"), String::from("admin@site.com"));
+
+    let user_three = User {
+        active: false,
+        signin_count: 10,
+        ..user_two
+    };
+
+    println!("{:?}", user);
+    println!("{:?}", user_three);
 }
 ```
 
@@ -956,11 +950,22 @@ fn main() {
 
 `std::end::args()` returns an `iterator`. This syntax of the For-loop can be used with iterators. `skip()` tells the iterator to omit one value, which in this case is the first value i.e. name of the program executable.
 
-**Note:** All Command line arguments are read as `String`. These arguments will need to be converted to numbers or booleans where necessary.
+**Note:** All Command line arguments are read as `String`. These arguments will need to be converted to numbers or boolean where necessary.
 
 ---
 
 #### Convert types
+
+##### Convert `u8` to `i32`
+```rust
+let a: u8 = 20;
+let b = i32::from(a);
+
+// alternatively
+let c: i32 = a.into();
+
+println!("{:?}", (a, b, c));
+```
 
 ##### Convert string to other types
 ```rust

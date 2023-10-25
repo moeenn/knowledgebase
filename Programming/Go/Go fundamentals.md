@@ -1,5 +1,7 @@
 ```bash
-# language server
+$ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
+
+# install language server manually
 $ go install golang.org/x/tools/gopls@latest
 ```
 

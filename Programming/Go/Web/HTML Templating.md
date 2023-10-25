@@ -1,221 +1,243 @@
 ```
-go.mod
 main.go
-views/
-  base.layout.html
-  home.page.html
+go.mod
+public/
+	css/
+		styles.css
+	img/
+		favicon.ico
+pkg/
+	controllers/
+		controllers.go
+	templates/
+		templates.go
+		views/
+			layouts/
+				base.layout.html
+			pages/
+				about.page.html
+				home.page.html
+				error.page.html
+			partials/
+				navbar.partial.html
+```
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+	"sandbox/pkg/controllers"
+)
+
+const (
+	ADDRESS = "0.0.0.0:3000"
+)
+
+func main() {
+	mux := http.NewServeMux()
+
+	/* register all route handler here */
+	mux.HandleFunc("/about", controllers.AboutHandler)
+	mux.HandleFunc("/", controllers.HomeHandler)
+
+	/* serve static files */
+	fs := http.FileServer(http.Dir("./public"))
+	mux.Handle("/public/", http.StripPrefix("/public", fs))
+
+	/* start the server process */
+	log.Printf("starting server on %s\n", ADDRESS)
+	http.ListenAndServe(ADDRESS, mux)
+}
+```
+
+```go
+package controllers
+
+import (
+	"net/http"
+	"sandbox/pkg/templates"
+)
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	/* Note: all 404s are redirected to '/' handler */
+	if r.URL.Path != "/" {
+		templates.ErrorPageTemplate(w, templates.ErrorPageArgs{
+			Status:  http.StatusNotFound,
+			Message: "Not found",
+		})
+		return
+	}
+
+	templates.HomePageTemplate(w)
+}
+
+func AboutHandler(w http.ResponseWriter, r *http.Request) {
+	templates.AboutPageTemplate(w)
+}
+```
+
+```go
+package templates
+
+import (
+	"fmt"
+	"html/template"
+	"io"
+)
+
+var tmpl *template.Template
+
+/* templates will be parsed once at package first import */
+func init() {
+	if tmpl == nil {
+		tmpl = template.Must(template.ParseGlob("./pkg/templates/views/**/*.html"))
+	}
+}
+
+func HomePageTemplate(w io.Writer) {
+	if err := tmpl.ExecuteTemplate(w, "home.page.html", nil); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func AboutPageTemplate(w io.Writer) {
+	if err := tmpl.ExecuteTemplate(w, "about.page.html", nil); err != nil {
+		fmt.Println(err)
+	}
+}
+
+type ErrorPageArgs struct {
+	Status  int
+	Message string
+}
+
+func ErrorPageTemplate(w io.Writer, args ErrorPageArgs) {
+	if err := tmpl.ExecuteTemplate(w, "error.page.html", args); err != nil {
+		fmt.Println(err)
+	}
+}
+```
+
+```css
+* {
+  font-weight: normal;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 1rem;
+}
+
+:is(p, span, a) {
+  font-size: 0.9rem;
+  line-height: 1.4rem;
+}
+
+nav {
+  border-bottom: 1px dashed hsl(0, 0%, 70%);
+}
+
+nav, .nav-links {
+  display: flex;
+}
+
+nav .nav-links {
+  margin-left: auto;
+}
+
+nav a {
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  margin: auto 0;
+}
+
+.page-error {
+  padding: 5rem 0;
+  display: flex;
+}
+
+.page-error p {
+  margin: 0 auto;
+  font-size: 1.2rem;
+}
 ```
 
 ```html
-<!-- base.layout.html -->
-{{ define "base.layout" }}
+{{ define "base.layout.start" }}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
-  <title>{{ template "title" . }}</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/public/css/styles.css" />
+  <link rel="icon" type="image/x-icon" href="/public/img/favicon.ico" />
+  <title>My website - {{ template "title" . }}</title>
 </head>
 
 <body>
+  <aside>
+    {{ template "navbar.partial" . }}
+  </aside>
   <section>
     <main>
-      {{ template "content" . }}
+{{ end }}
+
+{{ define "base.layout.end" }}
     </main>
   </section>
 </body>
-
 </html>
 {{ end }}
 ```
 
 ```html
-<!-- home.page.html -->
-{{template "base.layout" . }}
+{{ define "navbar.partial" }}
+<nav>
+  <h3>Logo</h3>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+  </div>
+</nav>
+{{ end }}
+```
 
-{{ define "title" }}Awesome Website{{ end }}
-{{ define "content" }}
+```html
+{{ define "title" }}Home{{ end }}
+{{ template "base.layout.start" . }}
 <div>
   <h1>Welcome to the home page</h1>
-  <p>Lorem ipsum, dolor sit amet consectetur elit. Vero saepe harum nulla in adipisci ex doloribus cupiditate hic perferendis ab dolorem molestiae minima, ipsa unde qui eveniet. Facilis, dolores!
+  <p>Lorem ipsum, dolor sit amet consectetur elit. Vero saepe harum nulla in adipisci ex doloribus cupiditate hic
+    perferendis ab dolorem molestiae minima, ipsa unde qui eveniet. Facilis, dolores!
   </p>
 
   <button>Click me</button>
 </div>
-{{ end }}
-```
-
-```go
-/* main.go */
-package main
-
-import (
-  "fmt"
-  "html/template"
-  "os"
-)
-
-func main() {
-  templates, err := template.ParseGlob("views/*.html")
-  if err != nil {
-    fmt.Println("error: failed to parse template files")
-    os.Exit(1)
-  }
-
-  /* os.Stdout also implements io.Writer interface */
-  templates.ExecuteTemplate(os.Stdout, "home.page.html", nil)
-}
-```
-
-```go
-/* main.go */
-package main
-
-import (
-  "fmt"
-  "html/template"
-  "os"
-)
-
-/**
- * interface for io.Writer
- *
- * type Writer interface {
- *   Write(p []byte) (n int, err error)
- * }
- *
- */
-type Writer struct{}
-
-func (w Writer) Write(p []byte) (n int, err error) {
-  n = 0
-  err = nil
-
-  fmt.Printf("%s", p)
-  return n, err
-}
-
-func main() {
-  templates, err := template.ParseGlob("views/*.html")
-  if err != nil {
-    fmt.Println("error: failed to parse template files")
-    os.Exit(1)
-  }
-
-  writer := Writer{}
-
-  templates.ExecuteTemplate(writer, "home.page.html", nil)
-}
-```
-
-The above code will print the output to the console. The following code will spin up a web server and server the compiled template HTML
-
-```go
-/* main.go */
-package main
-
-import (
-  "fmt"
-  "html/template"
-  "net/http"
-  "os"
-)
-
-func main() {
-  templates, err := template.ParseGlob("views/*.html")
-  if err != nil {
-    fmt.Println("error: failed to parse template files")
-    os.Exit(1)
-  }
-
-  http.HandleFunc("/", Router(templates))
-  http.ListenAndServe(":3000", nil)
-}
-
-func Router(templates *template.Template) http.HandlerFunc {
-  return func(w http.ResponseWriter, r *http.Request) {
-    templates.ExecuteTemplate(w, "home.page.html", nil)
-  }
-}
-```
-
-
----
-
-#### Serving static resources
-Compiled HTML will include static resources like images, fonts etc. We can set up our server to serve this content from folder named `assets` in the root of the project.
-
-```go
-/* main.go */
-func main() {
-  ...
-  fs := http.FileServer(http.Dir("assets/"))
-  http.Handle("/public/", http.StripPrefix("/public/", fs))
-  ...
-}
-```
-
-Inside our templates, we can access our assets as follows.
-
-```html
-<div>
-  <img src="/public/image.jpg" alt="image" />
-</div>
-```
-
-
----
-
-#### Dynamic data in templates
-```go
-/* todos.go */
-package main
-
-type Todo struct {
-  Title string
-  Done  bool
-}
-
-var Todos []Todo = []Todo{
-  {Title: "Task item one", Done: false},
-  {Title: "Second item in list", Done: true},
-  {Title: "A third item", Done: false},
-}
-```
-
-```go
-/* main.go */
-...
-func Router(templates *template.Template) http.HandlerFunc {
-  return func(w http.ResponseWriter, r *http.Request) {
-    templates.ExecuteTemplate(w, "home.page.html", Todos)
-  }
-}
+{{ template "base.layout.end" . }}
 ```
 
 ```html
-<!-- home.page.html -->
-{{template "base.layout" . }}
-
-{{ define "title" }}Awesome Website{{ end }}
-{{ define "content" }}
+{{ define "title" }}About{{ end }}
+{{ template "base.layout.start" . }}
 <div>
-  <table>
-    <tbody>
-      {{ range . }}
-      <tr>
-        <td>
-          <input type="checkbox" {{ if .Done }} checked="checked" {{ end }}>
-        </td>
-        <td>{{ .Title }}</td>
-      </tr>
-      {{ end }}
-    </tbody>
-  </table>
+  <h1>About page</h1>
+  <p>Lorem ipsum, dolor sit amet consectetur elit. Vero saepe harum nulla in adipisci ex doloribus cupiditate hic
+    perferendis ab dolorem molestiae minima, ipsa unde qui eveniet. Facilis, dolores!
+  </p>
 </div>
-{{ end }}
+{{ template "base.layout.end" . }}
+```
+
+```html
+{{ define "title" }}Error{{ end }}
+{{ template "base.layout.start" . }}
+<div class="page-error">
+  <p>{{ .Status }} - {{ .Message }}</p>
+</div>
+{{ template "base.layout.end" . }}
 ```
 
