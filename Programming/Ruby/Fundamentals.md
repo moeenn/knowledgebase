@@ -4,7 +4,10 @@
 $ sudo apt-get install ruby-full
 
 # install global packages
-$ gem install solargraph rake rubocop
+$ gem install solargraph rake rubocop bundler
+
+# configure bundler to use user home
+$ bundle config set --local path '/home/<username>/.config/gem'
 ```
 
 
@@ -42,7 +45,7 @@ puts nums.last
 
 # access values
 puts nums[1]
-puts nums[-2]
+puts nums[-2] # allows negative indices
 puts nums[20] # nil
 puts nums[1..4] # access by range (end index inclusive)
 
@@ -76,8 +79,8 @@ puts (1..100).reduce(:+)
 ```rb
 capitals = {
   'Pakistan' => 'Islamabad',
-  'China' => 'Beijing',
-  'Russia' => 'Moscow'
+  'Britain' => 'London',
+  'Austrailia' => 'Sydney'
 }
 
 # using symbols (i.e. atoms) as keys
@@ -94,6 +97,17 @@ puts capitals.values
 # access elements
 puts capitals['Pakistan']
 puts map[:a]
+
+# insert element in place
+capitals['Russia'] = 'Moscow'
+
+# merge generates a new hashmap
+capitals = capitals.merge({ 'China' => 'Beijing' })
+
+# loop over keys and values
+capitals.each do |key, value|
+  puts "#{key} - #{value}"
+end
 ```
 
 
@@ -126,7 +140,6 @@ when 40..59
 
 else
   puts 'Failed'
-
 end
 ```
 
@@ -265,7 +278,7 @@ end
 ```
 
 ```rb
-def approach_one(pipeline, start = 10)
+def approach_one(pipeline, start=10)
   value = start
   pipeline.each do |lmb|
     value = lmb.call value
@@ -273,7 +286,7 @@ def approach_one(pipeline, start = 10)
   value
 end
 
-def approach_two(pipeline, start = 10)
+def approach_two(pipeline, start=10)
   pipeline.reduce(start) { |accum, current| current.call(accum) }
 end
 
@@ -312,15 +325,13 @@ end
 
 ```rb
 def problematic_function
-  raise StandardError.new('Unexpected number provided')
+  raise StandardError, 'Unexpected number provided'
 end
 
 def main
-  begin
-    problematic_function
-  rescue StandardError => e
-    puts "Error: #{e}"
-  end
+  problematic_function
+rescue StandardError => e
+  puts "Error: #{e}"
 end
 ```
 
@@ -475,7 +486,7 @@ end
 class Position
   attr_accessor :x, :y
 
-  def initialize(x_pos = 0, y_pos = 0)
+  def initialize(x_pos=0, y_pos=0)
     @x = x_pos
     @y = y_pos
   end
@@ -529,5 +540,91 @@ class Entity
   def to_s
     "Entity(name=#{name}, position=#{position})"
   end
+end
+```
+
+
+
+#### Files
+
+```rb
+def loop_over_lines(path)
+  File.foreach(path) { |line| puts line }
+end
+
+def read_all_content(path)
+  File.open(path) { |file| file.read }
+end
+
+def main
+  loop_over_lines 'sample.txt'
+  puts read_all_content 'sample.txt'
+rescue StandardError => e
+  puts "Error: #{e.message}"
+end
+```
+
+```rb
+def write_lines_to_file(path, lines)
+  File.open(path, 'w') do |file|
+    # new line character will be added automatically
+    lines.each { |line| file.puts line }
+  end
+end
+
+def main
+  lines = [
+    'Sample line',
+    'Example line',
+    'Another line'
+  ]
+
+  write_lines_to_file 'sample.txt', lines
+rescue StandardError => e
+  puts "Error: #{e.message}"
+end
+```
+
+**Note**: In the above example, the file is opened in Write mode (i.e. `w`). This will replace the existing content of the file. If we only want to append to a file, use Append mode (i.e. `a`).
+
+```rb
+File.rename('old-name.txt', 'new-name.txt')
+
+# File size in bytes
+File.size('users.txt')
+
+# Does this file already exist?
+File.exist?('log.txt')
+
+# Get the file extension, this works even if the file doesn't exists
+File.extname('users.txt')
+# => ".txt"
+
+# Get the file name without the directory part
+File.basename('/tmp/ebook.pdf')
+# => "ebook.pdf"
+
+# Get the path for this file, without the file name
+File.dirname('/tmp/ebook.pdf')
+# => "/tmp"
+
+# Is this actually a file or a directory?
+File.directory?('cats')
+
+# Get current directory
+Dir.pwd
+
+# Check if a directory is empty
+Dir.empty?('/tmp')
+
+# Check if a firectory exists
+Dir.exists?('/home/Downloads')
+
+# Create a new directory
+Dir.mkdir('/tmp/testing')
+
+# Create file temporarily
+Dir.mktmpdir do |dir|
+  File.write(dir + '/log.txt', 'test')
 end
 ```
