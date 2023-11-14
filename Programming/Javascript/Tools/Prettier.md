@@ -23,7 +23,7 @@ Configuration inside `package.json` file.
 ```
 
 
-#### Running prettier
+#### Running `prettier`
 
 ```bash
 $ npx prettier --write ./src/

@@ -64,6 +64,7 @@ public class Entity {
     this.y = y;
   }
 
+  // redundant: use toString method instead
   public String serialize() {
     return String.format("Entity(x=%d, y=%d)", this.x, this.y);
   }
@@ -174,7 +175,7 @@ public class Main {
 }
 ```
 
-- `Integer`, `Float`, `Double`, `Boolean` refer to **reference types**. We cannot pass primitive types to Generic classes.
+- `Integer`, `Float`, `Double`, `Boolean` are called **Reference types**. We cannot pass primitive types to Generic classes.
 - In generic method definition, the generic symbol appears before the return type of the method. 
 
 
