@@ -232,6 +232,7 @@ public class Main {
     Position moveDelta = new Position(10, 20);
     Optional<Position> currentPosition = e.move(moveDelta);
 
+	/* method one: meh! */
     if (currentPosition.isEmpty()) {
       System.out.println("object was empty");
     }
@@ -240,7 +241,7 @@ public class Main {
       System.out.println(currentPosition.get());
     }
 
-    /* same as above code */
+    /* method two: better option */
     currentPosition.ifPresentOrElse(
         (position) -> System.out.println(position),
         () -> System.out.println("object was empty"));
@@ -347,7 +348,7 @@ public class Main {
 #### Abstract Classes
 ```java
 /* file: Animal.java */
-abstract public class Animal {
+public abstract class Animal {
   private String name;
 
   public Animal(String name) {
