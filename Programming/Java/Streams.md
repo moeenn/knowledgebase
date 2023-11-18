@@ -63,6 +63,7 @@ public class Main {
   }
 
   private static List<Person> getPeople() {
+	// generate immutable list
     return List.of(
         new Person("Alice", 23, Gender.FEMALE),
         new Person("Bob", 36, Gender.MALE),
