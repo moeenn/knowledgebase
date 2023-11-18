@@ -39,7 +39,7 @@ $ docker container rm $(docker ps -a -q) -f
 
 ---
 
-#### Environment
+#### Environment variables
 
 ```bash
 # containers can be started with specific env variables
@@ -53,7 +53,8 @@ $ docker run --env-file ./env ubuntu bash
 ---
 
 #### Volumes
-Folders from outside the container (i.e. host) can be mapped on to specific folders inside the container. This way our container can use a folder from outside its operating environment i.e. client machine. E.g. We can map the current directory to the default site folder for Nginx.
+
+Folders from outside the container (i.e. host) can be mapped on to specific folders inside the container. This way our container can use a folder from outside its operating environment i.e. client machine. E.g. We can map the current directory to the default site folder for `nginx`.
 
 ```bash
 $ docker container run -p 80:80 -v $(pwd):/usr/share/nginx/html nginx
