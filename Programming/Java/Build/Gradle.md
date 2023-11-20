@@ -1,3 +1,11 @@
+#### Installation
+
+```bash
+$ sdk install gradle
+```
+
+#### Project structure 
+
 ```
 - sandbox/
   - .gitignore
