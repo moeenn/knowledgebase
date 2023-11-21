@@ -17,10 +17,20 @@ $ sdk install gradle
         - com/
           - sandbox/
             - Main.java
+            - Calculator.java
+    - test/
+      - java/
+        - com/
+          - sandbox/
+            - CalculatorTest.java
 ```
 
 ```bash
+# make directory structure for code files
 $ mkdir -p ./src/main/java/com/sandbox
+
+# make directory structure for test files
+$ mkdir -p ./src/test/java/com/sandbox
 ```
 
 
@@ -48,9 +58,21 @@ jar {
     }
 }
 
+testing {
+    suites {
+        test {
+            useJUnitJupiter('5.9.3')
+        }
+    }
+}
+
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 }
 ```
+
+**Note**: Ensure that the version of `junit` is same across the entire `build.gradle` file.
 
 ```gitignore
 .gradle
@@ -73,6 +95,33 @@ public class Main {
 }
 ```
 
+```java
+package com.sandbox;
+
+public class Calculator {
+  public int add(int a, int b) {
+    return a + b;
+  }
+}
+```
+
+```java
+package com.sandbox;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+public class CalculatorTest {
+  private final Calculator calculator = new Calculator();
+
+  @Test
+  public void testAdd() {
+    int result = this.calculator.add(10, 20);
+    assertEquals(result, 30);
+  }
+}
+```
 
 #### Commands
 
@@ -81,6 +130,9 @@ public class Main {
 # use -q flag for quiet
 # use -t flag for live reload build 
 $ gradle run
+
+# run tests
+$ gradle test
 
 # check and compile project classes
 $ gradle build
