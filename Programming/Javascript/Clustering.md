@@ -1,5 +1,5 @@
 ```bash
-$ npm i -G pm2
+$ npm i pm2
 ```
 
 
@@ -35,16 +35,16 @@ app.listen(PORT, () => {
 
 ```bash
 # list all running processes
-$ pm2 ls
+$ npx pm2 ls
 
 # start a new cluster, -i 0 means create according to num cpus
-$ pm2 start ./src/index.mjs -i 0
+$ npx pm2 start ./src/index.mjs -i 0
 
 # stop a running cluster
-$ pm2 delete ./src/index.mjs
+$ npx pm2 delete ./src/index.mjs
 
 # see logs of running clusters
-$ pm2 logs
+$ npx pm2 logs
 ```
 
 
@@ -58,7 +58,7 @@ The cluster configuration for `pm2` is named `ecosystem.config.js`.
 module.exports = {
   apps: [
     {
-      name: "sample_express",
+      name: "sample-express",
       instances: 0,
       exec_mode: "cluster",
       script: "./src/index.mjs"
@@ -88,14 +88,14 @@ $ npx pm2 delete <cluster_name>
 module.exports = {
   apps: [
     {
-      name: "dms_backend",
+      name: "project-name",
       instances: 0,
       exec_mode: "cluster",
       script: "./build/index.js"
     },
     {
       name: "cron",
-      script: "./build/app/jobs/processMissedDeliveries.js",
+      script: "./build/app/jobs/backgroundTask.js",
       instances: 1,
       exec_mode: "fork",
       cron_restart: "0 * * * *", // "0 */3 * * *" mean every three hours    
