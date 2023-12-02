@@ -104,6 +104,48 @@ public class Entity {
 
 ---
 
+#### Runnables
+
+```java
+package com.sandbox;
+
+public class Main {
+	public static void main(String[] args) {
+		Runnable fn = () -> {
+			System.out.println("Hello from simple runnable");
+		};
+
+		fn.run();
+	}
+}
+```
+
+**Note**: `Runnable` is simply an interface. We can also define classes which implement the `Runnable` interface.
+
+```java
+package com.sandbox;
+
+public class Task implements Runnable {
+  @Override
+  public void run() {
+    System.out.println("Hello from custom runnable class");
+  }
+}
+```
+
+```java
+package com.sandbox;
+
+public class Main {
+	public static void main(String[] args) {
+		new Task().run();
+	}
+}
+```
+
+
+---
+
 #### Generics
 ```java
 package com.app;

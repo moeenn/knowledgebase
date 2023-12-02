@@ -16,7 +16,10 @@ $ mkdir -p ./src/main/java/com/sandbox
 ```
 
 
-#### `build.gradle` file
+**Note**: `gradle` will generally give better performance than `maven` because `gradle` can spawn a background daemon which keeps the `jvm` alive. This way we don't have to startup the `jvm` every time we execute our code.
+
+
+#### `build.gradle`file
 
 ```groovy
 plugins {
