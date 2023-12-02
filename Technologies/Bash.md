@@ -23,8 +23,8 @@ echo $MESSAGE
 echo "My name ${NAME}"
 ```
 
-- It is a convention that all variables should be uppercase
-- There shouldn’t be a space before or after the = sign when declaring variables
+- It is a convention that all variables should be **uppercase**
+- There shouldn’t be a space before or after the equals (i.e. `=`) sign when declaring variables
 - Variables can be interpolated in strings. This only works in double-quote strings
 
 
@@ -36,7 +36,7 @@ declare -a packages=(
   "libxft-dev"
 )
 
-# loop through the arra
+# loop through the array
 for pkg in ${packages[@]}; do
   echo $pkg
 done

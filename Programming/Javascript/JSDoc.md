@@ -26,7 +26,6 @@ File `jsconfig.json`
 ```json
 {
   "compilerOptions": {
-    "checkJs": true,
     "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,

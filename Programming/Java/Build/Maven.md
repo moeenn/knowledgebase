@@ -1,3 +1,11 @@
+#### Installation
+
+```bash
+$ sdk install maven
+```
+
+#### Project structure 
+
 ```
 - sandbox/
   - pom.xml
