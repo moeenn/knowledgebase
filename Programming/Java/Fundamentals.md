@@ -42,7 +42,7 @@ $ java Main
 #### Exceptions
 ```java
 /** file: Main.java */
-package com.app;
+package com.sandbox;
 
 public class Main {
   public static void main(String... args) {
@@ -55,14 +55,14 @@ public class Main {
       System.out.println(ex.getMessage());
     }
 
-    System.out.println(e.serialize());
+    System.out.println(e);
   }
 }
 ```
 
 ```java
 /** file: Entity.java */
-package com.app;
+package com.sandbox;
 
 public class Entity {
   private int x;
@@ -81,11 +81,6 @@ public class Entity {
   public Entity(int x, int y) {
     this.x = x;
     this.y = y;
-  }
-
-  // redundant: use toString method instead
-  public String serialize() {
-    return String.format("Entity(x=%d, y=%d)", this.x, this.y);
   }
 
   private boolean isWithinBounds() {
@@ -116,6 +111,11 @@ public class Entity {
       throw new Exception(
           String.format("out of bounds: x: %d, y: %d", this.x, this.y));
     }
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Entity(x=%d, y=%d)", this.x, this.y);
   }
 }
 ```

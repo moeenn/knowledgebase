@@ -205,7 +205,6 @@ const name string = "Connor Kenway"
 ```
 
 
-
 ##### Find the type of a variable
 ```go
 var name string = "Kalahari"
@@ -792,6 +791,46 @@ func main() {
 
   e.UpdateSalary(40000)
   e.Display()
+}
+```
+
+
+##### Struct embedding
+
+```go
+type Position struct {
+	X float64
+	Y float64
+}
+
+func (p *Position) Move(x, y float64) {
+	p.X += x
+	p.Y += y
+}
+
+func (p *Position) Teleport(x, y float64) {
+	p.X = x
+	p.Y = y
+}
+
+type Player struct {
+	Name string
+	*Position
+}
+
+func NewPlayer(name string) *Player {
+	return &Player{
+		Name:     name,
+		Position: &Position{0, 0},
+	}
+}
+
+func main() {
+	player := NewPlayer("P One")
+	fmt.Printf("position: %v\n", player.Position)
+
+	player.Move(10.5, 20.5)
+	fmt.Printf("position: %v\n", player.Position)
 }
 ```
 
