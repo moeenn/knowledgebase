@@ -1164,3 +1164,120 @@ func main() {
 	fmt.Printf("%s\n", encoded)
 }
 ```
+
+
+#### Context
+
+##### Storing value in a context
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+)
+
+func performAction(ctx context.Context) error {
+    /**
+     * by default, the returned value is of type 'any'. Here
+     * we cast it to an 'int' type.
+     */ 
+	value, ok := ctx.Value("key").(int)
+	if !ok {
+		return errors.New("invalid value in context")
+	}
+
+	fmt.Printf("Context value: %v\n", value)
+	return nil
+}
+
+func main() {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "key", 300)
+
+	if err := performAction(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+		os.Exit(1)
+	}
+}
+```
+
+
+##### Cancelling contexts
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"time"
+)
+
+const (
+	REQUEST_DURATION = 250
+	REQUEST_TIMEOUT  = 500
+)
+
+/* simulate an external API call */
+func slowExternalRequest(userId int) (int, error) {
+	time.Sleep(time.Millisecond * REQUEST_DURATION)
+	return userId * 3, nil
+}
+
+type Response struct {
+	value int
+	err   error
+}
+
+func fetchUserData(ctx context.Context, userId int) (int, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*REQUEST_TIMEOUT)
+	defer cancel()
+
+	respChan := make(chan Response)
+
+	go func() {
+		result, err := slowExternalRequest(userId)
+		if err != nil {
+			respChan <- Response{-1, err}
+			return
+		}
+		respChan <- Response{result, nil}
+	}()
+
+	/**
+	 * channel synchronization: we return on the first channel
+	 * message i.e. either requests completes, or the context
+	 * times-out
+	 */
+	for {
+		select {
+		case <-ctx.Done():
+			return -1, errors.New("request timed-out")
+
+		case resp := <-respChan:
+			return resp.value, resp.err
+		}
+	}
+}
+
+func main() {
+	start := time.Now()
+	userId := 10
+	ctx := context.Background()
+
+	result, err := fetchUserData(ctx, userId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	fmt.Printf("result: %d\n", result)
+	fmt.Printf("Elapsed: %v\n", time.Since(start))
+}
+```
