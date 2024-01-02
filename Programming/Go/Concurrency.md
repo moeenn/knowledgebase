@@ -1,3 +1,81 @@
+#### Channels
+
+```go
+func main() {
+	valueChan := make(chan int /*, optional buffer length here */)
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			/**
+			 * sending value into unbuffered channel will block until there is
+			 * an active receiver
+			 */
+			valueChan <- i
+		}
+
+		/* the sender must always close the channel */
+		close(valueChan)
+	}()
+
+	/* receive values until channel is closed */
+	for value := range valueChan {
+		fmt.Printf("value: %d\n", value)
+	}
+}
+```
+
+
+#### Channel Sync: Select
+
+```go
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	chanOne := make(chan int)
+	chanTwo := make(chan int)
+
+	go func() {
+		for i := 1; i <= 10; i++ {
+			time.Sleep(time.Second / 2)
+			chanOne <- i
+		}
+		/* Don't close the channel here */
+	}()
+
+	go func() {
+		for i := 100; i <= 200; i += 10 {
+			time.Sleep(time.Second)
+			chanTwo <- i
+		}
+		/* Don't close the channel here */
+	}()
+
+	/* we expect to receive only 20 messages total on both channels */
+	for i := 0; i < 20; i++ {
+		/**
+		 * select will wait for incoming messages on these two channels.
+		 * Select block exits after in two situations
+		 * - it receives the first message from any of the two channels.
+		 * - any of the two channels closes.
+		 */
+		select {
+		case one := <-chanOne:
+			fmt.Printf("chanOne: %d\n", one)
+
+		case two := <-chanTwo:
+			fmt.Printf("chanTwo: %d\n", two)
+		}
+	}
+
+	close(chanOne)
+	close(chanTwo)
+}
+```
+
+
 ```go
 package main
 

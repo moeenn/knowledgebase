@@ -1012,6 +1012,34 @@ func main() {
 ```
 
 
+##### Custom errors
+
+```go
+type APIError struct {
+	error      string
+	statusCode int
+}
+
+func NewAPIError(status int, message string) APIError {
+	return APIError{message, status}
+}
+
+/* implementing this method satisfies the Error interface */
+func (err APIError) Error() string {
+	return err.error
+}
+
+func (err APIError) Status() int {
+	return err.statusCode
+}
+
+func main() {
+	err := NewAPIError(422, "Unauthorized")
+	fmt.Printf("error: %s, status: %d\n", err.Error(), err.Status())
+}
+```
+
+
 ---
 
 #### Sorting
