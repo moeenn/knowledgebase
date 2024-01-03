@@ -76,6 +76,74 @@ func main() {
 ```
 
 
+#### Timers & Tickers
+
+**Timers** can be used to perform some action in the future.
+
+```go
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	t1 := time.NewTimer(time.Millisecond * 500) // will fire second
+	t2 := time.NewTimer(time.Millisecond * 250) // will fire first
+
+	for i := 0; i < 2; i++ {
+		select {
+		case <-t1.C:
+			fmt.Println("timer one fired")
+
+		case <-t2.C:
+			fmt.Println("timer two fired")
+		}
+	}
+}
+```
+
+**Tickers** can be used to perform an action every `n` duration.
+
+```go
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ticker := time.NewTicker(time.Millisecond * 250)
+	done := make(chan bool)
+
+	defer func() {
+		fmt.Println("cleaning up...")
+		ticker.Stop()
+		close(done)
+	}()
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+
+			/* this will fire every 250 ms */
+			case t := <-ticker.C:
+				fmt.Printf("tick: %v\n", t)
+			}
+		}
+	}()
+
+	/* we will receive 8 messages from ticker in 2 seconds */
+	time.Sleep(time.Second * 2)
+	done <- true
+
+	fmt.Println("Completed")
+}
+```
+
+
+
+
 ```go
 package main
 

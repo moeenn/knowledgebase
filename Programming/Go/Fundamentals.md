@@ -1309,3 +1309,53 @@ func main() {
 	fmt.Printf("Elapsed: %v\n", time.Since(start))
 }
 ```
+
+**Note**: There is another simpler way of achieving the same thing.
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+const (
+	API_DURATION     = 500
+	TIMEOUT_DURATION = 1000
+)
+
+func slowExternalRequest(userId int) (int, error) {
+	time.Sleep(time.Millisecond * API_DURATION)
+	return userId * 10, nil
+}
+
+type UserResponse struct {
+	result int
+	error  error
+}
+
+func main() {
+	userId := 300
+	resultChan := make(chan UserResponse)
+
+	go func() {
+		result, err := slowExternalRequest(userId)
+		if err != nil {
+			resultChan <- UserResponse{-1, err}
+		}
+
+		resultChan <- UserResponse{result, nil}
+	}()
+
+	select {
+	case <-time.After(time.Millisecond * TIMEOUT_DURATION):
+		fmt.Println("request timeout")
+
+	case result := <-resultChan:
+		fmt.Printf("result: %+v\n", result)
+	}
+
+	close(resultChan)
+}
+```
