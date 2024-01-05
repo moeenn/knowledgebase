@@ -25,6 +25,8 @@ func main() {
 ```
 
 
+---
+
 #### Channel Sync: Select
 
 ```go
@@ -75,6 +77,8 @@ func main() {
 }
 ```
 
+
+---
 
 #### Timers & Tickers
 
@@ -142,6 +146,172 @@ func main() {
 ```
 
 
+---
+
+#### Worker pools 
+
+```go
+import (
+	"fmt"
+	"time"
+)
+
+func worker(jobs <-chan int, results chan<- int) {
+	for job := range jobs {
+		fmt.Printf("Processing job: %d\n", job)
+		time.Sleep(time.Second)
+		results <- job * 10
+	}
+}
+
+func main() {
+	start := time.Now()
+
+	numJobs := 5
+	jobs := make(chan int, numJobs)
+	results := make(chan int, numJobs)
+	defer close(results)
+
+	/* spawn multiple workers to maximize efficiency */
+	for w := 0; w < 5; w++ {
+		go worker(jobs, results)
+	}
+
+	for i := 0; i < numJobs; i++ {
+		jobs <- i
+	}
+
+	close(jobs)
+
+	/* cannot range over channel because sender is not closing the channel */
+	for i := 0; i < numJobs; i++ {
+		fmt.Printf("result: %d\n", <-results)
+	}
+
+	/* will take 1 second to complete */
+	fmt.Printf("elapsed: %v\n", time.Since(start))
+}
+```
+
+
+---
+
+#### Atomics
+
+```go
+import (
+	"fmt"
+	"sync"
+)
+
+func processCounter(counter *int) {
+	for i := 0; i < 1000; i++ {
+		(*counter)++
+	}
+}
+
+func main() {
+	/* WARNING: mutable state shared by many goroutines */ 
+	counter := 0
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			processCounter(&counter)
+		}()
+	}
+
+	wg.Wait()
+	fmt.Printf("counter: %d\n", counter)
+}
+```
+
+**Note**: The above code has a race-condition. When a non-atomic variable is mutated by multiple go-routines simultaneously, some updates (i.e. increments) may be missed. The solution is to use atomic variables.
+
+```go
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+)
+
+func processCounter(counter *atomic.Uint64) {
+	for i := 0; i < 1000; i++ {
+		(*counter).Add(1)
+	}
+}
+
+func main() {
+	/* atomics are thread-safe and don't incur race-conditions */
+	var counter atomic.Uint64
+	var wg sync.WaitGroup
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func(c *atomic.Uint64) {
+			processCounter(c)
+			wg.Done()
+		}(&counter)
+	}
+
+	wg.Wait()
+	fmt.Printf("counter: %d\n", counter.Load())
+}
+```
+
+
+---
+
+#### Mutex
+
+```go
+import (
+	"fmt"
+	"sync"
+)
+
+type MyAtomicCounter struct {
+	mu    sync.Mutex
+	count uint64
+}
+
+func (c *MyAtomicCounter) Increment() {
+	c.mu.Lock()
+	c.count++
+	c.mu.Unlock()
+}
+
+func (c *MyAtomicCounter) Count() uint64 {
+	return c.count
+}
+
+func processCounter(counter *MyAtomicCounter) {
+	for i := 0; i < 1000; i++ {
+		(*counter).Increment()
+	}
+}
+
+func main() {
+	/* atomics are thread-safe and don't incur race-conditions */
+	var counter MyAtomicCounter
+	var wg sync.WaitGroup
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func(c *MyAtomicCounter) {
+			processCounter(c)
+			wg.Done()
+		}(&counter)
+	}
+
+	wg.Wait()
+	fmt.Printf("counter: %d\n", counter.Count())
+}
+```
+
 
 
 ```go
@@ -183,6 +353,7 @@ func routine_b(channel chan string, flag chan bool) {
 ---
 
 #### Wait groups
+
 ```go
 package main
 
