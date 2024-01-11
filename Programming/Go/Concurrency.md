@@ -27,6 +27,42 @@ func main() {
 
 ---
 
+#### Implementing generators using channels
+Considering how Python uses generators, for iterating over a large number of values without running into memory usage issues. We can implement a similar pattern in Go using Channels
+
+```go
+func iterate(n int) chan int {
+  c := make(chan int)
+
+  go func() {
+    for i := 0; i < n; i++ {
+      c <- i
+    }
+
+	/* channel must be closed by the sender */
+    close(c)
+  }()
+
+  return c
+}
+
+func main() {
+  /** 
+   * ranging over channel requires that channel is eventually closed 
+   * if we don't closed the channel, this program will dead-lock because
+   * range will be expecting more messages to come in
+  */
+  for n := range iterate(1000) {
+    fmt.Printf("%d\t", n)
+  }
+}
+```
+
+**Note**: When we range over incoming channel values, we must ensure that the sender closes the channel when it is done sending values. The sender must always be responsible for closing the channel and if the channel is left open, it will result in a deadlock; The receiver will keep waiting for incoming values after the sender is done sending values.
+
+
+---
+
 #### Channel Sync: Select
 
 ```go
@@ -193,6 +229,74 @@ func main() {
 }
 ```
 
+##### Another example
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type Entry struct {
+	Id     int
+	Result bool
+}
+
+func createData() []Entry {
+	data := []Entry{
+		{Id: 1, Result: false},
+		{Id: 2, Result: false},
+		{Id: 3, Result: false},
+		{Id: 4, Result: false},
+		{Id: 5, Result: false},
+		{Id: 6, Result: false},
+		{Id: 7, Result: true},
+		{Id: 8, Result: false},
+	}
+
+	return data
+}
+
+func processEntry(entry Entry) Entry {
+	time.Sleep(time.Second)
+	fmt.Printf("Processed entry: %v\n", entry)
+	return entry
+}
+
+func executor(entries []Entry, maxWorkers int, results chan<- Entry) {
+	sem := make(chan struct{}, maxWorkers)
+	for _, entry := range entries {
+		go func(entry Entry) {
+			/**
+			 * this will block if the semaphore channel buffer is already full
+			 * also, we don't care about the value being sent over the channel,
+			 * therefore we are using anonymous struct
+			 */
+			sem <- struct{}{}
+			results <- processEntry(entry)
+			<-sem
+		}(entry)
+	}
+}
+
+func main() {
+	entries := createData()
+	maxWorkers := 2
+	results := make(chan Entry, maxWorkers)
+
+	executor(entries, maxWorkers, results)
+
+	for i := 0; i < len(entries); i++ {
+		result := <-results
+		fmt.Printf("Result: %v\n", result)
+	}
+}
+```
+
+**Note**: The purpose of the Semaphore (i.e. `sem`) is to coordinate and only allow max number of operation to happen concurrently i.e. `maxWorkers`.
+
 
 ---
 
@@ -313,6 +417,66 @@ func main() {
 ```
 
 
+---
+
+#### Multiple workers sending over a channel
+
+```go
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+func doWork(duration time.Duration, results chan<- string) {
+	id := rand.Intn(100)
+	fmt.Printf("starting: %d\n", id)
+	time.Sleep(duration)
+	fmt.Printf("complete: %d\n", id)
+	results <- fmt.Sprintf("work # %d", id)
+}
+
+func main() {
+	start := time.Now()
+	results := make(chan string)
+	wg := sync.WaitGroup{}
+
+	waitSeconds := []time.Duration{
+		time.Second * 2,
+		time.Second * 3,
+		time.Second * 4,
+	}
+	wg.Add(len(waitSeconds))
+
+	for _, wait := range waitSeconds {
+		go func(wait time.Duration) {
+			doWork(wait, results)
+			wg.Done()
+		}(wait)
+	}
+
+	/* range in background, to not block the main goroutine */
+	go func() {
+		for result := range results {
+			fmt.Printf("result: %s\n", result)
+		}
+	}()
+
+	wg.Wait()
+	close(results)
+
+	fmt.Printf("elapsed: %v\n", time.Since(start))
+}
+```
+
+**Note**: The above solution works because we already know the total number of messages which are going to be sent over the `results` channel, by the three workers.
+
+
+---
+
+
+
 
 ```go
 package main
@@ -348,180 +512,3 @@ func routine_b(channel chan string, flag chan bool) {
 
 // This is a message from the goroutine
 ```
-
-
----
-
-#### Wait groups
-
-```go
-package main
-
-import (
-  "fmt"
-  "sync"
-)
-
-func main() {
-  messages := make(chan string)
-
-  // configure wait group to wait to two concurrent tasks
-  var wait_group sync.WaitGroup
-  wait_group.Add(2)
-
-  go func() {
-    // mark task as complete
-    defer wait_group.Done()
-    routine_a(messages)
-  }()
-
-  go func() {
-    defer wait_group.Done()
-    routine_b(messages)
-  }()
-
-  // wait for running tasks to complete
-  wait_group.Wait()
-}
-
-func routine_a(channel chan string) {
-  channel <- "This is a message from the goroutine"
-}
-
-func routine_b(channel chan string) {
-  incoming := <-channel
-  fmt.Println(incoming)
-}
-```
-
-
----
-
-#### Ranging over Channel Messages
-- Channels must always be closed by senders (and not receivers) because we cannot send over closed channels
-- We can only range over channels which will be closed by senders
-
-```go
-package main
-
-import (
-  "fmt"
-)
-
-func main() {
-  msgs := make(chan string)
-
-  go action("Message", msgs)
-  go action("Response", msgs)
-
-  for msg := range msgs {
-    fmt.Println(msg)
-  }
-}
-
-func action(name string, c chan<- string) {
-  for i := 0; i < 10; i++ {
-    c <- fmt.Sprintf("%d - %s", i, name)
-  }
-
-  // sender must close the channel, never the receiver
-  close(c)
-}
-```
-
-
----
-
-#### Implementing generators 
-Considering how Python uses generators, for iterating over a large number of values without running into memory usage issues. We can implement a similar pattern in Go using Channels
-
-```go
-func iterate(n int) chan int {
-  c := make(chan int)
-
-  go func() {
-    for i := 0; i < n; i++ {
-      c <- i
-    }
-
-    close(c)
-  }()
-
-  return c
-}
-
-func main() {
-  for n := range iterate(1000) {
-    fmt.Printf("%d\t", n)
-  }
-}
-```
-
-**Note**: When we range over incoming channel values, we must ensure that the sender closes the channel when it is done sending values. The sender must always be responsible for closing the channel and if the channel is left open, it will result in a deadlock; The receiver will keep waiting for incoming values after the sender is done sending values.
-
-
----
-
-#### Worker Pools
-
-```go
-package main
-
-import (
-  "fmt"
-  "time"
-)
-
-type Entry struct {
-  Id     int
-  Result bool
-}
-
-func createData() []Entry {
-  data := []Entry{
-    {Id: 1, Result: false},
-    {Id: 2, Result: false},
-    {Id: 3, Result: false},
-    {Id: 4, Result: false},
-    {Id: 5, Result: false},
-    {Id: 6, Result: false},
-    {Id: 7, Result: true},
-    {Id: 8, Result: false},
-  }
-
-  return data
-}
-
-func task(entry Entry) Entry {
-  time.Sleep(time.Second)
-  fmt.Printf("Processed entry: %v\n", entry)
-  return entry
-}
-
-func executor(entries []Entry, maxWorkers int, results chan<- Entry) {
-  sem := make(chan int, maxWorkers)
-  for _, entry := range entries {
-    go func(entry Entry) {
-      sem <- 1
-      result := task(entry)
-      results <- result
-      <-sem
-    }(entry)
-  }
-}
-
-func main() {
-  entries := createData()
-  maxWorkers := 2
-  results := make(chan Entry, maxWorkers)
-
-  executor(entries, maxWorkers, results)
-
-  for i := 0; i < len(entries); i++ {
-    result := <-results
-    fmt.Printf("Result: %v\n", result)
-  }
-}
-```
-
-**Note**: The purpose of the Semaphore (i.e. `sem`) is to coordinate and only allow max number of operation to happen concurrently i.e. `maxWorkers`.
