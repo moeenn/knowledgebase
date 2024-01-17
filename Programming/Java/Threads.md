@@ -49,3 +49,53 @@ public class Main {
 }
 ```
 
+
+---
+
+#### Volatile
+
+```java
+public class Game {
+  /**
+   * member variable which will be modified my multiple threads (i.e. Players)
+   * volatile makes this variable atomic i.e. thread-safe
+   * 
+   * Without volatile, the counter variable may be cached in the CPU registers, 
+   * and each thread may have its own local copy. As a result, one player 
+   * thread may update the counter, but other threads may not immediately see 
+   * the updated value due to caching.
+   */
+  private static volatile int counter = 0;
+
+  public static class Player extends Thread {
+    public Player(String name) {
+      super(name);
+    }
+
+    @Override
+    public void run() {
+      for (int i = 0; i < 1000; i++) {
+        counter++;
+        System.out.printf("%s: %d\n", getName(), counter);
+      }
+    } 
+  }
+}
+```
+
+```java
+import java.util.ArrayList;
+
+public class Main {
+  public static void main(String[] args) {    
+    ArrayList<Game.Player> players = new ArrayList<>() {
+      {
+        add(new Game.Player("Player one"));
+        add(new Game.Player("Player two"));
+      }
+    };
+
+    players.stream().forEach(p -> p.start());
+  }
+}
+```

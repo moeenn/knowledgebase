@@ -4,6 +4,8 @@ $ rustup component add rust-analyzer
 ```
 
 
+---
+
 #### Getting started
 ```rust
 /* file: main.rs */  
@@ -90,6 +92,7 @@ fn type_of<T>(_: &T) -> String {
 }
 ```
 
+
 ---
 
 #### Control-flow
@@ -123,18 +126,16 @@ println!("The Bartender will allow entry? {allow_entry}");
 
 #### Loops
 ```rust
-use std::{thread, time};  
-  
-fn main() {  
-    let second = time::Duration::from_secs(1);  
-    let mut now: time::Instant;  
-  
-    /* infinitely loop every 1 second */  
-    loop {  
-        now = time::Instant::now();  
-        println!("{:?}", now);  
-        thread::sleep(second);  
-    }  
+use std::{thread, time};
+
+fn main() {
+    let second = time::Duration::from_secs(1);
+
+    /* infinitely loop every 1 second */
+    loop {
+        println!("looping through");
+        thread::sleep(second);
+    }
 }
 ```
 
@@ -158,6 +159,7 @@ for count in 0..100 {
     println!("{count}")  
 }
 ```
+
 
 ---
 

@@ -1,11 +1,14 @@
 
 #### Installation
+
+###### Option #1
 Java and its build toolchains can be installed using the os package managers. Following is an example.
 
 ```bash
 $ sudo apt-get install default-jdk libeclipse-jdt-core-java maven
 ```
 
+###### Option #2 (Recommended) 
 The above option works but it is not very flexible. A much better option is to use `sdkman` to install specific versions of java and build tools / packages / CLIs.
 
 ```bash
@@ -39,6 +42,36 @@ $ java Main
 
 ---
 
+#### Records
+```java
+/** records are similar to structs in C/C++ */
+public record Person(String name, int age) {
+  public void greet() {
+    System.out.printf("Hello, %s!\n", name);
+  }
+}
+```
+
+```java
+import java.util.ArrayList;
+
+public class Main {
+  public static void main(String[] args) {    
+    ArrayList<Person> people = new ArrayList<>() {
+      {
+        add(new Person("Player one", 30));
+        add(new Person("Player two", 40));
+      }
+    };
+
+    people.stream().forEach(System.out::println);
+  }
+}
+```
+
+
+---
+
 #### Exceptions
 ```java
 /** file: Main.java */
@@ -61,6 +94,18 @@ public class Main {
 ```
 
 ```java
+/** file: Direction.java */
+package com.sandbox;
+
+public enum Direction {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+}
+```
+
+```java
 /** file: Entity.java */
 package com.sandbox;
 
@@ -70,13 +115,6 @@ public class Entity {
   private int step = 20;
   private int lower_bound = 0;
   private int upper_bound = 100;
-
-  public enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-  }
 
   public Entity(int x, int y) {
     this.x = x;
@@ -230,7 +268,7 @@ public class Entity {
 
   public Optional<Position> move(Position position) {
     if (position.x < 0 || position.y < 0) {
-      return null;
+      return Optional.empty(); // OR: return null
     }
 
     this.position.x += position.x;
@@ -279,8 +317,8 @@ Java doesn’t support Multiple Inheritance.
 package com.app;
 
 public class Entity {
-  private int x;
-  private int y;
+  private final int x;
+  private final int y;
 
   public Entity(int x, int y) {
     this.x = x;
@@ -302,6 +340,7 @@ public class Person extends Entity {
     super(x, y);
   }
 
+  @Override
   public void speak() {
     System.out.println("Person spoke");
   }
@@ -378,7 +417,7 @@ public abstract class Animal {
     return this.name;
   }
 
-  abstract public void makeSound();
+  public abstract void makeSound();
 }
 ```
 
