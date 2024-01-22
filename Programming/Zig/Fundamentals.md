@@ -71,6 +71,40 @@ std.debug.print("{any}\n", .{variable_length});
 TODO: strings, hash-maps
 
 
+#### Optionals
+
+```zig
+test "optionals" {
+    var optionalValue: ?f32 = null;
+    optionalValue = 30.5;
+
+    // default value from optional
+    var defaultValue = optionalValue orelse 30.0;
+
+    // access optional value: approach one
+    if (optionalValue != null) {
+        const value: f32 = optionalValue.?;
+
+        try std.testing.expect(@TypeOf(value) == f32);
+        try std.testing.expectEqual(value, 30.5);
+    }
+
+    // access optional value: approach two (recommended)
+    if (optionalValue) |value| {
+        try std.testing.expect(@TypeOf(value) == f32);
+        try std.testing.expectEqual(value, 30.5);
+    }
+
+    // access and mutate optional value
+    if (optionalValue) |*value| {
+        value.* = 50.0;
+    }
+
+    try std.testing.expect(optionalValue.? == 50.0);
+}
+```
+
+
 #### Switch 
 
 ```zig
@@ -336,3 +370,33 @@ pub fn main() void {
     print("{}\n", .{result == 1000});
 }
 ```
+
+
+#### Multiple code files
+
+```zig
+// file: src/main.zig
+const std = @import("std");
+const User = @import("./user.zig").User;
+
+pub fn main() void {
+    const u = User.new(200);
+    std.debug.print("{}\n", .{u});
+}
+```
+
+```zig
+// file: src/user.zig
+pub const User = struct {
+    id: u32,
+    active: bool,
+
+    pub fn new(id: u32) User {
+        return User{
+            .id = id,
+            .active = true,
+        };
+    }
+};
+```
+
