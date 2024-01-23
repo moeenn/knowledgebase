@@ -456,3 +456,14 @@ import java.util.UUID;
 ...
 UUID uuid = UUID.randomUUID();
 ```
+
+
+
+#### TODO
+
+```
+https://www.baeldung.com/thread-pool-java-and-guava
+https://youtu.be/FTyMsFaTV4I?si
+https://www.marcobehler.com/
+```
+

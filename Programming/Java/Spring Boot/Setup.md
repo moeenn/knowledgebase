@@ -40,6 +40,9 @@ $ mvn spring-boot:run
 We can also clear build caches and do a clean run
 
 ```bash
+# using gradle
+$ gradle clean; gradle bootRun
+
+# using maven
 $ mvn clean spring-boot:run
 ```
-
