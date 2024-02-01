@@ -400,3 +400,12 @@ pub const User = struct {
 };
 ```
 
+
+
+# TODO
+
+```
+# tagged unions
+https://gist.github.com/SpexGuy/8723a4b890331658ebef090be1d2b562
+```
+
