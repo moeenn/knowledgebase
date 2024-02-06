@@ -14,6 +14,7 @@ $ php -S localhost:5000
 ---
 
 #### Variables
+
 ```php
 $name = "Admin";
 $age = 45;
