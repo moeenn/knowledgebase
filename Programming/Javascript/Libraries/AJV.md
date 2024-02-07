@@ -18,7 +18,9 @@ export const Validator = {
   async validate(validator, data) {
     const result = await validator(data)
     if (!result) {
-      return validator.errors
+      if (validator.errors) {
+        return validator.errors
+      }
     }
     return []
   },
