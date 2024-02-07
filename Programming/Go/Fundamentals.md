@@ -62,6 +62,28 @@ import (
 
 ---
 
+#### Variables
+
+
+**Note**: The memory size of any variable can be found using the following method.
+
+```go
+import (
+	"fmt"
+	"unsafe"
+)
+
+func main() {
+	var num int32 = 10
+	fmt.Printf("bytes: %d\n", unsafe.Sizeof(num)) // size in bytes
+}
+```
+
+**Note**: Remember that `int32` is `2^4 bits` i.e. `4 bytes` in size.
+
+
+--- 
+
 #### Packages
 You may have noticed the first line in our Hello World program: Every program must have at least one main package. **We cannot have more than one package in a single directory**.
 

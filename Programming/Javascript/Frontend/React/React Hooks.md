@@ -88,7 +88,8 @@ useEffect(() => {
 ```js
 /**
  * callback will execute only once during first render of the component  
- * (in production). The component will render twice in development mode.
+ * (in production). The component will render twice in development (i.e. strict) 
+ * mode.
  */
 useEffect(() => {
   console.log("Component mounted");
