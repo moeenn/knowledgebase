@@ -3,7 +3,6 @@
 /* includes arrays utility methods */
 import java.util.Arrays; 
 
-
 public class Main {
   public static void main(String[] args) {
     /**
@@ -32,6 +31,16 @@ public class Main {
 
     /* using streams */
     Arrays.stream(nums).forEach(System.out::println);
+
+	/** accessing elements */
+	int[] nums = {1,2,3,4,5};
+
+	try {
+		int n = nums[10];
+		System.out.println(n);
+	} catch (ArrayIndexOutOfBoundsException ex) {
+		System.out.printf("error: %s\n", ex.getMessage());
+	}
   }
 }
 ```
@@ -78,7 +87,7 @@ import java.util.ArrayList;
 public class Main {
   public static void main(String[] args) {
 
-    List<Integer> nums = new ArrayList<Integer>() {
+    List<Integer> nums = new ArrayList<>() {
       {
         add(10);
         add(20);
@@ -100,7 +109,10 @@ public class Main {
     /* check if array contains a value */
     System.out.println(nums.contains(20));
 
-    /* get value at specific index: will throw if out of bounds */
+    /** 
+     * get value at specific index: will throw IndexOutOfBoundsException 
+     * if out of bounds 
+     */
     System.out.println(nums.get(2));
   }
 }
@@ -113,18 +125,21 @@ public class Main {
 ```java
 /**
  *  non-thread-safe implementation is called Stack
- *  if thread-safety is needed, use Vector instead (with has the same interface
+ *  if thread-safety is needed, use Vector instead (has the same interface
  *  as Stack)
 */
 import java.util.Stack;
 
 public class Main {
   public static void main(String[] args) {
-    Stack<Integer> nums = new Stack<>();
-    nums.push(10);
-    nums.push(20);
-    nums.push(30);
-
+	Stack<Integer> nums = new Stack<>() {
+		{
+			push(10);
+			push(20);
+			push(30);
+		}
+	};
+	
     /* get size of stack */
     System.out.println(nums.size());
 
@@ -155,20 +170,23 @@ import java.util.LinkedList;
 
 public class Main {
   public static void main(String[] args) {
-    Queue<Person> people = new LinkedList<>();
-    people.add(new Person("Admin", 27));
-    people.add(new Person("User", 24));
-    people.add(new Person("Customer", 24));
+	Queue<Person> people = new LinkedList<>() {
+		{
+			add(new Person("Admin", 30));
+			add(new Person("User", 20));
+			add(new Person("Customer", 50));
+		}
+	};
 
-    /* get the element at the start of the queue */
-    System.out.println(people.peek());
+	/* get the element at the start of the queue */
+	System.out.println(people.peek());
 
-    /* remove and return first element from the queue */
-    Person first = people.poll();
-    System.out.println(first);
+	/* remove and return first element from the queue */
+	Person first = people.poll();
+	System.out.println(first);
 
-    /* get size of the queue */
-    System.out.println(people.size());
+	/* get size of the queue */
+	System.out.println(people.size());
   }
 }
 ```
@@ -183,7 +201,7 @@ import java.util.ListIterator;
 
 public class Main {
   public static void main(String[] args) {
-    LinkedList<Person> persons = new LinkedList<Person>() {
+    LinkedList<Person> persons = new LinkedList<>() {
       {
         add(new Person("Admin", 30));
         add(new Person("User", 28));
@@ -325,8 +343,6 @@ public class Color {
 import java.util.Map;
 import java.util.HashMap;
 
-
-
 public class Main {
   public static void main(String[] args) {
     Map<Integer, Person> map = new HashMap<>();
@@ -356,7 +372,9 @@ public class Main {
     map.entrySet().forEach(System.out::println);
 
     /* loop through map with lambda */
-    map.entrySet().forEach(p -> System.out.println(p.getKey() + " " + p.getValue()));
+    map.entrySet().forEach(
+      p -> System.out.printf("%d %s\n", p.getKey(), p.getValue())
+    );
 
     /* loop through map with lambda */
     map.forEach((k, v) -> {

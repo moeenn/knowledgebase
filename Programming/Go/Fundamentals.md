@@ -3,6 +3,8 @@ $ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
 
 # install language server manually
 $ go install golang.org/x/tools/gopls@latest
+$ go install github.com/go-delve/delve/cmd/dlv@latest
+$ go install honnef.co/go/tools/cmd/staticcheck@latest
 ```
 
 ##### Modules
@@ -59,6 +61,28 @@ import (
 
 
 ---
+
+#### Variables
+
+
+**Note**: The memory size of any variable can be found using the following method.
+
+```go
+import (
+	"fmt"
+	"unsafe"
+)
+
+func main() {
+	var num int32 = 10
+	fmt.Printf("bytes: %d\n", unsafe.Sizeof(num)) // size in bytes
+}
+```
+
+**Note**: Remember that `int32` is `2^4 bits` i.e. `4 bytes` in size.
+
+
+--- 
 
 #### Packages
 You may have noticed the first line in our Hello World program: Every program must have at least one main package. **We cannot have more than one package in a single directory**.
@@ -203,7 +227,6 @@ Constants are defined the same way as variables. We use the keyword `const` inst
 ```go
 const name string = "Connor Kenway"
 ```
-
 
 
 ##### Find the type of a variable
@@ -612,6 +635,7 @@ type wrappedFunc func (uint64) uint64
 ---
 
 #### Maps
+
 ```go
 nationality := map[string]string {}
 
@@ -637,6 +661,25 @@ nationality := map[string]string{
 delete(nationality, "George Clooney")
 ```
 
+###### Another example
+
+```go
+func main() {
+	capitals := map[string]string{
+		"Pakistan": "Islamabad",
+		"China":    "Beijing",
+		"Britain":  "London",
+	}
+
+	pak, ok := capitals["Pakistan"]
+	if !ok {
+		fmt.Fprintf(os.Stderr, "Not found\n")
+		os.Exit(1)
+	}
+
+	fmt.Printf("found: %s\n", pak)
+}
+```
 
 ---
 
@@ -796,6 +839,78 @@ func main() {
 ```
 
 
+##### Struct embedding
+
+```go
+type Position struct {
+	X float64
+	Y float64
+}
+
+func (p *Position) Move(x, y float64) {
+	p.X += x
+	p.Y += y
+}
+
+func (p *Position) Teleport(x, y float64) {
+	p.X = x
+	p.Y = y
+}
+
+type Player struct {
+	Name string
+	*Position
+}
+
+func NewPlayer(name string) *Player {
+	return &Player{
+		Name:     name,
+		Position: &Position{0, 0},
+	}
+}
+
+func main() {
+	player := NewPlayer("P One")
+	fmt.Printf("position: %v\n", player.Position)
+
+	player.Move(10.5, 20.5)
+	fmt.Printf("position: %v\n", player.Position)
+}
+```
+
+```go
+type SpecialPosition struct {
+	Position
+}
+
+func (sp *SpecialPosition) SpecialMove(x, y float64) {
+	sp.X += x * x
+	sp.Y += y * y
+}
+
+type Enemy struct {
+	*SpecialPosition
+}
+
+func NewEnemy() *Enemy {
+	return &Enemy{
+		SpecialPosition: &SpecialPosition{},
+	}
+}
+
+func main() {
+	enemy := NewEnemy()
+
+	// use position methods
+	enemy.Move(10, 40)
+
+	// use special position methods
+	enemy.SpecialMove(30, 50)
+
+	fmt.Printf("position: %v\n", enemy.Position)
+}
+```
+
 ##### Methods on Primitive Types
 Go enforces the rule that the Data Type and all its methods must be defined in the same package. Due to  this rule we cannot directly implement methods on Primitive Data Types. However, we have the option to derive custom data types from primitive data types
 
@@ -919,6 +1034,34 @@ func main() {
 ```
 
 
+##### Custom errors
+
+```go
+type APIError struct {
+	error      string
+	statusCode int
+}
+
+func NewAPIError(status int, message string) APIError {
+	return APIError{message, status}
+}
+
+/* implementing this method satisfies the Error interface */
+func (err APIError) Error() string {
+	return err.error
+}
+
+func (err APIError) Status() int {
+	return err.statusCode
+}
+
+func main() {
+	err := NewAPIError(422, "Unauthorized")
+	fmt.Printf("error: %s, status: %d\n", err.Error(), err.Status())
+}
+```
+
+
 ---
 
 #### Sorting
@@ -1013,3 +1156,228 @@ func main() {
 ```
 
 In the above example, the program will count up to 100 and then run the foo function.
+
+
+#### Generics
+
+```go
+func SayHello[C any](user C) {
+	fmt.Printf("Hello, %v\n", user)
+}
+
+func main() {
+	SayHello("Admin")
+	SayHello(100)
+}
+```
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
+type APIResponse[T any] struct {
+	Status int `json:"status"`
+	Data   T   `json:"data"`
+}
+
+type User struct {
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+}
+
+type ActionResponse struct {
+	Users []User `json:"users"`
+}
+
+func main() {
+	res := APIResponse[ActionResponse]{
+		Status: 200,
+		Data: ActionResponse{
+			Users: []User{
+				{Id: 10, Email: "admin@site.com"},
+				{Id: 20, Email: "user@site.com"},
+			},
+		},
+	}
+
+	encoded, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Printf("%s\n", encoded)
+}
+```
+
+
+#### Context
+
+##### Storing value in a context
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+)
+
+func performAction(ctx context.Context) error {
+    /**
+     * by default, the returned value is of type 'any'. Here
+     * we cast it to an 'int' type.
+     */ 
+	value, ok := ctx.Value("key").(int)
+	if !ok {
+		return errors.New("invalid value in context")
+	}
+
+	fmt.Printf("Context value: %v\n", value)
+	return nil
+}
+
+func main() {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "key", 300)
+
+	if err := performAction(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+		os.Exit(1)
+	}
+}
+```
+
+
+##### Cancelling contexts
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"time"
+)
+
+const (
+	REQUEST_DURATION = 250
+	REQUEST_TIMEOUT  = 500
+)
+
+/* simulate an external API call */
+func slowExternalRequest(userId int) (int, error) {
+	time.Sleep(time.Millisecond * REQUEST_DURATION)
+	return userId * 3, nil
+}
+
+type Response struct {
+	value int
+	err   error
+}
+
+func fetchUserData(ctx context.Context, userId int) (int, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*REQUEST_TIMEOUT)
+	defer cancel()
+
+	respChan := make(chan Response)
+
+	go func() {
+		result, err := slowExternalRequest(userId)
+		if err != nil {
+			respChan <- Response{-1, err}
+			return
+		}
+		respChan <- Response{result, nil}
+	}()
+
+	/**
+	 * channel synchronization: we return on the first channel
+	 * message i.e. either requests completes, or the context
+	 * times-out
+	 */
+	for {
+		select {
+		case <-ctx.Done():
+			return -1, errors.New("request timed-out")
+
+		case resp := <-respChan:
+			return resp.value, resp.err
+		}
+	}
+}
+
+func main() {
+	start := time.Now()
+	userId := 10
+	ctx := context.Background()
+
+	result, err := fetchUserData(ctx, userId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	fmt.Printf("result: %d\n", result)
+	fmt.Printf("Elapsed: %v\n", time.Since(start))
+}
+```
+
+**Note**: There is another simpler way of achieving the same thing.
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+const (
+	API_DURATION     = 500
+	TIMEOUT_DURATION = 1000
+)
+
+func slowExternalRequest(userId int) (int, error) {
+	time.Sleep(time.Millisecond * API_DURATION)
+	return userId * 10, nil
+}
+
+type UserResponse struct {
+	result int
+	error  error
+}
+
+func main() {
+	userId := 300
+	resultChan := make(chan UserResponse)
+
+	go func() {
+		result, err := slowExternalRequest(userId)
+		if err != nil {
+			resultChan <- UserResponse{-1, err}
+		}
+
+		resultChan <- UserResponse{result, nil}
+	}()
+
+	select {
+	case <-time.After(time.Millisecond * TIMEOUT_DURATION):
+		fmt.Println("request timeout")
+
+	case result := <-resultChan:
+		fmt.Printf("result: %+v\n", result)
+	}
+
+	close(resultChan)
+}
+```
