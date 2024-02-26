@@ -579,7 +579,7 @@ impl UserStore {
   fn find_by_id(self, id: u32) -> Option<User> {
     for user in self.users {
       if user.id == id {
-        return Some(user)
+        return Some(user);
       }
     }
 

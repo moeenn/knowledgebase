@@ -1172,45 +1172,63 @@ func main() {
 ```
 
 ```go
-package main
-
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 )
 
-type APIResponse[T any] struct {
-	Status int `json:"status"`
-	Data   T   `json:"data"`
+type APIOkResponse[T any] struct {
+	Success bool `json:"success"`
+	Data    T    `json:"data"`
 }
 
-type User struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+type APIErrorResponse struct {
+	Success    bool   `json:"success"`
+	Error      string `json:"error"`
+	StatusCode int    `json:"statusCode"`
 }
 
-type ActionResponse struct {
-	Users []User `json:"users"`
-}
-
-func main() {
-	res := APIResponse[ActionResponse]{
-		Status: 200,
-		Data: ActionResponse{
-			Users: []User{
-				{Id: 10, Email: "admin@site.com"},
-				{Id: 20, Email: "user@site.com"},
-			},
-		},
+func NewErrorResponse(status int, error string) APIErrorResponse {
+	return APIErrorResponse{
+		Success:    false,
+		Error:      error,
+		StatusCode: status,
 	}
+}
 
-	encoded, err := json.Marshal(res)
+func NewOkResponse[T any](data T) APIOkResponse[T] {
+	return APIOkResponse[T]{
+		Success: true,
+		Data:    data,
+	}
+}
+
+type HelloResponse struct {
+	Message string `json:"message"`
+}
+
+func OkResponseExample() {
+	// generic type is inferred from arguments
+	okRes := NewOkResponse(HelloResponse{
+		Message: "hello world",
+	})
+
+	encoded, err := json.Marshal(okRes)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
-		os.Exit(1)
+		return
 	}
+	fmt.Printf("%s\n", encoded)
+}
 
+func ErrorResponseExample() {
+	errRes := NewErrorResponse(401, "You are not authorized")
+	encoded, err := json.Marshal(errRes)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
 	fmt.Printf("%s\n", encoded)
 }
 ```
