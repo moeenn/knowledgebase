@@ -1033,6 +1033,13 @@ func main() {
 }
 ```
 
+**Note**: `error` is simply an interface which looks like this
+
+```go
+type error interface {
+	Error() string
+}
+```
 
 ##### Custom errors
 
