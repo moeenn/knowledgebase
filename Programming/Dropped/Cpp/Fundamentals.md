@@ -206,7 +206,7 @@ int main() {
   const char* msg{"some_random_word word_count_word_word"};
 
   /**
-   *  get a read-only into a const char*
+   *  get a read-only view into a const char*
    *  if msg was a std::string we'd use the following 
    *  std::string_view first{msg.c_str(), 16}; 
    */

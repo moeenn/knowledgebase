@@ -5,7 +5,7 @@
 Java and its build toolchains can be installed using the os package managers. Following is an example.
 
 ```bash
-$ sudo apt-get install default-jdk libeclipse-jdt-core-java maven
+$ sudo apt-get install default-jdk libeclipse-jdt-core-java
 ```
 
 ###### Option #2 (Recommended) 
