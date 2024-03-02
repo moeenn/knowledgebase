@@ -2,7 +2,7 @@
 Scala tools management software is called `coursier`. Visit their website to see latest installation instructions. After it has been installed and `bin` location has been added to `$PATH`, run the following command.
 
 ```bash
-$ cs install scala3 metals bloop sbt sbtn coursier ammonite scalac scalafmt mill
+$ cs install scala3 metals bloop sbt sbtn coursier scalac scalafmt
 ```
 
 
