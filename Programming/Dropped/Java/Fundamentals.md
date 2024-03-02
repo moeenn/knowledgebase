@@ -2,7 +2,7 @@
 #### Installation
 
 ###### Option #1
-Java and its build toolchains can be installed using the os package managers. Following is an example.
+Java and its build tool-chains can be installed using the OS package managers. Following is an example.
 
 ```bash
 $ sudo apt-get install default-jdk libeclipse-jdt-core-java maven
