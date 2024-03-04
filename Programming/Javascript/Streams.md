@@ -5,7 +5,10 @@ import process from "node:process"
 import path from "node:path"
 import fs, {ReadStream} from "node:fs"
 
-export async function main(): Promise<void> {
+/**
+ * returns {Promise<void>}
+ */
+async function main() {
   const filepath = path.join(process.cwd(), "sample.txt")
   const rs: ReadStream = fs.createReadStream(filepath, { 
 	encoding: "utf-8", highWaterMark: 10 
