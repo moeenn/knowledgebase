@@ -3,8 +3,15 @@ $ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
 
 # install language server manually
 $ go install golang.org/x/tools/gopls@latest
-$ go install github.com/go-delve/delve/cmd/dlv@latest
+
+# linting tools
 $ go install honnef.co/go/tools/cmd/staticcheck@latest
+$ go install github.com/kisielk/errcheck@latest
+$ go install github.com/jgautheron/goconst/cmd/goconst@latest
+
+# running linters 
+$ staticcheck ./... && errcheck ./... && goconst ./...
+
 ```
 
 ##### Modules
@@ -637,7 +644,10 @@ type wrappedFunc func (uint64) uint64
 #### Maps
 
 ```go
-nationality := map[string]string {}
+nationality := make(map[string]string)
+
+/* initialize with specified length */
+capitals := make(map[string]string, 10)
 
 /* add key values */
 nationality["Alice Eve"] = "British"
@@ -647,6 +657,9 @@ nationality["Trevor Noah"] = "South African"
 
 /* accessing a value using key */
 fmt.Println(nationality["Alice Eve"])
+
+/* count number of KV pairs in map */
+len(nationality)
 ```
 
 ```go
@@ -661,6 +674,8 @@ nationality := map[string]string{
 delete(nationality, "George Clooney")
 ```
 
+**Note**: A `map` can always grow in memory, but it can never shrink. This can potentially cause memory leaks.
+
 ###### Another example
 
 ```go
@@ -671,6 +686,7 @@ func main() {
 		"Britain":  "London",
 	}
 
+    /* access element from map, with error handling */
 	pak, ok := capitals["Pakistan"]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Not found\n")
