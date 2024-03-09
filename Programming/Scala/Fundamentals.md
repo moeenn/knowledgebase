@@ -50,15 +50,14 @@ val optionalDouble: Option[Double] = None
 ```
 
 ```scala
-// Either is similar to Result<T, E> in rust
 // Left conventionally means error, and right  means successful value
 val result: Either[String, Int] = Right(30)
 val anotherResult: Either[String, Boolean] = Left("Reason for some error")
 ```
 
 ```scala
+// use the follow when working with code that can throw Exceptions
 import scala.util.{ Try, Failure, Success }
-
 val result: Try[Int] = Success(300)
 val resultFailed: Try[Int] = Failure(new Throwable("Some random exception"))
 ```
