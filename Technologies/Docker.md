@@ -119,3 +119,24 @@ $ docker pull python:3.11-alpine
 # start the temporary image
 $ docker run --rm -it -v $(pwd):/app -w /app --tty python:<version> sh
 ```
+
+
+#### PostgreSQL Service
+
+```yml
+version: '3.3'
+
+services:
+  db:
+    container_name: "postgres-db"
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass
+      - POSTGRES_DB=dev
+    volumes:
+      - ./docker-volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  
+```

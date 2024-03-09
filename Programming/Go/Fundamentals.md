@@ -3,8 +3,15 @@ $ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
 
 # install language server manually
 $ go install golang.org/x/tools/gopls@latest
-$ go install github.com/go-delve/delve/cmd/dlv@latest
+
+# linting tools
 $ go install honnef.co/go/tools/cmd/staticcheck@latest
+$ go install github.com/kisielk/errcheck@latest
+$ go install github.com/jgautheron/goconst/cmd/goconst@latest
+
+# running linters 
+$ staticcheck ./... && errcheck ./... && goconst ./...
+
 ```
 
 ##### Modules
@@ -637,7 +644,10 @@ type wrappedFunc func (uint64) uint64
 #### Maps
 
 ```go
-nationality := map[string]string {}
+nationality := make(map[string]string)
+
+/* initialize with specified length */
+capitals := make(map[string]string, 10)
 
 /* add key values */
 nationality["Alice Eve"] = "British"
@@ -647,6 +657,9 @@ nationality["Trevor Noah"] = "South African"
 
 /* accessing a value using key */
 fmt.Println(nationality["Alice Eve"])
+
+/* count number of KV pairs in map */
+len(nationality)
 ```
 
 ```go
@@ -661,6 +674,8 @@ nationality := map[string]string{
 delete(nationality, "George Clooney")
 ```
 
+**Note**: A `map` can always grow in memory, but it can never shrink. This can potentially cause memory leaks.
+
 ###### Another example
 
 ```go
@@ -671,6 +686,7 @@ func main() {
 		"Britain":  "London",
 	}
 
+    /* access element from map, with error handling */
 	pak, ok := capitals["Pakistan"]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Not found\n")
@@ -1033,6 +1049,13 @@ func main() {
 }
 ```
 
+**Note**: `error` is simply an interface which looks like this
+
+```go
+type error interface {
+	Error() string
+}
+```
 
 ##### Custom errors
 
@@ -1172,45 +1195,63 @@ func main() {
 ```
 
 ```go
-package main
-
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 )
 
-type APIResponse[T any] struct {
-	Status int `json:"status"`
-	Data   T   `json:"data"`
+type APIOkResponse[T any] struct {
+	Success bool `json:"success"`
+	Data    T    `json:"data"`
 }
 
-type User struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+type APIErrorResponse struct {
+	Success    bool   `json:"success"`
+	Error      string `json:"error"`
+	StatusCode int    `json:"statusCode"`
 }
 
-type ActionResponse struct {
-	Users []User `json:"users"`
-}
-
-func main() {
-	res := APIResponse[ActionResponse]{
-		Status: 200,
-		Data: ActionResponse{
-			Users: []User{
-				{Id: 10, Email: "admin@site.com"},
-				{Id: 20, Email: "user@site.com"},
-			},
-		},
+func NewErrorResponse(status int, error string) APIErrorResponse {
+	return APIErrorResponse{
+		Success:    false,
+		Error:      error,
+		StatusCode: status,
 	}
+}
 
-	encoded, err := json.Marshal(res)
+func NewOkResponse[T any](data T) APIOkResponse[T] {
+	return APIOkResponse[T]{
+		Success: true,
+		Data:    data,
+	}
+}
+
+type HelloResponse struct {
+	Message string `json:"message"`
+}
+
+func OkResponseExample() {
+	// generic type is inferred from arguments
+	okRes := NewOkResponse(HelloResponse{
+		Message: "hello world",
+	})
+
+	encoded, err := json.Marshal(okRes)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
-		os.Exit(1)
+		return
 	}
+	fmt.Printf("%s\n", encoded)
+}
 
+func ErrorResponseExample() {
+	errRes := NewErrorResponse(401, "You are not authorized")
+	encoded, err := json.Marshal(errRes)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return
+	}
 	fmt.Printf("%s\n", encoded)
 }
 ```

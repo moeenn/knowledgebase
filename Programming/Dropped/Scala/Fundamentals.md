@@ -2,18 +2,7 @@
 Scala tools management software is called `coursier`. Visit their website to see latest installation instructions. After it has been installed and `bin` location has been added to `$PATH`, run the following command.
 
 ```bash
-$ cs install scala3 metals bloop sbt sbtn coursier ammonite scalac scalafmt mill
-```
-
-
-#### Starting a new Project
-
-```bash
-# for scala3
-$ sbt new scala/scala3.g8
-
-# for scala2
-$ sbt new scala/hello-world.g8
+$ cs install scala3 metals bloop sbt sbtn coursier scalac scalafmt
 ```
 
 
@@ -23,7 +12,9 @@ $ sbt new scala/hello-world.g8
 
 ```scala
 val num: Int = 10
-val money: Double = 10.5
+val floatNum: Double = 10.5
+val bigNumber: BigInt = 1_000_000_000
+val money: BigDecimal = 1_000_000_000_000.001
 val character: Char = 'c'
 val flag: Boolean = false
 val name: String = "Admin"
@@ -66,56 +57,106 @@ val result: Try[Int] = Success(300)
 val resultFailed: Try[Int] = Failure(new Throwable("Some random exception"))
 ```
 
+
+---
+
+#### Lists
+
+```scala
+val nums = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+// map & filter
+val timesTen = nums.map(_ * 10)
+val even = nums.filter(_ % 2 == 0)
+
+// map by calling object methods
+val cities = List("Lahore", "Karachi", "Islamabad", "Faisalabad")
+val upcased = cities.map(_.toUpperCase)
+
+// reduce (i.e. sum all numbers)
+val sumOne = nums.reduce((a, b) => a + b)
+val sumTwo = nums.reduceRight(_ + _)
+
+// generate range (end is non-inclusive)
+val oneToTen = List.range(1, 11)
+val oddOneToTen = List.range(start = 1, end = 11, step = 2)
+
+// look-up value
+val fiveValue: Option[Int] = nums.find(_ == 5)
+
+// remove value which satify predicate
+val greaterThanFive = nums.dropWhile(_ < 6)
+```
+
+
+---
+
+#### Map (i.e. Hash-map)
+
+```scala
+var superHeros = Map(
+  "Batman" -> "Bruce Wayne",
+  "Iron man" -> "Tony Stark",
+  "Deadpool" -> "Wade Wilson",
+)
+
+// add a new item
+superHeros += ("Superman" -> "Clark Kent")
+
+// lookup value
+val result: Option[String] = superHeros.get("Batman")
+
+// remove a value
+superHeros = superHeros.removed("Deadpool")
+```
+
+
 ---
 
 #### Case classes
 
 ```scala
-// enum definition
-sealed trait UserRole
-case object Admin extends UserRole
-case object Employee extends UserRole
-case object Customer extends UserRole
+import java.util.UUID
 
-case class Password(hash: String)
+enum UserRole:
+  case ADMIN, USER
 
-case class User(
-    id: Long,
-    email: String,
-    password: Password,
-    role: UserRole
+case class Password(
+  hash: String
 )
 
-object Main extends App {
+case class User(
+  id: String,
+  email: String,
+  password: Option[Password],
+  role: UserRole,
+)
+
+def id(): String = UUID.randomUUID().toString()
+
+@main def main(): Unit =
   val users: List[User] = List(
     User(
-      id = 10,
+      id = id(),
       email = "admin@site.com",
-      password = Password("dsalcnalkscnl"),
-      role = Admin
+      password = Some(Password("caskjcbaksjbck")),
+      role = UserRole.ADMIN,
     ),
     User(
-      id = 20,
-      email = "customer@site.com",
-      password = Password("dsalcnalkscnl"),
-      role = Customer
-    ),
-    User(
-      id = 30,
-      email = "employee@site.com",
-      password = Password("dsalcnalkscnl"),
-      role = Employee
+      id = id(),
+      email = "user@site.com",
+      password = None,
+      role = UserRole.USER,
     )
   )
 
-  val user: Option[User] = users.find(user => user.id == 50)
-  val message = user match {
-    case Some(user) => s"Found: ${user.email}"
+  val foundUser: Option[User] = users.find(u => u.email == "admin@site.com")
+  val message = foundUser match {
+    case Some(user) => s"Found user: ${user.email}"
     case None => "User not found"
   }
 
   println(message)
-}
 ```
 
 
@@ -300,81 +341,3 @@ object Main extends App {
 }
 ```
 
-
----
-
-#### Pattern matching
-
-```scala
-// basic usage
-val num = 6
-val result = num match {
-  case 1                => "One"
-  case 2 | 4 | 6        => "Two / Four / Six"
-  case 3                => "Three"
-  case n if n % 10 == 0 => "Multiple of 10"
-  case _                => "Unexpected number"
-}
-```
-
-```scala
-// deconstruction of case classes
-case class Person(name: String, age: Int)
-
-object Action {
-  def greetUser(person: Person) = person match {
-    case Person("Bob", _) => "Hello old friend!"
-    case Person(_, 40) => "Welcom our distinguished person"
-    case Person(name, _) => s"Welcome, ${name}!"
-    // a default case can also appear here i.e. case _
-  }
-}
-```
-
-```scala
-// list extractor patterns
-val nums = List(1, 2, 3, 4, 5, 6, 7, 8)
-val result = nums match {
-  case List(_, _, 3, n, _*) => s"Third element is 3 and fourth is $n"
-  case _                    => "List did not fit specified pattern"
-}
-
-// The `_*` variable argument (`vararg`) pattern, it means that the list can be // any size and we don't care.
-```
-
-```scala
-// match list head or tail
-val nums = List(1, 2, 3, 4, 5)
-val result = nums match {
-  case Nil       => "Provided list was empty"
-  case 1 :: tail => s"List starts with one and ends with elements $tail"
-  case _         => "List does not start with one"
-}
-```
-
-```scala
-// match variable length list starting and ending
-val nums = List(1, 2, 3, 4, 5, 6, 7, 8)
-val result = nums match {
-  case List(1, _*) :+ 8 => "List starts with 1 and ends with 8"
-  case _                => "List did not fit specified pattern"
-}
-```
-
-```scala
-// matching types
-object Action {
-  def getValue(): Any = 42
-}
-
-object Main extends App {
-  // this mechanism is based on reflections, avoid to gain perf
-  val result = Action.getValue() match {
-    case _: Int    => "result was a valid number"
-    case _: String => "result was a string"
-    case _         => "we have something else"
-  }
-
-  println(result)
-}
-```
