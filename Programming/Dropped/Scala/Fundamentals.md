@@ -29,6 +29,12 @@ val inferredTypeVariable = "hello world"
 ```
 
 ```scala
+// string interpolation
+val name = "User"
+val message = s"Hello, $name"
+```
+
+```scala
 // heterogeneous collection i.e. tuple
 val multipleValues: (Int, Double, Char) = (10, 30.55, 'a')
 
@@ -88,6 +94,26 @@ val fiveValue: Option[Int] = nums.find(_ == 5)
 val greaterThanFive = nums.dropWhile(_ < 6)
 ```
 
+```scala
+@main def main: Unit =
+  // List from range: start and end inclusive
+  val numsList = (1 to 8).toList
+  printIterable(numsList)
+  
+  val numsArray = (1 to 10).toArray
+  printIterable(numsArray)
+
+  val numsArrayWithStep = (0 to 100 by 10).toList
+  printIterable(numsArrayWithStep)
+
+def printIterable(list: Iterable[Int]) = list.foreach(println)
+```
+
+```scala
+// list methods can also be called on Range.Inclusive type
+val nums = (1 to 8).map(_ * 3).toList
+```
+
 
 ---
 
@@ -108,6 +134,112 @@ val result: Option[String] = superHeros.get("Batman")
 
 // remove a value
 superHeros = superHeros.removed("Deadpool")
+```
+
+
+---
+
+#### Optional
+
+```scala
+val optionalNum: Option[Int] = Some(300)
+optionalNum.isEmpty   // false
+optionalNum.isDefined // true
+```
+
+
+---
+
+#### Variable Evaluation
+
+```scala
+val num: Int = {
+  println("this is a normal value")
+  42
+}
+
+@main def main: Unit =
+  println(num)
+  println(num)
+
+// Output:
+// this is a normal value
+// 42
+// 42
+```
+
+```scala
+// lazy values are only initialized on their first call
+lazy val lazyNum: Int = {
+  // this message will only be printed once at value initialization
+  println("this is a lazy value")
+  500
+}
+
+// functions declared without parenthesis, must be called without parenthesis
+def numFunc: Int = {
+  println("this is a returned value from function")
+  700
+}
+
+@main def main: Unit =
+  println(numFunc)
+  println(lazyNum)
+  println(lazyNum)
+
+// Output:
+// this is a returned value from function
+// 700
+// this is a lazy value
+// 500
+// 500
+```
+
+
+---
+
+#### Functions
+
+```scala
+def simplePureFunc(): Int = 42
+
+def pureFuncWithBodyAndImplicitReturns(name: Option[String]): String = 
+  name match {
+    case Some(n) => s"Hello, $n!"
+    case None => "Hello there!"
+  }
+
+val simpleLambda = (n: Int) => n * 2 
+```
+
+```scala
+def hgherOrderFunc(v: Iterable[Int], f: (Int) => Int): Iterable[Int] = v.map(f)
+
+def hgherOrderGenericFunc[T](v: Iterable[T], f: (T) => T): Iterable[T] = v.map(f)
+```
+
+```scala
+def curriedFunc(a: Int)(b: Int): Int = a * b
+
+@main def main: Unit =
+  val resultOne: Int => Int = curriedFunc(10)
+  val resultTwo: Int = resultOne(20)
+  println(resultTwo)
+```
+
+```scala
+def customMap[A, B](v: List[A], f: A => B): List[B] = 
+  @annotation.tailrec
+  def loop(rem: List[A], acc: List[B]): List[B] = rem match {
+      case Nil => acc.reverse
+      case head :: tail => loop(tail, f(head) :: acc)  
+  }
+     
+  loop(v, Nil)
+
+@main def main: Unit =
+  val result = customMap((0 to 10).toList, _ * 10)
+  println(result)
 ```
 
 
@@ -165,129 +297,68 @@ def id(): String = UUID.randomUUID().toString()
 #### Packages and Imports
 
 ```
-src
-	main
-		scala
-			app
-				Main.scala
-				modules
-					user
-						User.scala
-					password
-						Password.scala
-					userRole
-						UserRole.scala
+src/
+	main/
+		scala/
+			Main.scala
+			modules/
+				user/
+					User.scala
+				password/
+					Password.scala
+				userRole/
+					UserRole.scala
 ```
 
 ```scala
-// file: Main.scala
+// File: Main.scala
 package app
 
-import app.modules.password.Password
-import app.modules.userRole._
 import app.modules.user.User
+import app.modules.password.Password
+import app.modules.userRole.UserRole
 
-object Main extends App {
-  val user = User(
-    id = 100,
-    email =  "admin@site.com",
-    password = Password("canklsclascnk"),
-    role = Admin,
+@main def main: Unit =
+  val user = User (
+    id = 300,
+    email = "admin@site.com",
+    password = Some(Password("123_Apple")),
+    role = UserRole.Admin,
   )
-
-  println(user)
-}
+  
+  println(user)  
 ```
 
 ```scala
-// file: Password.scala
-package app.modules.password
-
-case class Password(hash: String)
-```
-
-```scala
-// file: UserRole.scala
-package app.modules.userRole
-
-sealed trait UserRole
-case object Admin extends UserRole
-case object Customer extends UserRole
-```
-
-```scala
-// file: User.scala
+// File: User.scala
 package app.modules.user
 
 import app.modules.password.Password
-import app.modules.userRole._
+import app.modules.userRole.UserRole
 
 case class User(
-  id: Long,
+  id: Int,
   email: String,
-  password: Password,
+  password: Option[Password],
   role: UserRole,
 )
 ```
 
-
----
-
-#### Functions and methods
-Scala does not allow top level function declarations. All functions must be encased in objects or classes.
-
 ```scala
-// file: app/acption/Action.scala
-package app.action
+// File: Password.scala
+package app.modules.password
 
-object Action {
-  def factorial(n: Int): BigInt = {
-    if (n == 0) return 1
-    return n * Action.factorial(n - 1)
-  }
-
-  def withSideEffects(): Unit = {
-    println("performing action with side effects...")
-  }
-
-  def shorthandAdd(a: Int, b: Int): Int = a + b
-}
+case class Password (
+  hash: String
+)
 ```
 
 ```scala
-// file: app/Main.scala
-package app
+// File: UserRole.scala
+package app.modules.userRole
 
-import app.action.Action
-
-object Main extends App {
-  val result = Action.factorial(n = 50)
-  println(result)
-
-  // anonymous function
-  val anon = () => println("performing some action")
-  anon()
-}
-```
-
-```scala
-// returning error states from functions
-object Database {
-  def getUserCount(siteId: Long): Either[String, Long] = siteId match {
-    case 20 => Left("Provided site has been disabled")
-    case _ => Right(siteId * 10)
-  }
-}
-
-object Main extends App {
-  val dbResult = Database.getUserCount(40)
-  val userMessage = dbResult match {
-    case Left(msg) => s"error: ${msg}"
-    case Right(value) => s"number of users: ${value}"
-  }
-
-  println(userMessage)
-}
+enum UserRole:
+  case Admin, Customer
 ```
 
 
