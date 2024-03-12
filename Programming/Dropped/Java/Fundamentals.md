@@ -16,45 +16,39 @@ $ java Main
 
 ---
 
-#### Records
+#### Primitive data-types
 
 ```java
-/** records are similar to structs in C/C++ */
-public record Person(String name, int age) {
-  public void greet() {
-    System.out.printf("Hello, %s!\n", name);
-  }
-}
+boolean flag = true;
+char grade = 'A';    // a 2-byte character
+byte b = 12;	     // signed 8-bit (1-byte) int. Range: -128..127
+short s = 24;        // signed 16-bit (2-byte) int. Range: -32,768..32,767
+int k = 257;         // signed 4-byte int. Range: -2,147,483,648..2,147,483,647
+long l = 890L;       // note the use of ”L” here
+float pi = 3.1416F;  // note the use of ”F” here
+double e = 2.7182;
 ```
 
-```java
-import java.util.ArrayList;
+**Note**: Java doesn't natively have unsigned `int`. This functionality can be achieved through external libraries.
 
-public class Main {
-  public static void main(String[] args) {    
-    ArrayList<Person> people = new ArrayList<>() {
-      {
-        add(new Person("Player one", 30));
-        add(new Person("Player two", 40));
-      }
-    };
-
-    people.stream().forEach(System.out::println);
-  }
-}
-```
+**Note**: If a variable is declared by not initialised, using this variable will result in a compile-time error.
 
 
 ---
 
-#### Exceptions
+#### Classes (i.e. Reference types)
 
 ```java
 /** file: Main.java */
 package com.sandbox;
 
+/**
+ * Note: This class contains the entry-point `main` method. Therefore, this 
+ * class is called `Universe class`.
+ */ 
 public class Main {
   public static void main(String... args) {
+    // `new` keyword returns a reference to the reference type
     Entity e = new Entity(0, 0);
     try {
       e.move(Entity.Direction.UP);
@@ -130,6 +124,150 @@ public class Entity {
   @Override
   public String toString() {
     return String.format("Entity(x=%d, y=%d)", this.x, this.y);
+  }
+}
+```
+
+**Note**: Classes are also called `Reference types` in Java. When we assign an instance of a class to a variable, that variable is called `Reference variable`.  This is because class instance is a memory reference.
+
+
+##### Pass-by-value and Pass-by-reference
+In Java, all method arguments are always copied. In case of reference variables the references are copied (and not the actual object memory).
+
+
+##### Note on Null safety
+Java is a **NOT** a null-safe language. Java compiler allows the following code.
+
+```java
+// Point is a custom reference type
+Point p = null;		
+System.out.println(p);
+```
+
+
+##### Note on default initialisation
+
+- Numbers are initialised to zero values
+- Reference types are initialised to `null`. Notice `String name` in the following example.
+- Booleans are initialised to `false`.
+
+```java
+package com.sandbox;
+
+public class Entity {
+  private int age;
+  private String name;
+  private boolean isEmployed;  
+  private char grade;
+  
+  @Override
+  public String toString() {
+    return "Entity [age=" + age + ", name=" + name + ", isEmployed=" + isEmployed + ", grade=" + grade + "]";
+  }
+}
+```
+
+```java
+Entity e = new Entity();
+System.out.println(e);
+
+// Entity [age=0, name=null, isEmployed=false, grade=]
+```
+
+
+##### References
+
+```java
+Counter a = new Counter();
+a.increment();
+
+// create alias of a reference variable
+Counter b = a;
+b.increment();
+
+assert(a.getCount() == 2);
+assert(a == b); // true
+```
+
+
+---
+
+#### Access-control modifiers
+
+- `public` 
+    - Can be accessed by other classes in the same package
+    - Can be accessed by classes outside the package
+    - Can be accessed by other derived classes
+    
+- `protected` 
+    - Can be accessed by other classes in the same package 
+    - Cannot be accessed by classes outside the package
+    - Can be accessed by derived (i.e. child) classes
+
+- `private`
+    - Can only be accessed by other methods of the same class
+
+
+**Note**: If no explicit access control modifier is given, the defined aspect has what is known as **package-private** access level. This allows other classes in the same package to have access, but not any classes or subclasses from other packages.
+
+
+---
+
+#### Final
+A variable can be declared as `final`. If it is a base type, then it is a constant. If a reference variable is final, then it will always refer to the same object (even if that object changes its internal state).
+
+Entire methods and classes can also be marked as `final`. A `final method` cannot be overridden by a subclass, and a `final class` cannot even be subclassed.
+
+
+---
+
+#### Constructors
+
+```java
+public class Employee {
+    private int id;
+    private String name;
+    private Date startDate;
+
+    // default constructor
+    public Employee() {}
+
+    // copy constructor
+    public Employee(Employee employee) {
+        this.id = employee.id;
+        this.name = employee.name; // Strings are immutable, so this is fine
+        this.startDate = new Date(employee.startDate.getTime());
+    }
+}
+```
+
+
+--- 
+
+#### Records
+
+```java
+/** records are similar to structs in C/C++ */
+public record Person(String name, int age) {
+  public void greet() {
+    System.out.printf("Hello, %s!\n", name);
+  }
+}
+```
+
+```java
+import java.util.ArrayList;
+
+public class Main {
+  public static void main(String[] args) {    
+    ArrayList<Person> people = new ArrayList<>() {
+      {
+        add(new Person("Player one", 30));
+        add(new Person("Player two", 40));
+      }
+    };
+
+    people.stream().forEach(System.out::println);
   }
 }
 ```

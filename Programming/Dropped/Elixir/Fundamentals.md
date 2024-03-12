@@ -13,11 +13,11 @@ IO.puts "Hello world"
 ```
 
 - Single quotes are not the same as double quotes
-- Round brackets around the string also work
+- `IO.puts` is a function and calling it with `()` will also work as expected
 
 
 #### Mix
-```elixir
+```bash
 # set up a new project
 $ mix new <project-name>
 

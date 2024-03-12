@@ -7,11 +7,13 @@ $ go install golang.org/x/tools/gopls@latest
 # linting tools
 $ go install honnef.co/go/tools/cmd/staticcheck@latest
 $ go install github.com/kisielk/errcheck@latest
+
+# optional listers
 $ go install github.com/jgautheron/goconst/cmd/goconst@latest
 
 # running linters 
-$ staticcheck ./... && errcheck ./... && goconst ./...
-
+$ staticcheck ./... && errcheck ./... 
+$ goconst ./...
 ```
 
 ##### Modules
@@ -191,15 +193,15 @@ fmt.Println(!true)		    /* false */
 
 
 ##### Data types
-| Operator | Description |  
-| -------: | :------ |  
-| `int, int8, int16, int32, int64` | Integers |  
-| `uint, uint8, uint16, uint32, uint64` | Unsigned integers |
-| `float, float32, float64` | Floating point numbers |
-| `bool` | Boolean value | 
-| `string` | Stream of characters | 
-| `rune` | Rune is used to represent Characters. It is an alias for `int32` |
-| `byte` | Byte is an alias for `uint8` | 
+|                              Operator | Description                                                      |     |
+| ------------------------------------: | :--------------------------------------------------------------- | --- |
+|      `int, int8, int16, int32, int64` | Integers                                                         |     |
+| `uint, uint8, uint16, uint32, uint64` | Unsigned integers                                                |     |
+|             `float, float32, float64` | Floating point numbers                                           |     |
+|                                `bool` | Boolean value                                                    |     |
+|                              `string` | Stream of characters                                             |     |
+|                                `rune` | Rune is used to represent Characters. It is an alias for `int32` |     |
+|                                `byte` | Byte is an alias for `uint8`                                     |     |
 
 
 ##### Defining Variables
