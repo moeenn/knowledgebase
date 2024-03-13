@@ -2,23 +2,23 @@
 ```js
 /**
  * @template T
- * @typedef {{ result: T, error: null }} ok
+ * @typedef {{ ok: T, error: null }} ok
  */
 
-/** @typedef {{ result: null, error: Error }} error */
+/** @typedef {{ ok: null, error: Error }} error */
 
 /**
  * @template T
  * @param {T} result
  * @returns {ok<T>}
  */
-const ok = (result) => ({ result, error: null })
+const ok = (result) => ({ ok: result, error: null })
 
 /**
  * @param {Error} error
  * @returns {error}
  */
-const error = (error) => ({ result: null, error })
+const error = (error) => ({ ok: null, error })
 
 /**
  * @template T
@@ -83,12 +83,12 @@ function syncAction(arg) {
 test("recover sync function: no error", () => {
   const result = recover(() => syncAction(30))
   assert.strictEqual(result.error, null)
-  assert.equal(result.result, 3000)
+  assert.equal(result.ok, 3000)
 })
 
 test("recover sync function: error returned", () => {
   const result = recover(() => syncAction(-1))
-  assert.strictEqual(result.result, null)
+  assert.strictEqual(result.ok, null)
   assert.equal(result.error.message, "Cannot process negative number")
 })
 
@@ -110,12 +110,44 @@ async function asyncAction(arg) {
 test("recover async function: not error", async () => {
   const result = await recoverAsync(() => asyncAction(10))
   assert.strictEqual(result.error, null)
-  assert.equal(result.result, 1000)
+  assert.equal(result.ok, 1000)
 })
 
 test("recover async function: error returned", async () => {
   const result = await recoverAsync(() => asyncAction(-1))
-  assert.strictEqual(result.result, null)
+  assert.strictEqual(result.ok, null)
   assert.equal(true, result.error instanceof Error)
 })
+```
+
+
+
+#### Usage with `fetch`
+
+```js
+/** @returns {Promise<void>} */
+async function main() {
+  const url = "http://localhost:5000/todo"
+  const res = await recoverAsync(() => fetch(url))
+
+  if (res.error) {
+    console.error("[error]", res.error.message)
+    return
+  }
+
+  const raw = await recoverAsync(() => res.ok.json())
+  if (raw.error) {
+    console.error("[error] JSON parsing failed:", raw.error.message)
+    return
+  }
+
+  /** Todo class constructor can throw */
+  const todo = recover(() => new Todo(raw.ok))
+  if (todo.error) {
+    console.error("[error]", todo.error)
+    return
+  }
+
+  console.log(todo.ok)
+}
 ```
