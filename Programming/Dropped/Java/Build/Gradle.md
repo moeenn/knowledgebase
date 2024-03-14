@@ -1,6 +1,7 @@
 #### Installation
 
 ```bash
+# install using sdkman
 $ sdk install gradle
 ```
 
