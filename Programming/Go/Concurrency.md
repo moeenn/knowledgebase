@@ -13,7 +13,7 @@ func main() {
 			valueChan <- i
 		}
 
-		/* the sender must always close the channel */
+		/* channel must ALWAYS close the channel */
 		close(valueChan)
 	}()
 
@@ -50,7 +50,7 @@ func main() {
   /** 
    * ranging over channel requires that channel is eventually closed 
    * if we don't closed the channel, this program will dead-lock because
-   * range will be expecting more messages to come in
+   * range will be expecting more messages to come in after iterate has exited.
   */
   for n := range iterate(1000) {
     fmt.Printf("%d\t", n)
