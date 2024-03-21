@@ -33,7 +33,7 @@ $ iex -S mix
 ---
 
 #### Variables
-```elixir
+```ex
 # simple variable
 number = 42
 

@@ -1424,3 +1424,61 @@ func main() {
 	close(resultChan)
 }
 ```
+
+
+#### Conditional Compilation
+
+```go
+// File: main.go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	message := Greet()
+	fmt.Println(message)
+}
+```
+
+**Note**: If no tags are provided during build, the compilation will fail because the compiler is not sure which of the two following modules to use.
+
+```go
+// File: greet_dev.go
+
+//go:build dev
+// +build dev
+package main
+
+func Greet() string {
+	return "Greetings from dev flag"
+}
+```
+
+**Note**: The above module will only be used if `dev` tag is provided during compilation.
+
+```go
+// File: greet_prod.go
+
+//go:build prod
+// +build prod
+package main
+
+func Greet() string {
+	return "Greetings from prod flag"
+}
+```
+
+**Note**: The above module will only be used if `prod` tag is provided during compilation.
+
+```bash
+# run in dev mode
+$ go run -tags dev .
+
+# build in dev mode
+$ go build -tags dev .
+
+# build for production
+$ go build -tags prod .
+```
