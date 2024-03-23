@@ -25,22 +25,22 @@ print("Hello there", end="")
 
 #### Operators
 
-| Type | Operator | Explanation |  
-| -------: | :------ | :------ |  
-| Arithmetic operators | `()` | Precedence 1st | 
-|  | `**` | Precedence 2nd | 
-|  | `% / // *` | Precedence 3rd | 
-|  | `+ -` | Precedence 4th | 
-| Compound operators | `+=` |  | 
-|  | `-=` |  | 
-|  | `*=*` |  | 
-|  | `/=` |  | 
-|  | `**=` | Power and equal | 
-|  | `%=` | Mod and equal | 
-|  | `//=` | Floor divisor and equal | 
-| Logical operators | `not` | Precedence 1st | 
-|  | `and` | Precedence 2nd | 
-|  | `or` | Precedence 3rd | 
+|                 Type | Operator   | Explanation             |     |
+| -------------------: | :--------- | :---------------------- | --- |
+| Arithmetic operators | `()`       | Precedence 1st          |     |
+|                      | `**`       | Precedence 2nd          |     |
+|                      | `% / // *` | Precedence 3rd          |     |
+|                      | `+ -`      | Precedence 4th          |     |
+|   Compound operators | `+=`       |                         |     |
+|                      | `-=`       |                         |     |
+|                      | `*=*`      |                         |     |
+|                      | `/=`       |                         |     |
+|                      | `**=`      | Power and equal         |     |
+|                      | `%=`       | Mod and equal           |     |
+|                      | `//=`      | Floor divisor and equal |     |
+|    Logical operators | `not`      | Precedence 1st          |     |
+|                      | `and`      | Precedence 2nd          |     |
+|                      | `or`       | Precedence 3rd          |     |
 
 
 ---
