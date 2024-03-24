@@ -609,6 +609,29 @@ When we call `Actions.max/2` Elixir will match functions in the order they are d
 
 ---
 
+#### Idiomatic error handling 
+
+```ex
+defmodule Operation do
+  def calculate(n) when rem(n, 2) == 0, do: {:ok, n * 10}
+  def calculate(n) when rem(n, 2) == 1, do: {:error, :no_odd_nums}
+end
+
+defmodule Sandbox do
+  def main do
+    case Operation.calculate(11) do
+      {:ok, result} -> IO.puts("success: #{result}")
+      {:error, reason} -> IO.puts("error: #{reason}")
+    end
+  end
+end
+```
+
+In the above example, we return an error tuple when an odd number is provided as input. The second value in the tuple is the reason for error. It could have been a string, but **it is conventional to provide an atom as reason for error**.
+
+
+---
+
 #### Modules
 ```elixir
 defmodule Learning do
