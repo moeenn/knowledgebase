@@ -28,6 +28,7 @@ Plain JS project config entry inside `package.json` file.
       "ecmaVersion": "latest"
     },
     "rules": {
+      "no-console": "error",
       "quotes": [
         2,
         "double",
