@@ -1,4 +1,31 @@
 
+#### Connecting to Database
+
+##### Through `psql`
+
+```bash
+$ psql -h <hostname> -p <port> -d <database> -U <username>
+```
+
+##### Connection string 
+
+```
+postgresql://devuser:devpass@localhost:5432/dev?sslmode=disable
+```
+
+
+---
+
+#### Comments
+
+```sql
+-- this style is used, as comments to document SQL statements
+SELECT * FROM /* test */ users;
+```
+
+
+---
+
 ##### Databases
 
 ```sql
@@ -131,6 +158,40 @@ INSERT INTO
 
 ---
 
+#### UUID
+UUIDs can be used as unique identifiers for records. Here is how they work.
+
+```sql
+-- UUID as primary key, without default value
+CREATE TABLE
+  users (
+    user_id UUID NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    PRIMARY KEY (user_id)
+  );
+```
+
+```sql
+-- UUID as primary key, with auto-generating UUIDs at insertion
+CREATE TABLE
+  users (
+    user_id UUID DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    PRIMARY KEY (user_id)
+  );
+```
+
+```sql
+-- generating UUID at the time of insertion
+INSERT INTO
+  users (user_id, email)
+VALUES
+  (gen_random_uuid (), 'admin@site.com'),
+  (gen_random_uuid (), 'user@site.com');
+```
+
+
+---
 #### Enumerations
 
 ```sql
@@ -151,6 +212,25 @@ INSERT INTO
 VALUES
   ('admin@site.com', user_role 'ADMIN');
 ```
+
+
+---
+
+#### Pagination using `limit` and `offset`
+
+```sql
+SELECT
+  *
+FROM
+  users
+LIMIT
+  2
+OFFSET 0;
+```
+
+**Note**: `OFFSET 0` will return the first page of results.
+
+**Note**: The `LIMIT` keyword is supported by `MySQL`, `PostgreSQL` and `SQLite` but it may not be supported by other databases.
 
 
 ---
@@ -360,3 +440,78 @@ FROM
 WHERE
   roles.role_name = 'admin';
 ```
+
+
+
+---
+
+#### Performance optimisations
+
+##### Prepared statements
+
+```sql
+-- define the prepared statement
+PREPARE
+  users_insert AS
+INSERT INTO
+  users (name, email)
+VALUES
+  ($1, $2);
+```
+
+```sql
+-- execute existing prepared statement
+EXECUTE users_insert ('User one', 'user_one@site.com'); 
+```
+
+**Note**: Prepared statements are scoped to connection, this means that only the session which prepares the statement can execute it.
+
+
+##### Indexing
+
+```sql
+-- create indexes on fields prequently used for querying tables
+CREATE INDEX users_index ON users (email, name);
+```
+
+```sql
+-- remove index if not required
+DROP INDEX users_index;
+```
+
+**Note**: Indexes help with `read` speeds. However, they slow down `write` speeds because with every new records inserted, indexes have to be updated as well.
+
+
+##### Partitioning
+
+```sql
+-- create the original table: will be partitioned by day (through timestamp)
+CREATE TABLE
+  events (
+    event_id UUID NOT NULL,
+    payload JSON NOT NULL,
+    source INET NOT NULL,
+    event_timestamp TIMESTAMP
+  )
+PARTITION BY
+  RANGE (event_timestamp);
+
+-- create subpartitions for single days
+CREATE TABLE
+  events_20230401 PARTITION OF events FOR
+VALUES
+FROM
+  ('2023-04-01') TO ('2023-04-02');
+
+CREATE TABLE
+  events_20230402 PARTITION OF events FOR
+VALUES
+FROM
+  ('2023-04-02') TO ('2023-04-03');
+```
+
+Caveats
+
+- The sub-partition tables in the above example will need to be created using a scheduler like CRON job etc.
+- If a query has to multiple partitions, it will be slower than if we had not used partitioning at all.
+- If a table is partitioned, it cannot have a global unique row identifier. However, row IDs can be unique within any single partition. 
