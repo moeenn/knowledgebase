@@ -77,7 +77,7 @@ Add the following to the `tsconfig.json` file
 ```
 
 
-#### Loading environment varia./style.cssbles
+#### Loading environment variables
 
 ```ts
 // file: vite.config.ts

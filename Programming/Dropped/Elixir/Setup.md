@@ -21,10 +21,9 @@ IO.puts "Hello world"
 # set up a new project
 $ mix new <project-name>
 
-
 # start interactive shell
 $ iex -S mix
 
 # run the code
-> recompile && Sandbox.main
+> recompile && Sandbox.hello
 ```

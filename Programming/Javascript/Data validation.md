@@ -2,11 +2,12 @@
 /**
  * Throw failed assertions as errors
  * @param {boolean} assertion
- * @param {string} error
+ * @param {string} errorMessage
+ * @returns {asserts assertion}
  */
-function invariant(assertion, error) {
+function invariant(assertion, errorMessage) {
   if (!assertion) {
-    throw new Error(error)
+    throw new Error(errorMessage)
   }
 }
 ```

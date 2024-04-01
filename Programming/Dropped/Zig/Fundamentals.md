@@ -1,5 +1,5 @@
 
-#### Initialize project 
+#### Initialise project 
 
 ```bash
 # new executable project
