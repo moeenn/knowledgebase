@@ -69,3 +69,5 @@ export const AnimatedToggle: FC = () => {
   )
 }
 ```
+
+**Note**: Avoid adding classes directly on `motion.*` elements because it can cause janky animations.
