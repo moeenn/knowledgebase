@@ -41,45 +41,80 @@ DROP DATABASE sample;
 $ psql -h <Host> -p <Port> -U <User> <database> --command="CREATE DATABASE <db_name> WITH OWNER <User>"
 ```
 
+
 ---
 
 #### Column Data types
 
-| Type | Description |  
-| -------: | :------ |  
-| `INT` | Signed four-byte integer |
-| `BIGINT` | Signed eight-byte integer |
-| `BOOL` | Logical Boolean (true/false) |
-| `CHAR (n)` | Fixed-length character string |
-| `VARCHAR (n)` | Variable-length character string |
-| `TEXT` | Variable-length character string |
-| `UUID` | Universally unique identifier |
-| `DATE` | Calendar date (year, month, day) |
-| `FLOAT8` | Double precision floating-point number (8 bytes) |
-| `INET` | IPv4 or IPv6 host address |
-| `INTERVAL` | Time span |
-| `JSON` | Textual JSON data |
-| `JSONB` | Binary JSON data, decomposed |
-| `SMALLINT` | Signed two-byte integer |
-| `SERIAL` | Auto Incrementing four-byte integer |
-| `BIGSERIAL` | Auto Incrementing eight-byte integer |
-| `TIME` | Time of day (no time zone) |
-| `TIMETZ` | Time of day, including time zone |
-| `TIMESTAMP` | Date and time (no time zone) |
-| `TIMESTAMPTZ` | Date and time, including time zone |
+|            Type | Description                                                                                                |
+| --------------: | :--------------------------------------------------------------------------------------------------------- |
+|           `INT` | Signed four-byte integer                                                                                   |
+|        `BIGINT` | Signed eight-byte integer. Can be used to store money values in cents.                                     |
+|          `BOOL` | Logical Boolean (true/false)                                                                               |
+|      `CHAR (n)` | Fixed-length character string                                                                              |
+|   `VARCHAR (n)` | Variable-length character string                                                                           |
+|          `TEXT` | Variable-length character string                                                                           |
+|          `UUID` | Universally unique identifier                                                                              |
+|          `DATE` | Calendar date (year, month, day)                                                                           |
+|        `FLOAT8` | Double precision floating-point number (8 bytes). Avoid using in production because has precision problems |
+| `DECIMAL(15,2)` | Store amount to exactly 2-decimal points. Used by most general ledger software                             |
+|          `INET` | IPv4 or IPv6 host address                                                                                  |
+|      `INTERVAL` | Time span                                                                                                  |
+|          `JSON` | Textual JSON data                                                                                          |
+|      `SMALLINT` | Signed two-byte integer                                                                                    |
+|        `SERIAL` | Auto Incrementing four-byte integer. Can be used as column id                                              |
+|     `BIGSERIAL` | Auto Incrementing eight-byte integer                                                                       |
+|          `TIME` | Time of day (no time zone)                                                                                 |
+|        `TIMETZ` | Time of day, including time zone                                                                           |
+|     `TIMESTAMP` | Date and time (no time zone)                                                                               |
+|   `TIMESTAMPTZ` | Date and time, including time zone                                                                         |
 
 
 ---
 
 #### Constraints
 
-| Type | Description |  
-| -------: | :------ |  
-| `NOT NULL` | Column value is mandatory |
-| `UNIQUE` | The value in the column must be unique |
-| `DEFAULT` | Specify a default value in case a value is not provided by the user |
-| `PRIMARY KEY` | Set column and the primary key for the table |
-| `REFERENCES other_table(other_column)` | Add foreign key constraint |
+|                                   Type | Description                                                         |
+| -------------------------------------: | :------------------------------------------------------------------ |
+|                             `NOT NULL` | Column value is mandatory                                           |
+|                               `UNIQUE` | The value in the column must be unique                              |
+|                              `DEFAULT` | Specify a default value in case a value is not provided by the user |
+|                          `PRIMARY KEY` | Set column and the primary key for the table                        |
+| `REFERENCES other_table(other_column)` | Add foreign key constraint                                          |
+|                                `CHECK` | Boolean checks                                                      |
+
+##### Example: Product price and discounted price
+
+```sql
+CREATE TABLE
+  products (
+    product_id SERIAL,
+    name TEXT NOT NULL,
+    -- column level check
+    price NUMERIC NOT NULL CHECK (price >= 0),
+    discounted_price NUMERIC NOT NULL,
+    PRIMARY KEY (product_id),
+    
+    -- table level check
+    CONSTRAINT valid_discount CHECK (discounted_price < price)
+  );
+```
+
+
+##### Example: Unique combinations
+
+```sql
+CREATE TABLE
+  user_profile (
+    user_id SERIAL,
+    profile_id SERIAL,
+    UNIQUE (user_id, profile_id)
+  );
+```
+
+**Note**: In this example we have applied a table level constraint which ensures that following
+- `(1, 1)` and `(1,2)` is allowed
+- `(1, 1)` and `(1, 1)` in two separate rows is not allowed.
 
 
 ---
@@ -118,6 +153,7 @@ All Existing tables can also be deleted using the following query.
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 ```
+
 
 ---
 
@@ -441,6 +477,47 @@ WHERE
   roles.role_name = 'admin';
 ```
 
+
+---
+
+#### Transactions
+
+##### ACID
+ACID is an acronym that refers to the set of 4 key properties that define a transaction.
+
+- **Atomicity**: Each statement in a transaction (to read, write, update or delete data) is treated as a single unit. Either the entire statement is executed, or none of it is executed. This property prevents data loss and corruption from occurring in case of system failure.
+
+- **Consistency**: Ensures that transactions only make changes to tables in predefined, predictable ways. Transactional consistency ensures that corruption or errors in your data do not create unintended consequences for the integrity of your table.
+
+- **Isolation**: When multiple users are reading and writing from the same table all at once, isolation of their transactions ensures that the concurrent transactions don't interfere with or affect one another. Each request can occur as though they were occurring one by one, even though they're actually occurring simultaneously.
+
+- **Durability**: Ensures that changes to your data made by successfully executed transactions will be saved, even in the event of system failure.
+
+
+#### Syntax
+
+```sql
+-- table schema as some dummy data
+CREATE TABLE
+  accounts (
+    account_id SERIAL,
+    balance BIGINT NOT NULL,
+    PRIMARY KEY (account_id),
+    CONSTRAINT balance_nonnegative CHECK (balance >= 0)
+  );
+  
+INSERT INTO accounts (account_id, balance) 
+VALUES (1, 100000), (2, 20000), (3, 40500000);
+```
+
+**Note**: `BIGINT` is used to store currency values in cents.
+
+```sql
+BEGIN;
+UPDATE accounts SET balance = balance - 100000 WHERE account_id = 1;
+UPDATE accounts SET balance = balance + 100000 WHERE account_id = 2;
+COMMIT;
+```
 
 
 ---
