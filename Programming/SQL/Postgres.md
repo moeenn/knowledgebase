@@ -42,6 +42,14 @@ $ psql -h <Host> -p <Port> -U <User> <database> --command="CREATE DATABASE <db_n
 ```
 
 
+##### Drop all content of database
+
+```sql
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+```
+
+
 ---
 
 #### Column Data types
@@ -145,13 +153,6 @@ CREATE TABLE users (
   
   PRIMARY KEY (user_id)
 );
-```
-
-All Existing tables can also be deleted using the following query. 
-
-```sql
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
 ```
 
 
@@ -608,6 +609,7 @@ Caveats
 ---
 
 ##### Stored Procedures
+Procedures are reusable blocks of statements, which don't return a value.
 
 ```sql
 -- example table with some dummy data
@@ -657,8 +659,10 @@ END;
 $$;
 ```
 
+**Note**: The statements defined within the procedure body are executed as a single transaction. This means, when a procedure is called, it will either succeed entirely or fail entirely.
+
 ```
-# list out all stored procedures inside psql shell
+-- list out all stored procedures inside psql shell
 db=# \df
 ```
 
@@ -674,5 +678,42 @@ drop procedure
     from_account INTEGER,
     to_account INTEGER,
     amount BIGINT
+  );
+```
+
+
+---
+
+#### Hashing passwords inside PostgreSQL
+
+PostgreSQL hashing functions rely on `pgcrypto` extension, it needs to be manually enabled on the database.
+
+```sql
+-- enable extension on the current database
+CREATE EXTENSION pgcrypto;
+```
+
+```sql
+-- define a stored function for quickly hashing passwords
+CREATE
+OR
+REPLACE
+  FUNCTION hash_password (password VARCHAR(255)) RETURNS VARCHAR(255) AS $$ BEGIN
+RETURN
+  crypt (password, gen_salt ('bf'));
+
+END;
+$$ LANGUAGE plpgsql;
+```
+
+```sql
+-- hash password at the time of record creation
+INSERT INTO
+  users (user_id, email, password)
+VALUES
+  (
+    gen_random_uuid (),
+    'admin@site.com',
+    hash_password ('abc123123')
   );
 ```
