@@ -49,12 +49,12 @@ $ psql -h <Host> -p <Port> -U <User> <database> --command="CREATE DATABASE <db_n
 |            Type | Description                                                                                                |
 | --------------: | :--------------------------------------------------------------------------------------------------------- |
 |           `INT` | Signed four-byte integer                                                                                   |
-|        `BIGINT` | Signed eight-byte integer. Can be used to store money values in cents.                                     |
+|        `BIGINT` | Signed 64-Bit (i.e. 8-Byte) integer. Can be used to store money values in cents.                           |
 |          `BOOL` | Logical Boolean (true/false)                                                                               |
 |      `CHAR (n)` | Fixed-length character string                                                                              |
 |   `VARCHAR (n)` | Variable-length character string                                                                           |
 |          `TEXT` | Variable-length character string                                                                           |
-|          `UUID` | Universally unique identifier                                                                              |
+|          `UUID` | Universally unique identifier. Takes up 128-Bits of storage.                                               |
 |          `DATE` | Calendar date (year, month, day)                                                                           |
 |        `FLOAT8` | Double precision floating-point number (8 bytes). Avoid using in production because has precision problems |
 | `DECIMAL(15,2)` | Store amount to exactly 2-decimal points. Used by most general ledger software                             |
@@ -62,8 +62,8 @@ $ psql -h <Host> -p <Port> -U <User> <database> --command="CREATE DATABASE <db_n
 |      `INTERVAL` | Time span                                                                                                  |
 |          `JSON` | Textual JSON data                                                                                          |
 |      `SMALLINT` | Signed two-byte integer                                                                                    |
-|        `SERIAL` | Auto Incrementing four-byte integer. Can be used as column id                                              |
-|     `BIGSERIAL` | Auto Incrementing eight-byte integer                                                                       |
+|        `SERIAL` | Auto Incrementing four-byte integer. Should **not** be used as primary key.                                |
+|     `BIGSERIAL` | Auto Incrementing eight-byte integer. Can be used as primary keys.                                         |
 |          `TIME` | Time of day (no time zone)                                                                                 |
 |        `TIMETZ` | Time of day, including time zone                                                                           |
 |     `TIMESTAMP` | Date and time (no time zone)                                                                               |
@@ -225,6 +225,20 @@ VALUES
   (gen_random_uuid (), 'admin@site.com'),
   (gen_random_uuid (), 'user@site.com');
 ```
+
+
+##### Why use `UUID` over `BIGSERIAL` as primary key?
+
+- First question to ask is whether the record key should be random or sequential. 
+- If record key is going to be exposed to the users, they random keys are more secure. Sequential keys can lead to enumeration attacks.
+
+On the other hand, sequential keys have certain advantages as well
+
+- They are faster to generate
+- They are quick to index
+- They take up less space than `BIGSERIAL`
+
+In summary, use `UUID` where security / entropy matters, otherwise default to using `BIGSERIAL` sequential keys.
 
 
 ---
@@ -493,9 +507,6 @@ ACID is an acronym that refers to the set of 4 key properties that define a tran
 
 - **Durability**: Ensures that changes to your data made by successfully executed transactions will be saved, even in the event of system failure.
 
-
-#### Syntax
-
 ```sql
 -- table schema as some dummy data
 CREATE TABLE
@@ -592,3 +603,63 @@ Caveats
 - The sub-partition tables in the above example will need to be created using a scheduler like CRON job etc.
 - If a query has to multiple partitions, it will be slower than if we had not used partitioning at all.
 - If a table is partitioned, it cannot have a global unique row identifier. However, row IDs can be unique within any single partition. 
+
+
+---
+
+##### Stored Procedures
+
+```sql
+-- example table with some dummy data
+CREATE TABLE
+  accounts (
+    account_id SERIAL,
+    balance BIGINT NOT NULL,
+    PRIMARY KEY (account_id),
+    CONSTRAINT balance_nonnegative CHECK (balance >= 0)
+  );
+
+INSERT INTO
+  accounts (account_id, balance)
+VALUES
+  (1, 100),
+  (2, 300),
+  (3, 4000);
+```
+
+```sql
+CREATE
+OR
+REPLACE
+  PROCEDURE transfer_balance (
+    from_account INTEGER,
+    to_account INTEGER,
+    amount BIGINT
+  ) LANGUAGE plpgsql AS $$ BEGIN
+-- deduct from sender
+UPDATE
+  accounts
+SET
+  balance = balance - amount
+WHERE
+  account_id = from_account;
+
+-- add to recepient
+UPDATE
+  accounts
+SET
+  balance = balance + amount
+WHERE
+  account_id = to_acount;
+
+commit;
+
+END;
+
+$$;
+```
+
+```
+# list out all stored procedures inside psql shell
+db=# \df
+```
