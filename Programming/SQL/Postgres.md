@@ -636,7 +636,7 @@ REPLACE
     to_account INTEGER,
     amount BIGINT
   ) LANGUAGE plpgsql AS $$ BEGIN
--- deduct from sender
+  -- deduct from sender
 UPDATE
   accounts
 SET
@@ -650,16 +650,29 @@ UPDATE
 SET
   balance = balance + amount
 WHERE
-  account_id = to_acount;
+  account_id = to_account;
 
 commit;
-
 END;
-
 $$;
 ```
 
 ```
 # list out all stored procedures inside psql shell
 db=# \df
+```
+
+```sql
+-- execute a stored procedure
+CALL transfer_balance (1, 2, 100);
+```
+
+```sql
+-- drop procedure if not required
+drop procedure
+  transfer_balance (
+    from_account INTEGER,
+    to_account INTEGER,
+    amount BIGINT
+  );
 ```
