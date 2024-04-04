@@ -23,6 +23,7 @@ main: ${OBJ}
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
+	@mkdir -p ${OUT_DIR}
 	@mv ./*.o ${OUT_DIR}/
 
 run:

@@ -112,3 +112,36 @@ defmodule Sandbox do
   end
 end
 ```
+
+
+#### Game entities
+
+```ex
+defmodule Position do
+  defstruct [:x, :y]
+end
+
+defmodule Entity do
+  defstruct [:name, :position]
+
+  def move(e, direction) do
+    cond do
+      direction == :up -> %Entity{e | position: %Position{e.position | y: e.position.y + 10}}
+      direction == :down -> %Entity{e | position: %Position{e.position | y: e.position.y - 10}}
+      direction == :left -> %Entity{e | position: %Position{e.position | x: e.position.x - 10}}
+      direction == :right -> %Entity{e | position: %Position{e.position | x: e.position.x + 10}}
+      true -> :error
+    end
+  end
+end
+
+defmodule Sandbox do
+  def main do
+    %Entity{name: "Entity one", position: %Position{x: 0, y: 0}}
+    |> Entity.move(:up)
+    |> Entity.move(:up)
+    |> Entity.move(:right)
+    |> IO.inspect()
+  end
+end
+```
