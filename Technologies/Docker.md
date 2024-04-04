@@ -140,3 +140,9 @@ services:
     ports:
       - "5432:5432"  
 ```
+
+**Note**: The connection string will be as follows.
+
+```
+postgresql://user:pass@localhost:5432/dev?sslmode=disable
+```

@@ -95,10 +95,8 @@ defmodule Grade do
 end
 
 defmodule Sandbox do
-  @marks 90
-
   def main do
-    Grade.calc @marks
+    Grade.calc(90)
   end
 end
 ```
@@ -110,9 +108,9 @@ allowed = if age > 18, do: true, else: false
 ```
 
 ```elixir
-@input 30
+input = 30
 
-case @input do
+case input do
   10    -> IO.puts "You entered 10"
   20    -> IO.puts "You entered 20"
   30    -> IO.puts "You entered 30"
@@ -127,7 +125,7 @@ end
 
 #### User input
 ```elixir
-name = IO.gets("Enter your name: ") |> String.trim
+IO.gets("Enter your name: ") |> String.trim
 IO.puts "Hello #{name}. Welcome to our website"
 ```
 
