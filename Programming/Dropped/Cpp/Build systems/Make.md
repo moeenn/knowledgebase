@@ -24,6 +24,7 @@ main: ${OBJ}
 
 .cpp.o:
 	${CC} -c ${CFLAGS} $<
+	@mkdir -p ${OUT_DIR}
 	@mv ./*.o ${OUT_DIR}/
 
 run:
