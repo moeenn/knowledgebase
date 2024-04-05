@@ -121,7 +121,6 @@ test("recover async function: error returned", async () => {
 ```
 
 
-
 #### Usage with `fetch`
 
 ```js

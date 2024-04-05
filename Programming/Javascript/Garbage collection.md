@@ -12,8 +12,7 @@ import express from "express"
 import process from "node:process"
 
 /**
- * calculate current process memory usage in MB
- *
+ * calculate current process memory usage in MBs
  * @returns {number}
  */
 function memory() {

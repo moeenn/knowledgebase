@@ -58,7 +58,7 @@ CREATE SCHEMA public;
 | --------------: | :--------------------------------------------------------------------------------------------------------- |
 |           `INT` | Signed four-byte integer                                                                                   |
 |        `BIGINT` | Signed 64-Bit (i.e. 8-Byte) integer. Can be used to store money values in cents.                           |
-|          `BOOL` | Logical Boolean (true/false)                                                                               |
+|          `BOOL` | Logical Boolean (`TRUE` / `FALSE`)                                                                         |
 |      `CHAR (n)` | Fixed-length character string                                                                              |
 |   `VARCHAR (n)` | Variable-length character string                                                                           |
 |          `TEXT` | Variable-length character string                                                                           |
@@ -69,9 +69,9 @@ CREATE SCHEMA public;
 |          `INET` | IPv4 or IPv6 host address                                                                                  |
 |      `INTERVAL` | Time span                                                                                                  |
 |          `JSON` | Textual JSON data                                                                                          |
-|      `SMALLINT` | Signed two-byte integer                                                                                    |
-|        `SERIAL` | Auto Incrementing four-byte integer. Should **not** be used as primary key.                                |
-|     `BIGSERIAL` | Auto Incrementing eight-byte integer. Can be used as primary keys.                                         |
+|      `SMALLINT` | Signed 2-byte (16-bit) integer                                                                             |
+|        `SERIAL` | Auto Incrementing 4-byte (32-bit) integer. Should **not** be used as primary key.                          |
+|     `BIGSERIAL` | Auto Incrementing 8-byte (64-bit) integer. Can be used as primary keys.                                    |
 |          `TIME` | Time of day (no time zone)                                                                                 |
 |        `TIMETZ` | Time of day, including time zone                                                                           |
 |     `TIMESTAMP` | Date and time (no time zone)                                                                               |
@@ -98,6 +98,7 @@ CREATE TABLE
   products (
     product_id SERIAL,
     name TEXT NOT NULL,
+    
     -- column level check
     price NUMERIC NOT NULL CHECK (price >= 0),
     discounted_price NUMERIC NOT NULL,
@@ -121,7 +122,7 @@ CREATE TABLE
 ```
 
 **Note**: In this example we have applied a table level constraint which ensures that following
-- `(1, 1)` and `(1,2)` is allowed
+- `(1, 1)` and `(1, 2)` is allowed
 - `(1, 1)` and `(1, 1)` in two separate rows is not allowed.
 
 
@@ -141,55 +142,6 @@ CREATE TABLE
     location POINT NOT NULL,
     PRIMARY KEY (user_id)
   );
-```
-
-`UUID` can be used as Primary key as follows.
-
-```sql
-CREATE TABLE users (
-  user_id UUID DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  active BOOL DEFAULT (TRUE),
-  
-  PRIMARY KEY (user_id)
-);
-```
-
-
----
-
-#### Insert Data into Table
-
-```sql
--- insert multiple records into table
-INSERT INTO
-  users (name, email, dob, location)
-VALUES
-  (
-    'User one',
-    'user_one@site.com',
-    DATE '1990-02-10',
-    POINT '(30.44, 50.23)'
-  ),
-  (
-    'User two',
-    'user_two@site.com',
-    DATE '1998-09-17',
-    POINT '(30.44, 50.23)'
-  );
-```
-
-```sql
--- insert into multiple tables
-WITH password_insert AS (
-  INSERT INTO password (hash)
-  VALUES ('abc123223213')
-  RETURNING id 
-)
-
-INSERT INTO
-  users (email, role, password_id)
-  VALUES ('admin@site.com', 'ADMIN', (select id from password_insert));
 ```
 
 
@@ -243,6 +195,74 @@ In summary, use `UUID` where security / entropy matters, otherwise default to us
 
 
 ---
+
+#### Array Columns
+
+```sql
+-- table with array field
+CREATE TABLE
+  users (
+    user_id SERIAL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_numbers VARCHAR(255) ARRAY,
+    PRIMARY KEY (user_id)
+  );
+
+-- inserting data into array field
+INSERT INTO
+  users (user_id, email, phone_numbers)
+VALUES
+  (
+    1,
+    'admin@site.com',
+    '{"123123897", "39847928347", "53475934875"}'
+  );
+```
+
+```sql
+-- alternative syntax
+phone_numbers TEXT[],
+```
+
+
+--- 
+
+#### Insert Data into Table
+
+```sql
+-- insert multiple records into table
+INSERT INTO
+  users (name, email, dob, location)
+VALUES
+  (
+    'User one',
+    'user_one@site.com',
+    DATE '1990-02-10',
+    POINT '(30.44, 50.23)'
+  ),
+  (
+    'User two',
+    'user_two@site.com',
+    DATE '1998-09-17',
+    POINT '(30.44, 50.23)'
+  );
+```
+
+```sql
+-- insert into multiple tables
+WITH password_insert AS (
+  INSERT INTO password (hash)
+  VALUES ('abc123223213')
+  RETURNING id 
+)
+
+INSERT INTO
+  users (email, role, password_id)
+  VALUES ('admin@site.com', 'ADMIN', (select id from password_insert));
+```
+
+
+---
 #### Enumerations
 
 ```sql
@@ -262,6 +282,31 @@ INSERT INTO
   users (email, role)
 VALUES
   ('admin@site.com', user_role 'ADMIN');
+```
+
+
+--- 
+
+#### Composite types
+
+```sql
+CREATE TYPE address as (street TEXT, city TEXT, zip INT);
+
+CREATE TABLE
+  users (
+    email VARCHAR(255) UNIQUE NOT NULL,
+    address address,
+    PRIMARY KEY (email)
+  );
+
+INSERT INTO users (email, address) 
+VALUES ('admin@site.com', ROW('Main street', 'Lahore', 5400));
+```
+
+```sql
+-- composite type fields can also be accessed as follows
+INSERT INTO users (email, address.street, address.city, address.zip) 
+VALUES ('admin@site.com', 'Main street', 'Lahore', 5400);
 ```
 
 
@@ -339,7 +384,7 @@ SELECT
   profiles.name
 FROM
   users
-  JOIN profiles ON users.profile_id = profiles.profile_id;
+JOIN profiles ON users.profile_id = profiles.profile_id;
 
 -- fetch data through profiles table
 SELECT
@@ -429,7 +474,7 @@ WHERE
 ##### Many-to-many
 
 ```sql
- -- schena definitions
+-- schena definitions
 CREATE TABLE
   roles (
     role_id SERIAL NOT NULL,
@@ -637,7 +682,7 @@ REPLACE
     from_account INTEGER,
     to_account INTEGER,
     amount BIGINT
-  ) LANGUAGE plpgsql AS $$ BEGIN
+  ) AS $$ BEGIN
   -- deduct from sender
 UPDATE
   accounts
@@ -656,7 +701,7 @@ WHERE
 
 commit;
 END;
-$$;
+$$ LANGUAGE plpgsql;
 ```
 
 **Note**: The statements defined within the procedure body are executed as a single transaction. This means, when a procedure is called, it will either succeed entirely or fail entirely.
@@ -679,6 +724,71 @@ drop procedure
     to_account INTEGER,
     amount BIGINT
   );
+```
+
+
+---
+
+#### Stored functions
+
+```sql
+-- define schema
+CREATE TABLE
+  profiles (
+    profile_id SERIAL,
+    name TEXT,
+    address TEXT,
+    PRIMARY KEY (profile_id)
+  );
+
+CREATE TABLE
+  users (
+    user_id SERIAL,
+    email TEXT UNIQUE,
+    profile_id SERIAL UNIQUE, -- one-to-one relation  
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
+  );
+
+-- insert dummy data
+INSERT INTO
+  profiles (profile_id, name, address)
+VALUES
+  (1, 'Admin', '12 Main street'),
+  (2, 'Customer', '13 Street');
+
+INSERT INTO
+  users (user_id, email, profile_id)
+VALUES
+  (1, 'admin@site.com', 1),
+  (2, 'customer@site.com', 2);
+```
+
+```sql
+-- define stored functions and their return (composite) types
+CREATE TYPE user_with_profile as (email TEXT, name TEXT, address TEXT);
+
+CREATE
+OR
+REPLACE
+  FUNCTION get_user (id INT) RETURNS user_with_profile AS $$
+SELECT
+  users.email,
+  profiles.name,
+  profiles.address
+FROM
+  users
+  JOIN profiles ON users.profile_id = profiles.profile_id
+WHERE
+  users.user_id = id
+LIMIT
+  1 $$ LANGUAGE SQL;
+
+-- execute defined function
+SELECT
+  *
+FROM
+  get_user (1);
 ```
 
 
@@ -717,3 +827,11 @@ VALUES
     hash_password ('abc123123')
   );
 ```
+
+
+#### TODO
+
+- [x] Stored functions
+- [x] Composite types as stored function return types
+- [ ] Delete cascades
+- [ ] Type casting

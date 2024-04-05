@@ -278,7 +278,6 @@ const schema = /** @type {const} */ ({
 
 /** @returns {Promise<void>} */
 export async function main() {
-
   const validator = new Ajv()
 
   /** @type {unknown} */
