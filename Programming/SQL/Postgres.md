@@ -287,6 +287,33 @@ VALUES
 
 --- 
 
+#### Domain types
+Domain types can be used to extend existing types with additional checks etc.
+
+```sql
+CREATE DOMAIN rating AS FLOAT4 CHECK (
+  VALUE >= 0
+  AND VALUE <= 5
+);
+
+CREATE TABLE
+  book (
+    book_id SERIAL,
+    name TEXT,
+    rating rating,
+    PRIMARY KEY (book_id)
+  );
+
+-- insert dummy records
+INSERT INTO
+  book (book_id, name, rating)
+VALUES
+  (1, 'Foundation', 5);
+```
+
+
+---
+
 #### Composite types
 
 ```sql
