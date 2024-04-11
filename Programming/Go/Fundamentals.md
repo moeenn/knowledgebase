@@ -1,3 +1,11 @@
+
+#### Todo
+
+- Common Go Mistakes [Link](https://youtu.be/biGr232TBwc?si=aS0oCFLzT-nP6t5K)
+
+
+```
+
 ```bash
 $ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
 

@@ -1,4 +1,37 @@
 
+#### TODO
+
+- [ ] Delete cascades
+- [ ] Type casting
+- [ ] Regex checks [Link](https://stackoverflow.com/questions/24403085/validate-column-using-regular-expression-in-postgre-sql)
+- [ ] Additional Features [Link](https://sive.rs/pg)
+
+
+---
+
+#### Running through Docker
+
+```yml
+version: '3.3'
+
+services:
+  db:
+    image: postgres:16-alpine  
+    container_name: "postgres-db"
+    restart: always
+    environment:
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=devpass
+      - POSTGRES_DB=dev
+    ports:
+      - "5432:5432" 
+    volumes:
+      - ./docker-volume:/var/lib/postgresql/data
+```
+
+
+---
+
 #### Connecting to Database
 
 ##### Through `psql`
@@ -11,6 +44,13 @@ $ psql -h <hostname> -p <port> -d <database> -U <username>
 
 ```
 postgresql://devuser:devpass@localhost:5432/dev?sslmode=disable
+```
+
+
+#### Exporting existing DB schema
+
+```bash
+pg_dump --schema-only --no-acl $DATABASE_URL > migrations/0000-init.sql
 ```
 
 
@@ -796,8 +836,6 @@ VALUES
 CREATE TYPE user_with_profile as (email TEXT, name TEXT, address TEXT);
 
 CREATE
-OR
-REPLACE
   FUNCTION get_user (id INT) RETURNS user_with_profile AS $$
 SELECT
   users.email,
@@ -816,6 +854,13 @@ SELECT
   *
 FROM
   get_user (1);
+```
+
+**Note**: If we are simply returning a row from an existing (single) table, we can put the name of the table as the function return type.
+
+```sql
+-- remove a defined function
+DROP FUNCTION get_user (id INT);
 ```
 
 
@@ -856,9 +901,51 @@ VALUES
 ```
 
 
-#### TODO
+---
 
-- [x] Stored functions
-- [x] Composite types as stored function return types
-- [ ] Delete cascades
-- [ ] Type casting
+#### Views
+
+```sql
+CREATE TABLE
+  sites (
+    site_id SERIAL,
+    site_name TEXT,
+    PRIMARY KEY (site_id)
+  );
+
+CREATE TABLE
+  orders (
+    order_id SERIAL,
+    amount DECIMAL,
+    PRIMARY KEY (order_id)
+  );
+
+CREATE TABLE
+  site_orders (
+    site_id SERIAL,
+    order_id SERIAL,
+    PRIMARY KEY (site_id, order_id),
+    FOREIGN KEY (site_id) REFERENCES sites (site_id),
+    FOREIGN KEY (order_id) REFERENCES orders (order_id)
+  );
+```
+
+```sql
+CREATE VIEW
+  site_orders_view AS
+SELECT
+  sites.site_name,
+  orders.order_id,
+  orders.amount
+FROM
+  site_orders
+  JOIN sites ON site_orders.site_id = sites.site_id
+  JOIN orders on site_orders.order_id = orders.order_id
+WHERE
+  orders.amount > 100;
+```
+
+```sql
+SELECT * FROM site_orders_view;
+```
+
