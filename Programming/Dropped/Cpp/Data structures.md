@@ -316,7 +316,6 @@ Deque is a dynamic array that can grow in two directions i.e. towards the beginn
 #include <iostream>
 #include <deque>
 
-
 // overloading for stream insertion operator
 std::ostream& operator << (std::ostream& stream, const std::deque<int>& d) {
 	for(const auto& elem : d)
@@ -366,17 +365,17 @@ int main() {
 	std::cout << *result << std::endl;	// *result == 50
 
 	// insert() method :: new element will be inserted before 
-      // the provided iterator
+    // the provided iterator
 	numbers.insert(result, 2000);
 	std::cout << numbers << std::endl; 
-      // 5 100 20 2000 50 34 82 95 70
+    // 5 100 20 2000 50 34 82 95 70
 
 	// increment iterator: *result == 34
 	result++;
 
 	// remove the selected element i.e. 34
 	numbers.erase(result);				
-      // 5 100 20 2000 50 82 95 70
+    // 5 100 20 2000 50 82 95 70
 
 	std::cout << numbers << std::endl;
 }

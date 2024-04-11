@@ -3,6 +3,7 @@ $ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
 
 # install language server manually
 $ go install golang.org/x/tools/gopls@latest
+$ go install github.com/nametake/golangci-lint-langserver@latest
 
 # linting tools
 $ go install honnef.co/go/tools/cmd/staticcheck@latest

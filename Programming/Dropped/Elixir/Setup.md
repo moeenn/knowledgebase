@@ -27,3 +27,20 @@ $ iex -S mix
 # run the code
 > recompile && Sandbox.hello
 ```
+
+
+
+#### Helix Config
+
+```toml
+[[language]]
+name = "elixir"
+scope = "source.elixir"
+injection-regex = "(elixir|ex)"
+shebangs = ["elixir"]
+roots = ["mix.exs", "mix.lock"]
+comment-token = "#"
+language-servers = [ "elixir-ls" ]
+indent = { tab-width = 2, unit = "  " }
+auto-format = true
+```
