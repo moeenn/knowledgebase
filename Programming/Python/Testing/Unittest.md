@@ -12,7 +12,7 @@ def div(a: int, b: int) -> float:
 ```
 
 ```python
-# file: test_operations.py
+# file: operations_test.py
 from unittest import TestCase
 from .operations import add, div
 from dataclasses import dataclass
@@ -54,7 +54,7 @@ class TestOperations(TestCase):
 
 ##### Running the tests
 ```bash
-$ python -m unittest ./src/**/test_*.py
+$ python -m unittest ./src/**/*_test.py
 ```
 
 
