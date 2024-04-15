@@ -29,9 +29,9 @@ float pi = 3.1416F;  // note the use of ”F” here
 double e = 2.7182;
 ```
 
-**Note**: Java doesn't natively have unsigned `int`. This functionality can be achieved through external libraries.
+**Note**: Java doesn't have native unsigned `int`. This functionality can be achieved through external libraries.
 
-**Note**: If a variable is declared by not initialised, using this variable will result in a compile-time error.
+**Note**: If a variable is declared by not initialized, using this variable will result in a compile-time error.
 
 
 ---
@@ -139,7 +139,7 @@ In Java, all method arguments are always copied. In case of reference variables 
 Java is a **NOT** a null-safe language. Java compiler allows the following code.
 
 ```java
-// Point is a custom reference type
+// Point is a custom reference type. All reference types can be null
 Point p = null;		
 System.out.println(p);
 ```
