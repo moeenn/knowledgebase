@@ -5,7 +5,12 @@
 - [ ] Type casting
 - [ ] Regex checks [Link](https://stackoverflow.com/questions/24403085/validate-column-using-regular-expression-in-postgre-sql)
 - [ ] Additional Features [Link](https://sive.rs/pg)
-- [ ] Normalization 
+- [ ] Normalisation 
+- [ ] Partial indexing
+- [ ] Volatile
+- [ ] Triggers / Listen / Notify
+- [ ] `create index CONCURRENTLY`
+- [ ] N+1 query problem
 
 
 ---
@@ -671,6 +676,8 @@ EXECUTE users_insert ('User one', 'user_one@site.com');
 
 ##### Indexing
 
+A good rule of thumb is to create database indexes for everything that is referenced in the `WHERE`, `HAVING` and `ORDER BY` parts of your SQL queries.
+
 ```sql
 -- create indexes on fields prequently used for querying tables
 CREATE INDEX users_index ON users (email, name);
@@ -767,7 +774,7 @@ SET
 WHERE
   account_id = to_account;
 
-commit;
+COMMIT;
 END;
 $$ LANGUAGE plpgsql;
 ```
@@ -786,7 +793,7 @@ CALL transfer_balance (1, 2, 100);
 
 ```sql
 -- drop procedure if not required
-drop procedure
+DROP PROCEDURE
   transfer_balance (
     from_account INTEGER,
     to_account INTEGER,

@@ -71,6 +71,22 @@ public class Invoice {
 In the above example, the `Invoice` class has multiple responsibilities. Ideally, we should split these responsibilities into their own dedicated classes.
 
 ```java
+public class Invoice {
+  private final Invoicable item;
+  private final int quantity;
+
+  public Invoice(Invoicable item, int quantity) {
+    this.item = item;
+    this.quantity = quantity;
+  }
+
+  public double calculateTotal() {
+    return (item.getPrice() * quantity) - item.getDiscount();
+  }
+}
+```
+
+```java
 public class InvoicePrinter {
   private final Invoice invoice;
 
@@ -97,22 +113,6 @@ public class InvoiceDAO {
 ```
 
 **Note**: `DAO` stands for Data access object. `DAO` is a pattern that provides an abstract interface to some type of database or other persistence mechanism.
-
-```java
-public class Invoice {
-  private final Invoicable item;
-  private final int quantity;
-
-  public Invoice(Invoicable item, int quantity) {
-    this.item = item;
-    this.quantity = quantity;
-  }
-
-  public double calculateTotal() {
-    return (item.getPrice() * quantity) * item.getDiscount();
-  }
-}
-```
 
 
 ---
