@@ -10,7 +10,6 @@
 - [ ] Volatile
 - [ ] Triggers / Listen / Notify
 - [ ] `create index CONCURRENTLY`
-- [ ] N+1 query problem
 
 
 ---
@@ -956,4 +955,10 @@ WHERE
 ```sql
 SELECT * FROM site_orders_view;
 ```
+
+
+---
+
+#### N+1 query problem
+N+1 queries are a performance problem in which the application makes database queries in a loop, instead of making a single query that returns or modifies all the information at once. Each database connection takes some amount of time, so querying the database in a loop can be many times slower than doing it just once. This problem often occurs when you use an object-relational mapping (ORM) tool in web frameworks like Django or Ruby on Rails.
 
