@@ -10,6 +10,7 @@
 - [ ] Volatile
 - [ ] Triggers / Listen / Notify
 - [ ] `create index CONCURRENTLY`
+- [ ] Partitioning [Link](https://rasiksuhail.medium.com/guide-to-postgresql-table-partitioning-c0814b0fbd9b)
 
 
 ---
