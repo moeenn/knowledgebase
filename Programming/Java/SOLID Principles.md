@@ -1,4 +1,9 @@
 
+#### Todo
+- [Link](https://www.digitalocean.com/community/conceptual-articles/s-o-l-i-d-the-first-five-principles-of-object-oriented-design)  
+- [Link](https://www.freecodecamp.org/news/solid-principles-for-better-software-design/#:~:text=The%20SOLID%20principles%20are%20a,understand%2C%20modify%2C%20and%20extend).
+
+
 - Single-responsibility
 - Open-closed
 - Liskov substitution

@@ -1,0 +1,3 @@
+#### TODO
+- Event sourcing
+- CQRS

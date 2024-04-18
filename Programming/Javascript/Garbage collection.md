@@ -1,4 +1,8 @@
 
+#### Todo
+- Detect memory leaks [Link]([https://techtldr.com/simple-guide-to-finding-a-javascript-memory-leak-in-node-js/](https://techtldr.com/simple-guide-to-finding-a-javascript-memory-leak-in-node-js/))
+
+
 ```bash
 # run nodejs process with GC exposed
 $ node --expose-gc ./src/index.mjs

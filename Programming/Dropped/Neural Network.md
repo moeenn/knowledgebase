@@ -1,0 +1,1 @@
+- [Neural network from scratch]([https://www.youtube.com/watch?v=w8yWXqWQYmU&list=WL&index=1&pp=gAQBiAQB](https://www.youtube.com/watch?v=w8yWXqWQYmU&list=WL&index=1&pp=gAQBiAQB))
