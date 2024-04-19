@@ -125,5 +125,84 @@ public class InvoiceDAO {
 #### Open-closed principle
 
 - Objects or entities should be open for extension but closed for modification.
+- In practice, this means that we should be able to add new functionality without modifying existing code.
 
+```java
+public class PaymentProcessor {
+  public void processCreditCard() {
+    // 
+  }
+
+  public void processPaypal() {
+    // 
+  }
+}
+```
+
+The above code violates the Open/Closed principle. Here is how we can fix it.
+
+```java
+public interface PaymentProcessor {
+  void processPayment();
+}
+```
+
+```java
+public class BankPaymentProcessor implements PaymentProcessor {
+  @Override
+  public void processPayment() {
+    // 
+  }
+}
+```
+
+```java
+public class PaypalPaymentProcessor implements PaymentProcessor {
+  @Override
+  public void processPayment() {
+    // 
+  }
+}
+```
+
+This fixes the extensibility problem. Anytime a new payment processor needs to be implemented, we can simply implement it as a concrete implementation of `PaymentProcessor` interface.
+
+
+---
+
+#### Liskov Substitution principle
+
+Any instance of a derived class should be substitutable for an instance of its base class without affecting the correctness of the program.
+
+
+```java
+public class CreditCard {
+  public void makePayment(double amount) {
+    // 
+  }
+}
+```
+
+```java
+public class VisaCard extends CreditCard {
+  @Override
+  public void makePayment(double amount) {
+    // 
+  }
+}
+```
+
+```java
+public class MasterCard extends CreditCard {
+  @Override
+  public void makePayment(double amount) {
+    // 
+  }  
+}
+```
+
+In this scenario, `VisaCard` and `MasterCard` are derived from `CreditCard` class. The method `makePayment` must have the same signature in all these classes to ensure these classes can be used interchangeably.
+
+
+**Note**: Ideally in a scenario such as above, I would always prefer to define `CreditCard` as an `interface` and define `VisaCard` and `MasterCard` as concrete implementations. Inheritance should be avoided as much as possible.  However, scenario may arise where we must use inheritance - here ensuring this principle would make perfect sense.
 

@@ -2,7 +2,26 @@
 
 - [ ] Exceptions: [Link](https://www.javatpoint.com/exception-handling-in-java)
 - [ ] Virtual threads
-- [ ] 
+- [ ] Thread pools [Link](https://www.baeldung.com/thread-pool-java-and-guava)
+- [ ] Java interview questions [Link](https://youtu.be/FTyMsFaTV4I?si)
+- [ ] Features blog [Link](https://www.marcobehler.com/)
+- [ ] Java IO / FS
+- [ ] Functional interfaces [Link](https://www.baeldung.com/java-8-functional-interfaces)
+- [ ] Java tutorial series [Link](https://www.baeldung.com/get-started-with-java-series)
+
+
+---
+
+#### Pillars of Object oriented programming
+
+**Abstraction** is the process of hiding unnecessary details of an object’s internal structure. By abstracting an object’s data, its structure and behaviour can be kept separate and more easily understood.
+
+**Encapsulation** is the process of wrapping data and related functions into a single unit (object). Encapsulation limits access to object data and methods, preventing their misuse and ensuring their proper functioning.
+
+**Inheritance** is the ability to create a new class (derived class) from an existing one (base class). The child class typically inherits the attributes (members and methods) of the parent class, although it can also redefine them. 
+
+**Polymorphism** is the ability of an object to take on multiple forms. This allows objects of different classes to be used interchangeably, as long as they implement a certain interface. 
+
 
 ---
 
@@ -39,7 +58,9 @@ double e = 2.7182;
 
 **Note**: Java doesn't have native unsigned `int`. This functionality can be achieved through external libraries.
 
-**Note**: If a variable is declared by not initialized, using this variable will result in a compile-time error.
+**Note**: If a variable is declared by not initialised, using this variable will result in a compile-time error.
+
+**Note**: `final` variables i.e. constants should be named in uppercase, this includes `enum` values. Member variables should be named in camel-case.  
 
 
 ---
@@ -47,33 +68,25 @@ double e = 2.7182;
 #### Classes (i.e. Reference types)
 
 ```java
-/** file: Main.java */
 package com.sandbox;
 
-/**
- * Note: This class contains the entry-point `main` method. Therefore, this 
- * class is called `Universe class`.
- */ 
-public class Main {
-  public static void main(String... args) {
-    // `new` keyword returns a reference to the reference type
-    Entity e = new Entity(0, 0);
-    try {
-      e.move(Entity.Direction.UP);
-      e.move(Entity.Direction.LEFT);
-    } 
-    catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+import com.sandbox.modules.Player;
+import com.sandbox.modules.Position;
+import com.sandbox.modules.Direction;
 
-    System.out.println(e);
-  }
+public class Main {
+	public static void main(String[] args) {
+		Player p = new Player("Player One", Position.origin());
+		p.updatePosition(Direction.RIGHT);
+		p.updatePosition(Direction.RIGHT);
+		p.updatePosition(Direction.UP);
+		System.out.println(p);
+	}
 }
 ```
 
 ```java
-/** file: Direction.java */
-package com.sandbox;
+package com.sandbox.modules;
 
 public enum Direction {
   UP,
@@ -84,54 +97,96 @@ public enum Direction {
 ```
 
 ```java
-/** file: Entity.java */
-package com.sandbox;
+package com.sandbox.modules;
 
-public class Entity {
+public class Position {
   private int x;
   private int y;
-  private int step = 20;
-  private int lower_bound = 0;
-  private int upper_bound = 100;
 
-  public Entity(int x, int y) {
+  public Position(int x, int y) {
     this.x = x;
     this.y = y;
   }
 
-  private boolean isWithinBounds() {
-    return (this.x > this.lower_bound && this.y > this.lower_bound &&
-            this.x < this.upper_bound && this.y < this.upper_bound);
+  public static Position origin() {
+    return new Position(0, 0);
   }
 
-  public void move(Direction d) throws Exception {
+  public int getX() {
+    return x;
+  }
+
+  public int getY() {
+    return y;
+  } 
+
+  public void incrementX(int step) {
+    this.x += step;
+  }
+
+  public void decrementX(int step) {
+    this.x -= step;
+  } 
+
+  public void incrementY(int step) {
+    this.y += step;
+  }
+
+  public void decrementY(int step) {
+    this.y -= step;
+  }
+
+  @Override
+  public String toString() {
+    return "Position [x=" + x + ", y=" + y + "]";
+  }
+}
+```
+
+```java
+package com.sandbox.modules;
+
+public class Player {
+  private final String name;
+  private Position position;
+  private final int step = 10;
+
+  public Player(String name, Position position) {
+    this.name = name;
+    this.position = position;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Position getPosition() {
+    return position;
+  }
+
+  public void updatePosition(Direction d) {
     switch (d) {
-    case UP:
-      this.y += this.step;
-      break;
+      case UP:
+        position.incrementY(step);
+        break;
 
-    case DOWN:
-      this.y -= this.step;
-      break;
+      case DOWN:
+        position.decrementY(step);
+        break;
 
-    case LEFT:
-      this.x -= this.step;
-      break;
+      case LEFT:
+        position.decrementX(step);
+        break;
 
-    case RIGHT:
-      this.x += this.step;
-      break;
-    }
-
-    if (!this.isWithinBounds()) {
-      throw new Exception(
-          String.format("out of bounds: x: %d, y: %d", this.x, this.y));
+      case RIGHT:
+        position.incrementX(step);
+        break;
     }
   }
 
   @Override
   public String toString() {
-    return String.format("Entity(x=%d, y=%d)", this.x, this.y);
+    return "Player [name=" + name + ", position=" + position + "]";
   }
 }
 ```
@@ -150,6 +205,13 @@ Java is a **NOT** a null-safe language. Java compiler allows the following code.
 // Point is a custom reference type. All reference types can be null
 Point p = null;		
 System.out.println(p);
+```
+
+```java
+// check if variable is null
+if (someVal == null) {
+    // perform some action with value 
+}
 ```
 
 
@@ -222,9 +284,9 @@ assert(a == b); // true
 ---
 
 #### Final
-A variable can be declared as `final`. If it is a base type, then it is a constant. If a reference variable is final, then it will always refer to the same object (even if that object changes its internal state).
+A variable can be declared as `final`. If it is a base type, then it is a constant. If a reference variable is final, then it will always refer to the same object (even if that object changes its internal state) (const reference).
 
-Entire methods and classes can also be marked as `final`. A `final method` cannot be overridden by a subclass, and a `final class` cannot even be subclassed.
+Entire methods and classes can also be marked as `final`. A `final method` cannot be overridden by a subclass, and a `final class` cannot even be subclassed (i.e. derived from).
 
 
 ---
@@ -264,11 +326,9 @@ public record Person(String name, int age) {
 ```
 
 ```java
-import java.util.ArrayList;
-
 public class Main {
   public static void main(String[] args) {    
-    ArrayList<Person> people = new ArrayList<>() {
+    List<Person> people = new ArrayList<>() {
       {
         add(new Person("Player one", 30));
         add(new Person("Player two", 40));
@@ -624,12 +684,30 @@ UUID uuid = UUID.randomUUID();
 ```
 
 
+---
 
-#### TODO
+#### Environment variables
 
-```
-https://www.baeldung.com/thread-pool-java-and-guava
-https://youtu.be/FTyMsFaTV4I?si
-https://www.marcobehler.com/
+```java
+package com.sandbox;
+
+public class Env {
+  public static String Get(String key) throws Exception {
+    String value = System.getenv(key);
+    if (value == null) {
+      throw new Exception(
+          String.format("Env variable not found: '%s'", key));
+    }
+    return value;
+  }
+
+  public static String Get(String key, String fallback) {
+    String value = System.getenv(key);
+    if (value == null) {
+      return fallback;
+    }
+    return value;
+  }
+}
 ```
 
