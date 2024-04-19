@@ -1,7 +1,14 @@
 
 #### Todo
-- Mongo-sh
+- [ ] Mongo-sh
+- [ ] CRUD
+- [ ] Indexes
+- [ ] `$lookup`
+- [ ] Aggregate
+- [ ] Embedded documents
 
+
+---
 
 #### Run using Docker
 
@@ -112,7 +119,7 @@ class UserCollection {
   /** 
    * create the collection in mongodb. This function can be executed safely even
    * if the collection already exists. However, if we update the schema, this 
-   * function will throw an error.
+   * function will throw an error regarding schema mis-match.
    * 
    * @param {import("mongodb").Db} db
    */
@@ -132,6 +139,8 @@ class UserCollection {
   }
 }
 ```
+
+**Note**: This schema as a slightly different syntax than standard JSON schema. We cannot use `json-schema-to-ts` to infer the type from this schema.
 
 
 ---
