@@ -56,17 +56,17 @@ public class Invoice {
     this.quantity = quantity;
   }
 
-  // responsibility one
+  // responsibility # 1
   public double calculateTotal() {
     return (item.getPrice() * quantity) * item.getDiscount();
   }
 
-  // responsibility two
+  // responsibility # 2
   public void printInvoice() {
     // TODO
   }
 
-  // responsibility three
+  // responsibility # 3
   public void saveInvoiceToDB() {
     // TODO
   }
@@ -174,35 +174,185 @@ This fixes the extensibility problem. Anytime a new payment processor needs to b
 
 Any instance of a derived class should be substitutable for an instance of its base class without affecting the correctness of the program.
 
+Liskov substitution principle goes beyond just method parameters and return types. It is necessary where some code thinks it is calling the methods of a type `T`, and may unknowingly call the methods of a type `S`, where `S extends T`. If this program breaks in a situation where it is provided an instance of derived class of `S`, then there is a LSP violation.
 
 ```java
-public class CreditCard {
-  public void makePayment(double amount) {
+public interface Bike {
+  void turnOnEngine();
+  void accelerate(double by);
+}
+```
+
+```java
+public class Motorbike implements Bike {
+  private boolean engine;
+  private double speed;
+  
+  public Motorbike(boolean engine, double speed) {
+    this.engine = engine;
+    this.speed = speed;
+  }
+
+  @Override
+  public void turnOnEngine() {
+    this.engine = true;
+  }
+
+  @Override
+  public void accelerate(double by) {
+    this.speed += by;
+  }
+}
+```
+
+```java
+// class violating the liskov-substitution principle
+public class Bicycle implements Bike {
+  private double speed;
+
+  public Bicycle(double speed) {
+    this.speed = speed;
+  }
+
+  @Override
+  public void turnOnEngine() throws AssertionError {
+    throw new AssertionError("Bicycle does not have engine");
+  }
+  
+  @Override
+  public void accelerate(double by) {
+    this.speed += by;
+  }
+}
+```
+
+In this example, `Motorbike` correctly implements the `Bike` interface. However, since `Bicycle` does not have an engine, it cannot correctly implement the interface. This is because `turnOnEngine` method in `Bicycle` can throw an `AssertionError` which means it can break the program if used together with other classes which implement `Bike` interface.
+
+
+---
+
+#### Interface segregation principle
+
+The Interface Segregation Principle (ISP) focuses on designing interfaces that are specific to their client's needs. It states that no client should be forced to depend on methods it does not use.
+
+```java
+public interface Vehicle {
+  void startEngine();
+  void stopEngine();
+  void drive();
+  void fly();
+}
+```
+
+```java
+public class Car implements Vehicle {
+  @Override
+  public void startEngine() {
+    // 
+  }
+
+  @Override
+  public void stopEngine() {
+    //
+  }
+
+  @Override
+  public void drive() {
+    // 
+  }
+
+  @Override
+  public void fly() throws AssertionError {
+    throw new AssertionError("Car cannot fly");
+  }
+}
+```
+
+```java
+public class Airplane implements Vehicle {
+  @Override
+  public void startEngine() {
+    // 
+  }
+
+  @Override
+  public void stopEngine() {
+    // 
+  }
+
+  @Override
+  public void drive() throws AssertionError {
+    throw new AssertionError("Airplane cannot drive");
+  }
+  
+  @Override
+  public void fly() {
+    // 
+  }
+}
+```
+
+The `Vehicle` interface violates the ISP, because it defines too many responsibilities. E.g. `Car` class implements this interface but does not need the `fly` method. Similarly, `Airplane` implements the interface but does not need the `drive` method.
+
+```java
+public interface Enginable {
+  void startEngine();
+  void stopEngine();
+}
+```
+
+```java
+public interface Drivable {
+  void drive();
+}
+```
+
+```java
+public interface Flyable {
+  void fly();
+}
+```
+
+```java
+public class Car implements Enginable, Drivable {
+  @Override
+  public void startEngine() {
+    // 
+  }
+
+  @Override
+  public void stopEngine() {
+    //
+  }
+
+  @Override
+  public void drive() {
     // 
   }
 }
 ```
 
 ```java
-public class VisaCard extends CreditCard {
+public class Airplane implements Enginable, Flyable {
   @Override
-  public void makePayment(double amount) {
+  public void startEngine() {
+    // 
+  }
+
+  @Override
+  public void stopEngine() {
+    // 
+  }
+
+  @Override
+  public void fly() {
     // 
   }
 }
 ```
 
-```java
-public class MasterCard extends CreditCard {
-  @Override
-  public void makePayment(double amount) {
-    // 
-  }  
-}
-```
 
-In this scenario, `VisaCard` and `MasterCard` are derived from `CreditCard` class. The method `makePayment` must have the same signature in all these classes to ensure these classes can be used interchangeably.
+---
 
-
-**Note**: Ideally in a scenario such as above, I would always prefer to define `CreditCard` as an `interface` and define `VisaCard` and `MasterCard` as concrete implementations. Inheritance should be avoided as much as possible.  However, scenario may arise where we must use inheritance - here ensuring this principle would make perfect sense.
+#### Dependency Inversion Principle 
 
