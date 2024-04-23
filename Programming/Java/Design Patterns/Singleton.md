@@ -1,6 +1,4 @@
 ```java
-package com.sandbox;
-
 public class EmailService {
   private static EmailService instance;
   private String format;
@@ -25,15 +23,11 @@ public class EmailService {
 ```
 
 ```java
-package com.sandbox;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 
 public class EmailServiceTest {
- 
   @Test
   public void testGetInstance() {
     assertNotEquals(EmailService.getInstance(), null);

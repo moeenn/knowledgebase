@@ -1,14 +1,10 @@
 ```java
-package com.sandbox;
-
 public interface ITransport {
   String deliver();
 }
 ```
 
 ```java
-package com.sandbox;
-
 public class Boat implements ITransport {
   private final String name;
 
@@ -24,8 +20,6 @@ public class Boat implements ITransport {
 ```
 
 ```java
-package com.sandbox;
-
 public class Truck implements ITransport {
   private final String name;
 
@@ -41,8 +35,6 @@ public class Truck implements ITransport {
 ```
 
 ```java
-package com.sandbox;
-
 public enum DeliveryMethod {
   BOAT,
   TRUCK,
@@ -50,8 +42,6 @@ public enum DeliveryMethod {
 ```
 
 ```java
-package com.sandbox;
-
 public class LogisticsManager {
   private ITransport transport;
 
@@ -74,10 +64,7 @@ public class LogisticsManager {
 ```
 
 ```java
-package com.sandbox;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 
 public class LogisticsManagerTest {
@@ -99,8 +86,6 @@ public class LogisticsManagerTest {
 ```
 
 ```java
-package com.sandbox;
-
 public class Main {
   public static void main(String[] args) {
     LogisticsManager manager = new LogisticsManager();

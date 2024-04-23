@@ -1,18 +1,14 @@
 We wrap the external interface of a class within another class, adding additional functionality to the methods of the existing class.
 
 ```java
-package com.sandbox;
-
-public interface IDataSource {
+public interface DataSource {
   void writeData(String data);
   String readData();
 }
 ```
 
 ```java
-package com.sandbox;
-
-public class FileDataSource implements IDataSource {
+public class FileDataSource implements DataSource {
   private String content;
 
   public FileDataSource() {
@@ -32,12 +28,10 @@ public class FileDataSource implements IDataSource {
 ```
 
 ```java
-package com.sandbox;
+public class DecoratedFileDataSource implements DataSource {
+  private DataSource dataSource;
 
-public class DecoratedFileDataSource implements IDataSource {
-  private IDataSource dataSource;
-
-  public DecoratedFileDataSource(IDataSource dataSource) {
+  public DecoratedFileDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
   }
 
@@ -56,8 +50,6 @@ public class DecoratedFileDataSource implements IDataSource {
 ```
 
 ```java
-package com.sandbox;
-
 public class Logger {
   public static void log(String message) {
     System.out.printf("[log] %s\n", message);
@@ -66,14 +58,11 @@ public class Logger {
 ```
 
 ```java
-package com.sandbox;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 
 public class DecoratedFileDataSourceTest {
-  private IDataSource decoratedSource;
+  private DataSource decoratedSource;
 
   public DecoratedFileDataSourceTest() {
     FileDataSource fileSource = new FileDataSource();
@@ -92,8 +81,6 @@ public class DecoratedFileDataSourceTest {
 ```
 
 ```java
-package com.sandbox;
-
 public class Main {
   public static void main(String[] args) {
     FileDataSource source = new FileDataSource();

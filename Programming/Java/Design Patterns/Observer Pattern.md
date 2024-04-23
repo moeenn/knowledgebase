@@ -1,31 +1,27 @@
 ```java
-package com.sandbox;
-
-public interface ISubscriber {
+public interface Subscriber {
   String getId();
+  String getLastMessage();
   void update();
 }
 ```
 
 ```java
-package com.sandbox;
-
-public interface IPublisher {
-  void addSubscriber(ISubscriber subscriber);
-  void removeSubscriber(ISubscriber subscriber);
+public interface Publisher {
+  void addSubscriber(Subscriber sub);
+  void removeSubscriber(Subscriber sub);
   void notifySubscribers();
 }
 ```
 
 ```java
-package com.sandbox;
-
 import java.util.UUID;
 
-public class TestSubscriber implements ISubscriber {  
-  private String id;
+public class ExampleSubscriber implements Subscriber {
+  private final String id;
+  private String lastMessage;
 
-  public TestSubscriber() {
+  public ExampleSubscriber() {
     this.id = UUID.randomUUID().toString();
   }
 
@@ -35,60 +31,81 @@ public class TestSubscriber implements ISubscriber {
   }
 
   @Override
+  public String getLastMessage() {
+    return this.lastMessage;
+  }
+
+  @Override
   public void update() {
-    System.out.printf("%s: subscriber has received a message\n", this.id);
+    lastMessage = String.format("Message received by sub # %s", this.id);
+    System.out.println(lastMessage);
   }
 }
 ```
 
 ```java
-package com.sandbox;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestPublisher implements IPublisher {
-  private List<ISubscriber> subscribers;
+public class ExamplePublisher implements Publisher {
+  private List<Subscriber> subscribers;
 
-  public TestPublisher() {
-    this.subscribers = new ArrayList<>();
+  public ExamplePublisher() {
+    subscribers = new ArrayList<>();
   }
 
   @Override
-  public void addSubscriber(ISubscriber subscriber) {
-    this.subscribers.add(subscriber);
-  }
+  public void addSubscriber(Subscriber sub) {
+    subscribers.add(sub);
+  }  
 
   @Override
-  public void removeSubscriber(ISubscriber subscriber) {
-    this.subscribers.removeIf(sub -> sub.getId().equals(subscriber.getId()));
+  public void removeSubscriber(Subscriber sub) {
+    subscribers.removeIf(s -> s.getId().equals(sub.getId()));
   }
 
   @Override
   public void notifySubscribers() {
-    this.subscribers.stream().forEach(sub -> sub.update());
+    subscribers.stream().forEach(s -> s.update());
   }
 }
 ```
 
 ```java
-package com.sandbox;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
-public class Main {
-  public static void main(String[] args) {
-    TestPublisher publisher = new TestPublisher();
+public class TestExamplePublisher {
+  private Publisher pub;
+  
+  public TestExamplePublisher() {
+    pub = new ExamplePublisher();
+  }
 
-    TestSubscriber subOne = new TestSubscriber();
-    TestSubscriber subTwo = new TestSubscriber();
-    TestSubscriber subThree = new TestSubscriber();
+  @Test
+  public void testPublisherPublish() {
+    Subscriber sub = new ExampleSubscriber();
+    pub.addSubscriber(sub);
+    assertNull(sub.getLastMessage());
 
-    publisher.addSubscriber(subOne);
-    publisher.addSubscriber(subTwo);
-    publisher.addSubscriber(subThree);
-    publisher.notifySubscribers();
+    pub.notifySubscribers();
+    assertTrue(sub.getLastMessage().contains(sub.getId()));
+  }
 
-    publisher.removeSubscriber(subTwo);
-    publisher.notifySubscribers();
+  @Test
+  public void testRemoveSubscriber() {
+    Subscriber subOne = new ExampleSubscriber();
+    Subscriber subTwo = new ExampleSubscriber();
+  
+    pub.addSubscriber(subOne);
+    pub.addSubscriber(subTwo);
+    pub.removeSubscriber(subOne);
+    pub.notifySubscribers();
+
+    assertNull(subOne.getLastMessage());
+    assertNotNull(subTwo.getLastMessage());
   }
 }
 ```

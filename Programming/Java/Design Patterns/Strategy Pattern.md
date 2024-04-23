@@ -1,141 +1,78 @@
 ```java
-package com.sandbox;
-
-public interface IContext {
-  void setStrategy(IRouteStrategy strategy);
-  String executeStrategy(Location start, Location end);
-}
+public record Location(double lat, double lng) {}
 ```
 
 ```java
-package com.sandbox;
-
-public class RouteContext implements IContext {
-  private IRouteStrategy strategy;
-
-  @Override
-  public void setStrategy(IRouteStrategy strategy) {
-    this.strategy = strategy;
-  }
-  
-  @Override
-  public String executeStrategy(Location start, Location end) {
-    return this.strategy.execute(start, end);
-  }  
-}
-```
-
-```java
-package com.sandbox;
-
-public interface IRouteStrategy {
+public interface RouteStrategy {
   String execute(Location start, Location end);
 }
 ```
 
 ```java
-package com.sandbox;
-
-public class WalkStrategy implements IRouteStrategy {
+public class WalkStrategy implements RouteStrategy {
   @Override
   public String execute(Location start, Location end) {
-    return String.format("This is how you walk from %s to %s\n", 
-	    start.toString(), end.toString());
-  }  
-}
-```
-
-```java
-package com.sandbox;
-
-public class DriveStrategy implements IRouteStrategy {
-  @Override
-  public String execute(Location start, Location end) {
-    return String.format("This is how you drive from %s to %s\n",
+    return String.format("This is how you walk from %s, to %s", 
         start.toString(), end.toString());
   }
 }
 ```
 
 ```java
-package com.sandbox;
-
-public class Location {
-  private final double lat;
-  private final double lng;
-  
-  public Location(double lat, double lng) {
-    this.lat = lat;
-    this.lng = lng;
-  }
-
-  public double getLat() {
-    return lat;
-  }
-
-  public double getLng() {
-    return lng;
-  }
-
+public class DriveStrategy implements RouteStrategy {
   @Override
-  public String toString() {
-    return "Location [lat=" + lat + ", lng=" + lng + "]";
+  public String execute(Location start, Location end) {
+    return String.format("This is how you drive from %s, to %s",
+        start.toString(), end.toString());
   }
 }
 ```
 
 ```java
-package com.sandbox;
+public class RouteContext {
+  private RouteStrategy strategy;
 
+  public void setStrategy(RouteStrategy strategy) {
+    this.strategy = strategy;
+  }
+  
+  public String executeStategy(Location start, Location end) {
+    return this.strategy.execute(start, end);
+  }
+}
+```
+
+```java
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 
-public class RouteContextTest {
-  private IContext context;
-  private final Location start;
-  private final Location end;
+public class TestRouteContext {
+  private RouteContext context;
+  private Location start;
+  private Location end;
 
-  public RouteContextTest() {
+  public TestRouteContext() {
     this.context = new RouteContext();
-    this.start = new Location(30.44, 40.66);
-    this.end = new Location(10.34, 20.67);
-  }
+    this.start = new Location(30.55, 40.66);
+    this.end = new Location(60.22, 70.33);
+  }  
 
   @Test
-  void testWalkStrategy() {
+  public void testWalkStrategy() {
     WalkStrategy strategy = new WalkStrategy();
     this.context.setStrategy(strategy);
 
-    String result = this.context.executeStrategy(this.start, this.end);
+    String result = this.context.executeStategy(start, end);
     assertTrue(result.contains("walk"));
   }
 
   @Test
-  void testDriveStrategy() {
+  public void testDriveStrategy() {
     DriveStrategy strategy = new DriveStrategy();
     this.context.setStrategy(strategy);
 
-    String result = this.context.executeStrategy(this.start, this.end);
-    assertTrue(result.contains("drive"));    
-  }
-}
-```
-
-```java
-package com.sandbox;
-
-public class Main {
-  public static void main(String[] args) {
-    RouteContext context = new RouteContext();
-    Location start = new Location(30.44, 40.66);
-    Location end = new Location(10.34, 20.67);
-
-    WalkStrategy strategy = new WalkStrategy();
-    context.setStrategy(strategy);
-
-    String result = context.executeStrategy(start, end);
-    System.out.println(result);
+    String result = this.context.executeStategy(start, end);
+    assertTrue(result.contains("drive"));
   }
 }
 ```

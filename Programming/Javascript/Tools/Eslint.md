@@ -28,19 +28,17 @@ Plain JS project config entry inside `package.json` file.
       "ecmaVersion": "latest"
     },
     "rules": {
-      "no-console": "error",
+      "no-console": "warn",
       "quotes": [
-        2,
+        "warn",
         "double",
         {
           "allowTemplateLiterals": true,
           "avoidEscape": true
         }
       ],
-      "semi": [
-        "error",
-        "never"
-      ]
+      "semi": ["warn", "never"],
+      "no-unused-vars": "warn"
     }
   },
   ...
@@ -65,17 +63,15 @@ Typescript project config inside `package.json` file.
     "rules": {
       "no-console": "error",
       "quotes": [
-        2,
+        "warn",
         "double",
         {
           "allowTemplateLiterals": true,
           "avoidEscape": true
         }
       ],
-      "semi": [
-        "error",
-        "never"
-      ]
+      "semi": ["warn", "never"],
+      "no-unused-vars": "warn"
     }
   },
   ...
