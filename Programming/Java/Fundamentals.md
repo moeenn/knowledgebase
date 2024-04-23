@@ -1,6 +1,5 @@
 #### Todo
 
-- [x] Exceptions: [Link](https://www.javatpoint.com/exception-handling-in-java)
 - [ ] Virtual threads
 - [ ] Thread pools [Link](https://www.baeldung.com/thread-pool-java-and-guava)
 - [ ] Java interview questions [Link](https://youtu.be/FTyMsFaTV4I?si)
@@ -9,6 +8,12 @@
 - [ ] Functional interfaces [Link](https://www.baeldung.com/java-8-functional-interfaces)
 - [ ] Java tutorial series [Link](https://www.baeldung.com/get-started-with-java-series)
 - [ ] FutureTask [Link](https://www.digitalocean.com/community/tutorials/java-futuretask-example-program)
+- [ ] Date time
+- [ ] Design patterns
+    - [ ] Adapter pattern [Link](https://medium.com/@akshatsharma0610/adapter-design-pattern-in-java-fa20d6df25b8)
+    - [ ] Builder pattern
+    - [ ] Facade pattern
+
 
 ---
 
