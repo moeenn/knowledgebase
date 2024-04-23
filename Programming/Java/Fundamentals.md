@@ -1,6 +1,6 @@
 #### Todo
 
-- [ ] Exceptions: [Link](https://www.javatpoint.com/exception-handling-in-java)
+- [x] Exceptions: [Link](https://www.javatpoint.com/exception-handling-in-java)
 - [ ] Virtual threads
 - [ ] Thread pools [Link](https://www.baeldung.com/thread-pool-java-and-guava)
 - [ ] Java interview questions [Link](https://youtu.be/FTyMsFaTV4I?si)
@@ -8,7 +8,7 @@
 - [ ] Java IO / FS
 - [ ] Functional interfaces [Link](https://www.baeldung.com/java-8-functional-interfaces)
 - [ ] Java tutorial series [Link](https://www.baeldung.com/get-started-with-java-series)
-
+- [ ] FutureTask [Link](https://www.digitalocean.com/community/tutorials/java-futuretask-example-program)
 
 ---
 
@@ -463,6 +463,75 @@ public class Main {
 
 ---
 
+#### Functional interfaces
+
+```java
+@FunctionalInterface
+public interface CustomMapCallback<T, E> {
+  E map(T value);
+}
+```
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class CustomMap {
+  public static <T, E> List<E> map(List<T> items, CustomMapCallback<T, E> callback) {
+    List<E> result = new ArrayList<>();
+    for (T item : items) {
+      result.add(callback.map(item));
+    }
+
+    return result;
+  }
+}
+```
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+  public static void main(String[] args) {
+    List<Integer> items = new ArrayList<>() {
+      {
+        add(10);
+        add(20);
+        add(30);
+      }
+    };
+
+    List<Integer> result = CustomMap.map(items, (n) -> n * 10);
+    System.out.println(result);
+  }
+}
+```
+
+**Note**:  The `FunctionalInterface` annotation enables the compiler to issue warnings or errors in the event that a functional interface is defined inconsistently.
+
+**Note**: The above code is fine, but generally we won't need to define our own functional interfaces. We can update the code as follows.
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+public class CustomMap {
+  public static <T, E> List<E> map(List<T> items, Function<T, E> callback) {
+    List<E> result = new ArrayList<>();
+    for (T item : items) {
+      result.add(callback.apply(item));
+    }
+
+    return result;
+  }
+}
+```
+
+
+---
+
 #### Optionals
 ```java
 public class Position {
@@ -625,6 +694,8 @@ public class Main {
 }
 ```
 
+**Note**: A class can implement multiple interfaces.
+
 
 ---
 
@@ -674,6 +745,39 @@ public class Main {
 
 ---
 
+#### Errors and Exceptions
+
+There are three types in Java
+1. Checked exceptions: The classes that directly inherit the `Throwable` class except `RuntimeException` and `Error` are known as checked exceptions. For example, `IOException`, `SQLException`, etc. Checked exceptions are checked at compile-time.
+2. Unchecked exceptions: The classes that inherit the `RuntimeException` are known as unchecked exceptions. For example, `ArithmeticException`, `NullPointerException`, `ArrayIndexOutOfBoundsException`, etc. Unchecked exceptions are not checked at compile-time, but they are checked at runtime.
+3. Errors: `Error` is irrecoverable. Some example of errors are `OutOfMemoryError`, `VirtualMachineError`, `AssertionError` etc.
+
+```java
+public class Operations {
+  public int performCalculation(int n) throws ArithmeticException {
+    return 10 / n;
+  }
+}
+```
+
+```java
+public class Main {
+  public static void main(String[] args) {
+    Operations op = new Operations();
+
+    try {
+      int result = op.performCalculation(2);
+      System.out.println(result);
+    } catch (ArithmeticException ex) {
+      System.out.printf("error: %s\n", ex.getMessage());
+    }
+  }
+}
+```
+
+
+---
+
 #### UUID
 UUID can be generated in Java without requiring any third party libraries. 
 
@@ -713,3 +817,5 @@ public class Env {
 
 **Note**: The above example uses method over-loading for defining optional parameters.
 
+
+---

@@ -1,9 +1,4 @@
 
-#### Todo
-- [Link](https://www.digitalocean.com/community/conceptual-articles/s-o-l-i-d-the-first-five-principles-of-object-oriented-design)  
-- [Link](https://www.freecodecamp.org/news/solid-principles-for-better-software-design/#:~:text=The%20SOLID%20principles%20are%20a,understand%2C%20modify%2C%20and%20extend).
-
-
 - Single-responsibility
 - Open-closed
 - Liskov substitution
@@ -355,4 +350,57 @@ public class Airplane implements Enginable, Flyable {
 ---
 
 #### Dependency Inversion Principle 
+
+Entities must depend on abstractions, not on concretions. It states that the high-level module must not depend on the low-level module, but they should depend on abstractions.
+
+```java
+package com.sandbox.modules;
+
+public class WhetherTracker {
+  private Emailer emailer;
+  
+  public WhetherTracker() {
+    this.emailer = new Emailer();
+  }
+}
+```
+
+```java
+public class Emailer {
+  public void sendEmail(String to, String content)  {
+    // 
+  }
+}
+```
+
+In this example, `WhetherTracker` directly initialises the private `Emailer` instance. This creates strong coupling between the two classes. We can remove this coupling by depending on interfaces rather than concrete types.
+
+```java
+public interface Notifier {
+  void sendNotification(String to, String content);
+}
+```
+
+```java
+public class Emailer implements Notifier {
+  @Override
+  public void sendNotification(String to, String content)  {
+    // 
+  }
+}
+```
+
+```java
+public class WhetherTracker {
+  private Notifier notifier;
+
+  public WhetherTracker(Notifier notifier) {
+    this.notifier = notifier;
+  }
+
+  public void sendNotification(String to) {
+    this.notifier.sendNotification(to, /* */);    
+  }
+}
+```
 

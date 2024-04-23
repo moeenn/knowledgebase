@@ -1,7 +1,4 @@
 ```java
-/** file: ThreadTask.java */
-package com.app;
-
 public class ThreadTask implements Runnable {
 
   @Override
@@ -24,9 +21,6 @@ public class ThreadTask implements Runnable {
 ```
 
 ```java
-/** file: Main.java */
-package com.app;
- 
 public class Main {
   public static void main(String... args) {
     Thread t1 = new Thread(new ThreadTask(), "sample thread # 1");
@@ -193,3 +187,47 @@ public class SyncCounter {
   }
 }
 ```
+
+
+---
+
+#### Virtual threads
+
+```java
+public class Task implements Runnable {
+  private final int count;
+
+  public Task(int count) {
+    this.count = count;
+  }
+
+  @Override
+  public void run() {
+    System.out.printf("%d: Hello from task\n", count);
+  }
+}
+```
+
+```java
+public class Main {
+  public static void main(String[] args) {
+    for (int i = 0; i < 10; i++) {
+      Thread.startVirtualThread(new Task(i));
+    }
+
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException ex) {
+      System.out.printf("interruption: %s\n", ex.getMessage());
+    }
+  }
+}
+```
+
+**Note**
+- `Runnable` does not accept any arguments and it doesn't return anything.
+- `Thread.startVirtualThread` only accepts `Runnables`
+- In order to pass arguments to Runnable, we use instance variables.
+
+
+
