@@ -19,7 +19,7 @@
 
 #### Pillars of Object oriented programming
 
-**Abstraction** is the process of hiding unnecessary details of an object’s internal structure. By abstracting an object’s data, its structure and behaviour can be kept separate and more easily understood.
+**Abstraction** is the process of hiding unnecessary details of an object’s internal structure. By abstracting an object’s data, its structure and behavior can be kept separate and more easily understood.
 
 **Encapsulation** is the process of wrapping data and related functions into a single unit (object). Encapsulation limits access to object data and methods, preventing their misuse and ensuring their proper functioning.
 

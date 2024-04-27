@@ -1,0 +1,16 @@
+
+- [ ] Blackboard
+- [ ] Chain of responsibility
+- [ ] Command
+- [ ] Fluent interface
+- [ ] Interpreter
+- [ ] Iterator
+- [ ] Memento
+- [ ] Null object
+- [x] Observer
+- [ ] Servant
+- [ ] Specification
+- [ ] State
+- [x] Strategy
+- [ ] Template method
+- [ ] Visitor

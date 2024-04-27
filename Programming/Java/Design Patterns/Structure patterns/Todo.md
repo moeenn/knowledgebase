@@ -1,0 +1,15 @@
+
+- [ ] Adapter
+- [ ] Bridge
+- [ ] Composite
+- [x] Decorator
+- [ ] Delegation
+- [ ] Extension object
+- [ ] Facade
+- [ ] Flyweight
+- [ ] Front controller
+- [ ] Marker
+- [ ] Module
+- [ ] Proxy
+- [ ] Translator
+- [ ] Twin
