@@ -1,25 +1,20 @@
 #### Todo
 
+- [ ] FS
+- [x] DateTime
 - [ ] Virtual threads
 - [ ] Thread pools [Link](https://www.baeldung.com/thread-pool-java-and-guava)
 - [ ] Java interview questions [Link](https://youtu.be/FTyMsFaTV4I?si)
 - [ ] Features blog [Link](https://www.marcobehler.com/)
-- [ ] Java IO / FS
 - [ ] Functional interfaces [Link](https://www.baeldung.com/java-8-functional-interfaces)
 - [ ] Java tutorial series [Link](https://www.baeldung.com/get-started-with-java-series)
-- [ ] FutureTask [Link](https://www.digitalocean.com/community/tutorials/java-futuretask-example-program)
-- [ ] Date time
-- [ ] Design patterns
-    - [ ] Adapter pattern [Link](https://medium.com/@akshatsharma0610/adapter-design-pattern-in-java-fa20d6df25b8)
-    - [ ] Builder pattern
-    - [ ] Facade pattern
 
 
 ---
 
 #### Pillars of Object oriented programming
 
-**Abstraction** is the process of hiding unnecessary details of an object’s internal structure. By abstracting an object’s data, its structure and behavior can be kept separate and more easily understood.
+**Abstraction** is the process of hiding unnecessary details of an object’s internal structure. By abstracting an object’s data, its structure and behaviour can be kept separate and more easily understood.
 
 **Encapsulation** is the process of wrapping data and related functions into a single unit (object). Encapsulation limits access to object data and methods, preventing their misuse and ensuring their proper functioning.
 

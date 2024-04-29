@@ -9,6 +9,17 @@
 	- [ ] `LocalTime`
 	- [ ] `Optional`
 
+- [x] `ResponseEntity<T>`
+- [x] `@Controller` vs `@RestController`
+- [ ] `@CrudRepository` vs `@JpaRepository`
+- [ ] `@ControllerAdvice` vs `@RestControllerAdvice`
+
+
+---
+
+#### Reference Docs
+Official Reference Docs [Link](https://docs.spring.io/spring-boot/docs/3.2.5/reference/htmlsingle/index.html)
+
 
 ---
 
@@ -266,6 +277,8 @@ public class NotFoundAdvice {
 ```
 
 
+---
+
 ##### Handling validation Exceptions
 
 ```java
@@ -310,3 +323,101 @@ public class ValidationException {
     }
 }
 ```
+
+
+---
+
+#### `@Controller` vs `@RestController`
+
+`Controller` annotation comes from the traditional Spring MVC it required that all response bodies be annotated with `@ResponseBody` as below.
+
+```java
+@Controller
+@RequestMapping("books")
+public class SimpleBookController {
+
+    @GetMapping("/{id}", produces = "application/json")
+    public @ResponseBody Book getBook(@PathVariable int id) {
+        return findBookById(id);
+    }
+}
+```
+
+`RestController` annotation combines `Controller` and `ResponseBody` annotations. Using it, we don't need to specify `ResponseBody` on controller method returns.
+
+```java
+@RestController
+@RequestMapping("books-rest")
+public class SimpleBookRestController {
+    @GetMapping("/{id}", produces = "application/json")
+    public Book getBook(@PathVariable int id) {
+        return findBookById(id);
+    }
+}
+```
+
+
+---
+
+#### ResponseEntity
+
+`ResponseEntity<T>` represents the entire response object. It can include the generic body, status code and headers. It's basic usage can look like this.
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+  @GetMapping("")
+  public ResponseEntity<User> sample() {
+    var user = new User(10L, "admin@site.com", true);
+    return new ResponseEntity<>(user, HttpStatus.CREATED);
+  }
+}
+```
+
+```java
+ return ResponseEntity.status(HttpStatus.CREATED).body(user);
+```
+
+```java
+// return with status code 200
+return ResponseEntity.ok(user);
+```
+
+Headers can be included in the response entity as follows.
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+  @GetMapping("")
+  public ResponseEntity<User> sample() {
+    var user = new User(10L, "admin@site.com", true);
+    var headers = new HttpHeaders();
+    headers.add("Custom-header-X", "foo");
+    headers.add("Custom-header-Y", "bar");
+
+    return new ResponseEntity<>(user, headers, HttpStatus.CREATED);
+  }
+}
+```
+
+```java
+// include multiple headers
+return ResponseEntity
+  .badRequest()
+  .headers(headers)
+  .body(user);
+```
+
+```java
+// include single header
+return ResponseEntity
+  .ok()
+  .header("Custom-header-X", "value")
+  .body(user);
+```
+
+
+---
+
