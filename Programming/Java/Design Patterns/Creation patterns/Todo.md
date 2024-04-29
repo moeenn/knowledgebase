@@ -1,0 +1,11 @@
+
+- [ ] Abstract factory
+- [ ] Builder
+- [ ] Dependency injection
+- [x] Factory method
+- [ ] Lazy initialization
+- [ ] Multi-ton
+- [ ] Object pool
+- [ ] Prototype
+- [ ] RAII
+- [x] Singleton

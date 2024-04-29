@@ -18,7 +18,7 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ```
 
 
-#### Connect to H2 in-memory database
+#### Connect to `H2` in-memory database
 
 ```
 spring.datasource.url=jdbc:h2:mem:testdb
