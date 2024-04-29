@@ -1,7 +1,6 @@
 #### Todo
 
-- [ ] FS
-- [x] DateTime
+- [ ] FS (Files read & write)
 - [ ] Virtual threads
 - [ ] Thread pools [Link](https://www.baeldung.com/thread-pool-java-and-guava)
 - [ ] Java interview questions [Link](https://youtu.be/FTyMsFaTV4I?si)
@@ -61,6 +60,26 @@ double e = 2.7182;
 **Note**: If a variable is declared by not initialised, using this variable will result in a compile-time error.
 
 **Note**: `final` variables i.e. constants should be named in uppercase, this includes `enum` values. Member variables should be named in camel-case.  
+
+
+---
+
+#### String builder
+
+```java
+// initialize with initial size
+var buf = new StringBuilder(50);
+List<String> lines = new ArrayList<>() {
+  {
+    add("Line one\n");
+    add("Line two\n");
+    add("Line three\n");
+  }
+};
+
+lines.forEach(buf::append);
+System.out.println(buf.toString());
+```
 
 
 ---
@@ -463,6 +482,29 @@ public class Main {
 
 ---
 
+#### Interface default methods
+
+```java
+public interface Vehicle {
+  void turnOnEngine();
+  default void turnOffEngine() {
+    System.out.println("Turning engine off");
+  }
+}
+```
+
+```java
+public class Suzuki implements Vehicle {
+  @Override
+  public void turnOnEngine() {
+    System.out.println("Turning engine on");
+  }
+}
+```
+
+
+---
+
 #### Functional interfaces
 
 ```java
@@ -774,6 +816,48 @@ public class Main {
   }
 }
 ```
+
+
+---
+
+#### Try-with-resource
+
+Try with resource can be used to auto-close resources after we are done accessing them. This ensures that the resource will be closed even in case of an error. This is helpful because java does not have **destructors**.
+
+```java
+public class MyResource implements AutoCloseable{
+  public String accessResource() {
+    return "resource-content";
+  }
+  
+  @Override
+  public void close() throws Exception {
+    System.out.println("closing my-resource");
+  }
+}
+```
+
+```java
+try (MyResource res = new MyResource()) {
+  System.out.printf("Resource can be accessed now: %s\n", res.accessResource());
+} catch (Exception ex) {
+  System.out.println(ex.getMessage());
+}
+```
+
+**Note**: Try-with-resource functionality will only work for instances of classes with implement the `AutoCloseable` interface.
+
+```java
+try (Scanner scanner = new Scanner(new File("testRead.txt"));
+    PrintWriter writer = new PrintWriter(new File("testWrite.txt"))) {
+    
+    while (scanner.hasNext()) {
+    	writer.print(scanner.nextLine());
+    }
+}
+```
+
+**Note**: Multiple resources can be opened inside a single try block, we use `;` to separate their initialisation.
 
 
 ---
