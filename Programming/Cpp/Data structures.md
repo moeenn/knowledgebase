@@ -141,7 +141,7 @@ Vectors store Data on the Heap. Every time we add an element to the Vector, a ne
 Operator Overloading can be implemented to Print out an entire Vector using `std::cout`.
 
 ```cpp
-std::ostream& operator << (std::ostream& stream, const std::vector<int>& vec) {
+std::ostream& operator<<(std::ostream& stream, const std::vector<int>& vec) {
   for(const auto& elem : vec) {
     stream << elem << " ";
   }
@@ -236,6 +236,7 @@ The Keys Inside the Map are Constants. This means that their cannot be changed a
 // illegal behavior
 (*iter).first = "c#";
 ```
+
 
 ---
 

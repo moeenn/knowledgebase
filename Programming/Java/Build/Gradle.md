@@ -3,7 +3,12 @@
 ```bash
 # install using sdkman
 $ sdk install gradle
+
+# auto generate a new project
+$ mkdir <project> && cd ./<project>
+$ gradle init
 ```
+
 
 #### Project structure 
 
