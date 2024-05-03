@@ -61,7 +61,7 @@ Typescript project config inside `package.json` file.
       "plugin:@typescript-eslint/recommended"
     ],
     "rules": {
-      "no-console": "error",
+      "no-console": "warn",
       "quotes": [
         "warn",
         "double",
