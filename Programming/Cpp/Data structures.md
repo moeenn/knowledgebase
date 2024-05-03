@@ -1,15 +1,30 @@
 #### Struct
 ```cpp
-struct Person {
-  std::string name;
-  uint age;
+struct Point {
+  int x;
+  int y;
+};
+```
+
+```cpp
+# method # 1
+Point p {10 , 20};
+
+# method # 2
+Point p = Point {20, 30};
+
+# method # 3
+Point p = {
+  .x = 10,
+  .y = 20,
 };
 
-int main() {
-  Person person{"Shafiq", 30};
-  std::cout << "My name is " << person.name << " and I am " << person.age
-            << " years old \n";
-} 
+# method # 4
+auto p = Point {
+  .x = 20,
+  .y = 40,
+};
+
 ```
 
 Methods can also be attached to structs
@@ -17,13 +32,12 @@ Methods can also be attached to structs
 ```cpp
 #include <iostream>
 
-class Player {
-private:
+struct Player {
   uint m_xpos, m_ypos;
   uint m_speed;
 
-public:
-  Player(const uint& speed) : m_xpos(0), m_ypos(0), m_speed(speed) {}
+  Player(const uint& speed) 
+      : m_xpos(0), m_ypos(0), m_speed(speed) {}
 
   void move(int x, int y) {
     m_xpos += x * m_speed;
@@ -36,14 +50,13 @@ public:
 };
 
 int main() {
-  Player player{30};
+  Player player(10);
   player.move(2, 3);
 
-  // use structured binding
-  const auto [x, y] = player.position();
+  std::pair<uint, uint> pos = player.position();
 
-  std::cout << "[x]\t" << x << "\n"
-            << "[y]\t" << y << "\n";
+  std::cout << "[x] " << pos.first << "\n"
+            << "[y] " << pos.second << "\n";
 }
 ```
 
@@ -85,6 +98,11 @@ int main() {
     // perform bounds checking (at Runtime!)
     std::cout << nums.at(i) << '\n';
   }
+ 
+  // range-based for-loop 
+  for (const int n : nums) {
+    std::cout << n << "\n";
+  }
 }
 ```
 
@@ -92,6 +110,26 @@ Unassigned Elements in the STL Array will contain garbage values. If we need the
 
 ```cpp
 std::array<int, 200> nums{0};
+```
+
+Array can also be initialised in the following way
+
+```cpp
+auto nums = std::array<int, 3> {1,2,3};
+```
+
+```cpp
+struct TestCase {
+  std::array<int, 3> nums;
+  int result;
+};
+
+int main() {
+  TestCase testCase = TestCase {
+    .nums = {1,2,3},
+    .result = 50,
+  };
+}
 ```
 
 
@@ -161,6 +199,7 @@ Following are properties of Vectors
 - Slow Insert / remove at the beginning: O(n)
 - Slow Search: O(n)
 
+
 ---
 
 #### Tuples
@@ -197,7 +236,7 @@ int main() {
 ```
 
 ```cpp
-auto person = std::make_pair("Admin", 40);
+std::pair<int, std::string> p = std::make_pair(10, "Hello world");
 ```
 
 
@@ -210,27 +249,30 @@ auto person = std::make_pair("Admin", 40);
 #include <map>
 
 int main() {
-  std::map<std::string, std::string> locations{
+  std::map<std::string, std::string> capitals = {
     {"Pakistan", "Islamabad"},
     {"China", "Beijing"},
-    {"UK", "Britain"},
   };
 
-  // print a map
-  for (const auto &location : locations) {
-    std::cout << location.first << "\t\t" << location.second << '\n';
+  for (const std::pair<std::string, std::string> pair : capitals) {
+    std::cout << pair.first << ", " << pair.second << "\n";
   }
 
-  // insert element
-  locations.insert(std::make_pair("Australia", "Sydney"));
+  // structured bindings
+  for (const auto& [key, value] : capitals) {
+    std::cout << key << ", " << value << "\n";
+  }
 
-  // find an element (returns iterator pointing to element)
-  const auto result = locations.find("UK");
-  std::cout << (*result).first << "\t\t" << (*result).second << "\n";
+  auto entry = std::make_pair("Britain", "London");
+  capitals.insert(entry);
+
+
+  bool exists = capitals.find("USA") != capitals.end();
+  std::cout << std::boolalpha << exists << "\n";
 }
 ```
 
-The Keys Inside the Map are Constants. This means that their cannot be changed after dereferencing.
+The Keys Inside the Map are Constants. This means that they cannot be changed after dereferencing.
 
 ```cpp
 // illegal behavior
