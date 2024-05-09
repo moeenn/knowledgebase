@@ -11,6 +11,7 @@
 - [ ] Triggers / Listen / Notify
 - [ ] `create index CONCURRENTLY`
 - [ ] Partitioning [Link](https://rasiksuhail.medium.com/guide-to-postgresql-table-partitioning-c0814b0fbd9b)
+- [ ] Money types [Link](https://www.youtube.com/watch?v=lxVzLAHnPOE&list=WL&index=6)
 
 
 ---

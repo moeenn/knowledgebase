@@ -13,6 +13,7 @@
 - [x] `@Controller` vs `@RestController`
 - [ ] `@CrudRepository` vs `@JpaRepository`
 - [ ] `@ControllerAdvice` vs `@RestControllerAdvice`
+- [ ] Common mistakes [Link](https://www.youtube.com/watch?v=PbkROQPTBao&list=WL&index=5)
 
 
 ---

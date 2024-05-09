@@ -25,6 +25,10 @@ Configuration inside `package.json` file.
 
 #### Running `prettier`
 
-```bash
-$ npx prettier --write ./src/
+```json
+{
+  "scripts": {
+    "fmt": "npx prettier --write ./src/"
+  }
+}
 ```
