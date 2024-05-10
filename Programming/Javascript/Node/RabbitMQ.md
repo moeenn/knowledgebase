@@ -42,7 +42,6 @@ client().catch(console.error)
 
 ```ts
 // file: server.ts
-import "module-alias/register"
 import { RabbitMQService } from "@/broker/rabbitmqService"
 import { rabbitmqConfig } from "@/config/rabbitmqConfig"
 import { TestQueue } from "@/queues/testQueues"
