@@ -1,90 +1,188 @@
 `workspaces` is a features provided by `npm` to create `monorepos` and share code between different projects.
 
 
----
-
-#### Example
-
-```
-monorepo-project
-	package.json
-	tsconfig.json
-	backend/
-		package.json
-		src/
-			index.ts
-	frontend/
-		package.json
-		src/
-			index.ts
-```
-
-We can initialize top level package by running the following familiar command
+##### Creating workspaces
 
 ```bash
+# create root package.json
 $ npm init -y
+
+# create a workspace named "common"
+$ npm init -y -w common
+
+# create a workspace named "module-one"
+$ npm init -y -w module-one
 ```
 
-Next, we can initialize the sub-packages using the following commands
+The above commands will result in the following project structure.
+
+```
+monorepo/
+    common/
+        package.json
+    module-one/
+        package.json
+```
+
+Ideally, we should have `src` directories inside all our workspaces.
 
 ```bash
-$ npm init -y -w frontend
-$ npm init -y -w backend
+$ mkdir ./common/src ./module-one/src
 ```
 
-
----
-
-#### Configurations
-After creating new work-spaces using the above command, you will notice the following section in the top-level `package.json`. This will help us import symbols between the `frontend` and `backend` packages.
-
-```json
-{
-  ...
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
-  ...
-}
-```
-
-We must also configure `typescript` to look for code files inside `src` folders inside the sub-package directories. Add the following section to the top-level `tsconfig.json`.
+We will likely be building our projects using `typescript` and `swc`. We can add their configuration globally.
 
 ```json
 {
   "compilerOptions": {
-    ...
+    "target": "es2020",
+    "module": "es2020",
+    "allowJs": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types"],
+    "sourceMap": true,
+    "outDir": "dist",
+    "strict": true,
+    "lib": ["es2020"],
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "frontend/*": [
-        "frontend/src/*"
-      ],
-      "backend/*": [
-        "backend/src/*"
-      ]
+      "@common/*": ["./common/src/*"],
+      "@module-one/*": ["./module-one/src/*"],
     }
+  },
+  "include": ["*/src/**/*"],
+  "exclude": ["node_modules", "**/node_modules/**"]
+}
+```
+
+```json
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": true
+    },
+    "target": "es2020",
+    "baseUrl": ".",
+    "paths": {
+      "@common/*": ["./common/src/*"],
+      "@module-one/*": ["./module-one/src/*"]
+    }
+  },
+  "module": {
+    "type": "commonjs"
   }
 }
 ```
 
+```gitignore
+node_modules
+build
+.DS_Store
+```
 
----
+**Note**: Configurations for `jest`, `eslint` and `prettier` can also be added globally i.e. to the root `package.json`.
 
-#### Importing types between sub-packages
+For reference, `jest` config entry inside root `package.json` will look like this.
 
-```ts
-// file: backend/src/index.ts
-export type User = {
-  id: number
-  email: string
-  isActive: boolean
+```json
+{
+  "jest": {
+    "transform": {
+      "^.+\\.(t|j)sx?$": "@swc/jest"
+    },
+    "testEnvironment": "node",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/build/"
+    ],
+    "moduleNameMapper": {
+      "@common/(.*)": "<rootDir>/common/src/$1",
+      "@module-one/(.*)": "<rootDir>/module-one/src/$1"
+    }
+  },
 }
 ```
 
-The above type defined inside the `backend` package can be imported inside the `frontend` package as follows
+
+##### Root level scripts
+
+```json
+{
+  "scripts": {
+    "build": "npm run type-check && swc ./*/src --out-dir build",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "fmt": "npx prettier --write ./*/src/",
+    "lint": "npx eslint --fix ./*/src/ --ext .ts",
+    "clean": "rm -rvf ./build"
+  },
+}
+```
+
+##### Usage example
 
 ```ts
-// file: frontend/src/index.ts
-import { User } from "backend/index"
+// file: common/src/entities.ts
+import crypto from "node:crypto"
+
+class Password {
+  private value: string
+
+  constructor(clearText: string) {
+    this.value = clearText
+  }
+}
+
+export class User {
+  public id: string
+  public password: Password
+
+  constructor(
+    public email: string,
+    password: string,
+  ) {
+    this.id = crypto.randomUUID()
+    this.password = new Password(password)    
+  }
+}
 ```
+
+```ts
+// file: module-one/src/main.ts
+import { User } from "@common/user"
+
+async function main() {
+  const user = new User("admin@site.com", "abc123123123")
+  console.log(user)
+}
+
+main().catch(console.error)
+```
+
+For references, `module-one` `package.json` will have the following script.
+
+```json
+{
+  "scripts": {
+    "start": "NODE_ENV=production node ../build/module-one/src/main.js"
+  },
+}
+```
+
+```bash
+# build using root command
+$ npm run build
+
+# execute module one entry-point
+$ npm run start -w module-one
+```
+

@@ -1,11 +1,11 @@
 
 ##### Core domain
-Primary area of operation for business. Eg. Netflix video streaming
+Primary area of operation for business. E.g. Netflix video streaming
 
 #### Sub-domains
 Areas of operation which are ancillary to the core domain and support its operations. Sub-domains should be defined by consulting business/domain experts.
 
-Eg. Billing, Recommendations etc.
+E.g. Billing, Recommendations etc.
 
 
 ##### Key parts of domains

@@ -297,7 +297,7 @@ assert(a == b); // true
     - Can only be accessed by other methods of the same class
 
 
-**Note**: If no explicit access control modifier is given, the defined aspect has what is known as **package-private** access level. This allows other classes in the same package to have access, but not any classes or subclasses from other packages.
+**Note**: If no explicit access control modifier is given, the defined aspect has what is known as **package-private** access level. This allows other classes in the same package to have access, but not any classes or sub-classes from other packages.
 
 
 ---
@@ -305,7 +305,7 @@ assert(a == b); // true
 #### Final
 A variable can be declared as `final`. If it is a base type, then it is a constant. If a reference variable is final, then it will always refer to the same object (even if that object changes its internal state) (const reference).
 
-Entire methods and classes can also be marked as `final`. A `final method` cannot be overridden by a subclass, and a `final class` cannot even be subclassed (i.e. derived from).
+Entire methods and classes can also be marked as `final`. A `final method` cannot be overridden by a subclass, and a `final class` cannot even be sub-classed (i.e. derived from).
 
 
 ---
@@ -336,7 +336,7 @@ public class Employee {
 #### Records
 
 ```java
-/** records are similar to structs in C/C++ */
+/** records are similar to structs or data-classes in python */
 public record Person(String name, int age) {
   public void greet() {
     System.out.printf("Hello, %s!\n", name);
