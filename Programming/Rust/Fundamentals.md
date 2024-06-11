@@ -25,9 +25,12 @@ $ cargo build
 $ cargo -q run
 ```
 
+---
+
 ##### Statements vs. Expressions
 -   Statements perform an action but don’t return a value
 -   Expressions return a value
+
 
 ---
 
@@ -71,19 +74,19 @@ fn main() {
 ---
 
 #### Primitive (scalar) data types
-| Description | Type |  
-| -------: | :------ |  
-| Unsigned integers | `u8, u16, u32, u64, u128` |  
-| Signed integers | `i8, i16, i32, i64, i128` |
-| Floats | `f32, f64` |
-| Boolean | `true, false` |
-| Character | `char (used with single-quotes)` |
+|       Description | Type                             |
+| ----------------: | :------------------------------- |
+| Unsigned integers | `u8, u16, u32, u64, u128`        |
+|   Signed integers | `i8, i16, i32, i64, i128`        |
+|            Floats | `f32, f64`                       |
+|           Boolean | `true, false`                    |
+|         Character | `char (used with single-quotes)` |
 
 ##### Compound types
-| Description | Type | 
-| -------: | :------ | 
-| Array | `Fixed-sized collection of one data type` |  
-| Tuple | `Fixed-sized array of related data of different types` |
+| Description | Type                                                   |
+| ----------: | :----------------------------------------------------- |
+|       Array | `Fixed-sized collection of one data type`              |
+|       Tuple | `Fixed-sized array of related data of different types` |
 
 ##### Get variable type
 ```rust
@@ -270,26 +273,33 @@ let add = |n1, n2| n1 + n2 + c;
 
 #### Struct
 ```rust
+use std::fmt;
+
 struct Color {  
-  red: u8,  
-  green: u8,  
-  blue: u8  
-}  
-  
-fn display_color(c: Color) {  
-  println!("Color: {}:{}:{}", c.red, c.green, c.blue);  
-}  
-  
-fn main() {  
-  let mut c = Color{  
-    red: 100,  
-    green: 200,  
-    blue: 105  
-  };  
-  
-  /* change mutable struct object */  
-  c.red = 240;  
-  display_color(c);  
+	red: u8,  
+	green: u8,  
+	blue: u8,  
+} 
+
+impl Color {
+	fn new(r: u8, g: u8, b: u8) -> Self {
+		Color {
+			red: r,
+			green: g,
+			blue: b,
+		}
+	}
+}
+
+impl fmt::Display for Color {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "({}, {}, {})", self.red, self.green, self.blue)
+	}
+}
+
+fn main() {
+	let white = Color::new(255, 255, 255);
+	println!("{}", white);
 }
 ```
 
