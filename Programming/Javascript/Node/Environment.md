@@ -34,8 +34,8 @@ const envSchema = z.object({
 
 type Environment = z.infer<typeof envSchema>
 
-class Env {
-  static validateEnv() {
+export const Env = {
+  validateEnv() {
     try {
       envSchema.parse(process.env)
     } catch (err) {
@@ -52,9 +52,9 @@ class Env {
       }
       throw err
     }
-  }
+  },
 
-  static read(
+  read(
     key: keyof Environment,
     fallback: string | undefined = undefined,
   ): string {
