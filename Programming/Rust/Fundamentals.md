@@ -806,6 +806,61 @@ fn main() {
 }
 ```
 
+
+##### Traits as entries in a vector
+
+```rust
+trait Summarize {
+    fn summary(&self) -> String;
+}
+
+struct Tweet {
+    heading: String
+}
+
+impl Tweet {
+    fn new(heading: String) -> Self {
+        Tweet { heading }
+    }
+}
+
+impl Summarize for Tweet {
+    fn summary(&self) -> String {
+        self.heading.clone()
+    }
+}
+
+struct Article {
+    title: String
+}
+
+impl Article {
+    fn new( title: String) -> Self {
+        Article { title }
+    }
+}
+
+impl Summarize for Article {
+    fn summary(&self) -> String {
+        self.title.clone()
+    }
+}
+
+fn main() {
+    let entries: Vec<Box<dyn Summarize>> = vec![
+        Box::new(Tweet::new(String::from("Hello tweet"))),
+        Box::new(Article::new(String::from("Hello article"))),
+    ];
+
+    for entry in entries.iter() {
+        println!("{}", entry.summary());
+    }
+}
+```
+
+**Explanation**: All entries in a vector must be of the same size. However, any struct which implements `Summarize` trait will not necessarily be of the same size. We can work around this by boxing (i.e. allocating on the heap) all entries (which implement `Summarize`) and storing their pointers inside the vector. All pointers will be of the same size.
+
+
 ---
 
 #### Generics

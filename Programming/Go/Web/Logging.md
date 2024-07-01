@@ -34,7 +34,7 @@ import (
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	logger.Debug("this is a debug message")
 	logger.Info("this is an info message")
@@ -83,7 +83,7 @@ type User struct {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	user := User{
 		Id:    10,

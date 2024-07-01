@@ -202,15 +202,15 @@ fmt.Println(!true)		    /* false */
 
 
 ##### Data types
-|                              Operator | Description                                                      |     |
-| ------------------------------------: | :--------------------------------------------------------------- | --- |
-|      `int, int8, int16, int32, int64` | Integers                                                         |     |
-| `uint, uint8, uint16, uint32, uint64` | Unsigned integers                                                |     |
-|             `float, float32, float64` | Floating point numbers                                           |     |
-|                                `bool` | Boolean value                                                    |     |
-|                              `string` | Stream of characters                                             |     |
-|                                `rune` | Rune is used to represent Characters. It is an alias for `int32` |     |
-|                                `byte` | Byte is an alias for `uint8`                                     |     |
+|                              Operator | Description                                                      |
+| ------------------------------------: | :--------------------------------------------------------------- |
+|      `int, int8, int16, int32, int64` | Integers                                                         |
+| `uint, uint8, uint16, uint32, uint64` | Unsigned integers                                                |
+|             `float, float32, float64` | Floating point numbers                                           |
+|                                `bool` | Boolean value                                                    |
+|                              `string` | Stream of characters                                             |
+|                                `rune` | Rune is used to represent Characters. It is an alias for `int32` |
+|                                `byte` | Byte is an alias for `uint8`                                     |
 
 
 ##### Defining Variables
@@ -1001,6 +1001,8 @@ func main() {
 ---
 
 #### Enums
+
+##### Simple numeric enums
 ```go
 package direction
 
@@ -1026,6 +1028,46 @@ func (e *Entity) Move(d direction.Direction) error {
   /***/
 }
 ```
+
+
+##### Safer enums
+
+```go
+type Direction struct {
+  value string // private value, cannot be changed from outside
+}
+
+// ideally, enum types would be const. But, Go doesn't allow struct instances to
+// be const.
+var (
+  Unknown = Direction{""} // sentinel value
+  Up      = Direction{"Up"}
+  Down    = Direction{"Down"}
+  Left    = Direction{"Left"}
+  Right   = Direction{"Right"}
+)
+
+func DirectionFromString(value string) (Direction, error) {
+  switch value {
+  case Up.value:
+    return Up, nil
+
+  case Down.value:
+    return Down, nil
+
+  case Left.value:
+    return Left, nil
+
+  case Right.value:
+    return Right, nil
+
+  default:
+    return Unknown, fmt.Errorf("invalid direction '%s'", value)
+  }
+}
+```
+
+**Note**: Sentinel values are placeholder values which can be used to denote invalid states. Note that in this example it is the first value in `enum`.
 
 
 ---
