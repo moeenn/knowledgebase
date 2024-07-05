@@ -236,7 +236,7 @@ On the other hand, sequential keys have certain advantages as well
 
 - They are faster to generate
 - They are quick to index
-- They take up less space than `BIGSERIAL`
+- They take up less space than `UUID`
 
 In summary, use `UUID` where security / entropy matters, otherwise default to using `BIGSERIAL` sequential keys.
 

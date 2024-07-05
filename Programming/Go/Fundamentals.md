@@ -187,7 +187,7 @@ import s "strings"
 // single line comment
 
 /**
- *  Comment block
+ *  Comment block (this style is not conventional in Go)
  *
  */
 ```
@@ -287,7 +287,7 @@ We can use the name of the data type as a function call for casting data types.
 
 ```go 
 var num uint32 = 400
-num2 := int64(num)
+num2, ok := int64(num)
 typeof(num2)
 
 /* int64 */ 
@@ -304,7 +304,7 @@ As mentioned earlier, Byte is simply an Alias for the Uint8 Primitive Data Type.
 ```
 
 ```go
-data, _ := ioutil.ReadFile("./dir/sample")
+data, _ := os.ReadFile("./dir/sample")
 
 /* method one */
 fmt.Printf("%s\n", data)
