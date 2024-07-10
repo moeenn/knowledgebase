@@ -4,43 +4,6 @@
 - Common Go Mistakes [Link](https://youtu.be/biGr232TBwc?si=aS0oCFLzT-nP6t5K)
 
 
-```
-
-```bash
-$ sudo apt-get install golang gopls delve golang-honnef-go-tools-dev
-
-# install language server manually
-$ go install golang.org/x/tools/gopls@latest
-$ go install github.com/nametake/golangci-lint-langserver@latest
-
-# linting tools
-$ go install honnef.co/go/tools/cmd/staticcheck@latest
-$ go install github.com/kisielk/errcheck@latest
-
-# optional listers
-$ go install github.com/jgautheron/goconst/cmd/goconst@latest
-
-# running linters 
-$ staticcheck ./... && errcheck ./... 
-$ goconst ./...
-```
-
-##### Modules
-It is no longer compulsory to place your project files inside the directories specified above. Current versions of Go have introduced Go Modules. Inside any normal folder in the system, we can execute the following command to create a Go Module.
-
-```bash
-$ go mod init <program_name>
-```
-
-
-##### Install Project Dependencies
-When we run a project, Go detects all dependencies of the project. We can install all project dependencies using the following command. The following also looks for any unused dependencies and removes them.
-
-```bash
-$ go mod tidy
-```
-
-
 ---
 
 #### Hello world
@@ -291,6 +254,32 @@ num2, ok := int64(num)
 typeof(num2)
 
 /* int64 */ 
+```
+
+
+##### Type switch
+
+```go
+func main() {
+  var input any = false
+  var message string
+
+  switch t := input.(type) {
+  case int:
+    message = "int / bool was provided"
+
+  case bool:
+    message = "boolean was provided"
+
+  case string:
+    message = "string was provided: " + t // t is now string
+
+  default:
+    message = "unknown type provided"
+  }
+
+  fmt.Println(message)
+}
 ```
 
 
@@ -545,10 +534,20 @@ fmt.Println(myArray)
 ```
 
 
+##### Array length and capacity
+
+```go
+nums := [10]int{1, 2, 3, 4, 5, 6}
+fmt.Printf("len: %d, cap: %d\n", len(nums), cap(nums))
+```
+
+In the above example, both the `length` and `capacity` of the array will be `10`. The first six elements have been given explicit values, the rest of the elements will be zero initialised.
+
+
 ---
 
 #### Slices
-Slices are like arrays but they are dynamic in size. Unlike an array we don’t specify the size / length of a slice when we initialize it. 
+Slices are like arrays but they are dynamic in size. Unlike an array we don’t specify the size / length of a slice when we initialise it. 
 
 ```go
 /* declaration */
@@ -590,6 +589,56 @@ myArray = append(myArray[:remID], 5, 6, 7)
 ```
 
 **Note**: `…` are called the Spread Operator
+
+
+##### Length vs. Capacity
+
+```go
+slice := make([]int, 10 /* length */, 20 /* capacity (optional) */)
+```
+
+Length refers to the current number of elements in the slice. Initially, these elements will be zero-initialised (i.e. in case of `int` they will have the value of `0`).
+
+In the above example, the `capacity` is more than the `length`. This means that the first 10 elements will be zero-initialised and the remaining 10 elements will not be initialised.
+
+All slices are backed by fixed-length arrays. `length` keeps track of current number of elements inserted into the slice. `capacity` is the actual full length of the backing array. If the `length` is same as `capacity` and we try to insert another element into the slice, the backing array will be doubled in size.
+
+
+###### Example 
+
+```go
+func main() {
+  s := []int{}
+  fmt.Printf("len: %d, cap: %d\n", len(s), cap(s)) // 0, 0
+
+  for i := 0; i < 100; i++ {
+    s = append(s, 10)
+    fmt.Printf("i: %d, len: %d, cap: %d\n", i, len(s), cap(s))
+  }
+}
+```
+
+In this example, the `slice` will start off with `length` and `capacity` of `0`. `capacity` will then go like this as we keep inserting new elements inside the slice:
+
+```
+0 -> 1 -> 2 -> 4 -> 8 -> 16 -> 32 -> 64 -> 128 ... 
+```
+
+**Important**: We can never index any un-initialised slice value, it will result in a `panic`.
+
+###### Example
+
+```go
+func main() {
+  s := make([]int, 10, 20)
+
+  for i := 0; i < 20; i++ {
+    fmt.Println(s[i])
+  }
+}
+```
+
+In the above example, first `10` elements will be zero-initialised. The remaining (`10`) elements are not initialised. The above program will `panic` when trying to access `s[10]` because it has not been initialised.
 
 
 ---
@@ -707,6 +756,28 @@ func main() {
 	fmt.Printf("found: %s\n", pak)
 }
 ```
+
+---
+
+#### `make` vs `new`
+
+```go
+// make returns run-time initialised instance of the required type
+// make can be used to initialize slices, maps, channels
+mp := make(map[string]string, 10 /* size */)
+```
+
+**Important**: `make` cannot be used to initialise arrays. E.g. `make([10]int, 10)` is **NOT** valid.
+
+```go
+// new is used to zero-initialise structs i.e. all fields are zero-initialised
+// new returns a pointer to the initialised instance i.e. *User
+user := new(User)
+
+// the above is same as below (recommended)
+user := &User{}
+```
+
 
 ---
 
@@ -972,7 +1043,7 @@ type Employee struct {
   age int
 }
 
-func (e Employee) display() string {
+func (e Employee) Display() string {
   return fmt.Sprintf("Name: %v\n", e.age)
 }
 
@@ -980,20 +1051,46 @@ type Vine struct {
   vintage int
 }
 
-func (v Vine) display() string {
+func (v Vine) Display() string {
   return fmt.Sprintf("Vintage: %v\n", v.vintage)
 }
 
-func details(i interface{ display() string }) {
-  fmt.Print(i.display())
+type Displayable interface {
+  Display() string
+}
+
+func DisplayItem(i Displayable) {
+  fmt.Print(i.Display())
 }
 
 func main() {
-  var emp Employee = Employee{30}
-  details(emp)
+  items := []Displayable{
+    Employee{30},
+    Vine{1960},
+  }
 
-  var vine Vine = Vine{1960}
-  details(vine)
+  for _, item := range items {
+    DisplayItem(item)
+  }
+}
+```
+
+
+##### Combining interfaces 
+
+```go
+type Writer interface {
+  Write(string) error
+}
+
+type Reader interface {
+  Read() string
+}
+
+// this interface will include all methods of Writer and Reader interface
+type ReadWriter interface {
+  Writer
+  Reader
 }
 ```
 
@@ -1140,6 +1237,28 @@ func main() {
 
 ---
 
+#### Panic and recover
+
+```go
+func main() {
+  // handle potectial panics on the current goroutine
+  defer func() {
+    if err := recover(); err != nil {
+      fmt.Printf("panic inside go routing: %v\n", err)
+    }
+  }()
+
+  panicAction()
+}
+
+func panicAction() {
+  panic("panic happened ...")
+}
+```
+
+
+---
+
 #### Sorting
 
 ```go
@@ -1210,8 +1329,8 @@ func main() {
 
 #### Defer
 Defer is used to postpone the execution of instructions till either
-- End of the block
-- Error in the block
+- End of the current function (not block)
+- Error in the function
 
 This means the deferred statement inside a function will be executed when the entirety of the function is executed OR the program runs into errors during execution of the function.
 
@@ -1231,8 +1350,30 @@ func main() {
 }
 ```
 
-In the above example, the program will count up to 100 and then run the foo function.
+In the above example, the program will count up to 100 and then run the `foo` function.
 
+
+##### Example
+
+```go
+func main() {
+  {
+    defer fmt.Println("One")
+  }
+
+  fmt.Println("Two")
+  fmt.Println("Three")
+}
+
+// Two
+// Three
+// One
+```
+
+**Note**: The `defer` statement will execute at the end of the `main` function and **NOT** at the end of its block.
+
+
+---
 
 #### Generics
 
