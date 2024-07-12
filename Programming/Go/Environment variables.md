@@ -7,25 +7,21 @@ import (
   "strings"
 )
 
-func check(e error) {
-  if e != nil {
-    panic(e)
-  }
-}
-
 func main() {
-  var err error
-
-  err = os.Setenv("LINUX", "Ubuntu")
-  check(err)
+  err := os.Setenv("LINUX", "Ubuntu")
+  if err != nil {
+    fmt.Printf("error: %s\n", err.Error())
+    return
+  }
+  
   fmt.Println("LINUX: ", os.Getenv("LINUX"))
 
-  /* check if env Variable is set */
+  // check if env Variable is set
   if system := os.Getenv("SYSTEM"); len(system) > 0 {
     fmt.Println("SYSTEM: ", system)
   }
 
-  /* get all environment variables */
+  // get all environment variables
   for _, e := range os.Environ() {
     var pair []string = strings.Split(e, "=")
     fmt.Println(pair)

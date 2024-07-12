@@ -2,8 +2,8 @@
 - [ ] Abstract factory
 - [ ] Builder
 - [ ] Dependency injection
-- [x] Factory method
-- [ ] Lazy initialization
+- [x] Factory pattern
+- [ ] Lazy initialisation
 - [ ] Multi-ton
 - [ ] Object pool
 - [ ] Prototype
