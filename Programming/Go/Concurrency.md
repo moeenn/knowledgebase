@@ -6,18 +6,16 @@ func main() {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			/**
-			 * sending value into unbuffered channel will block until there is
-			 * an active receiver
-			 */
+			// sending value into unbuffered channel will block until there is
+			// an active receiver
 			valueChan <- i
 		}
 
-		/* channel must ALWAYS close the channel */
+		// channel must ALWAYS close the channel
 		close(valueChan)
 	}()
 
-	/* receive values until channel is closed */
+	// receive values until channel is closed
 	for value := range valueChan {
 		fmt.Printf("value: %d\n", value)
 	}
@@ -39,7 +37,7 @@ func iterate(n int) chan int {
       c <- i
     }
 
-	/* channel must be closed by the sender */
+	// channel must be closed by the sender
     close(c)
   }()
 
@@ -47,11 +45,9 @@ func iterate(n int) chan int {
 }
 
 func main() {
-  /** 
-   * ranging over channel requires that channel is eventually closed 
-   * if we don't closed the channel, this program will dead-lock because
-   * range will be expecting more messages to come in after iterate has exited.
-  */
+  // ranging over channel requires that channel is eventually closed 
+  // if we don't closed the channel, this program will dead-lock because
+  // range will be expecting more messages to come in after iterate has exited.
   for n := range iterate(1000) {
     fmt.Printf("%d\t", n)
   }
@@ -80,7 +76,7 @@ func main() {
 			time.Sleep(time.Second / 2)
 			chanOne <- i
 		}
-		/* Don't close the channel here */
+		// Don't close the channel here
 	}()
 
 	go func() {
@@ -88,17 +84,15 @@ func main() {
 			time.Sleep(time.Second)
 			chanTwo <- i
 		}
-		/* Don't close the channel here */
+		// Don't close the channel here
 	}()
 
-	/* we expect to receive only 20 messages total on both channels */
+	// we expect to receive 20 messages total on both channels
 	for i := 0; i < 20; i++ {
-		/**
-		 * select will wait for incoming messages on these two channels.
-		 * Select block exits after in two situations
-		 * - it receives the first message from any of the two channels.
-		 * - any of the two channels closes.
-		 */
+		// select will wait for incoming messages on these two channels.
+		//Select block exits after in two situations
+		// - it receives the first message from any of the two channels.
+		// - any of the two channels closes.
 		select {
 		case one := <-chanOne:
 			fmt.Printf("chanOne: %d\n", one)
@@ -143,6 +137,19 @@ func main() {
 ```
 
 **Tickers** can be used to perform an action every `n` duration.
+
+```go
+// print time once a second for 5 seconds
+func main() {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for i := 0; i < 5; i++ {
+		v := <-ticker.C
+		fmt.Println(v)
+	}
+}
+```
 
 ```go
 import (

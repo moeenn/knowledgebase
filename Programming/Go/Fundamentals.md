@@ -439,7 +439,7 @@ if marks < 40 {
 /* A: Excellent */ 
 ```
 
-GoLang supports for-loop style preconditions in if statements as well. This can be helpful in making the code easier to understand. 
+Golang supports for-loop style preconditions in if statements as well. This can be helpful in making the code easier to understand. 
 
 ```go
 if i := 30; i < 100 {
@@ -757,8 +757,51 @@ func main() {
 }
 ```
 
+
 ---
 
+#### Sets
+
+Go doesn't have built-in `set` data-structure. However, we can use `map` as a `set`.
+
+```go
+import (
+	"fmt"
+	"golang.org/x/exp/constraints"
+)
+
+// constraints.Ordered is an interface which allows all types of numbers
+// and string types. Values in map are of type struct{} to prevent unnecessary 
+// memory usage.
+type Set[T constraints.Ordered] map[T]struct{}
+
+func (s Set[T]) Add(value T) {
+	s[value] = struct{}{}
+}
+
+func (s Set[T]) ToSlice() []T {
+	r := []T{}
+	for k := range s {
+		r = append(r, k)
+	}
+
+	return r
+}
+
+func main() {
+	intSet := Set[int]{}
+	intSet.Add(20)
+	intSet.Add(500)
+	fmt.Printf("%+v\n", intSet.ToSlice())
+
+	strSet := Set[string]{}
+	strSet.Add("hello")
+	fmt.Printf("%+v\n", strSet.ToSlice())
+}
+```
+
+
+---
 #### `make` vs `new`
 
 ```go
