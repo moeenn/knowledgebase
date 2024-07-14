@@ -1,4 +1,6 @@
 
+Type: Creation
+
 ```go
 package singleton
 
