@@ -1,11 +1,21 @@
-##### Reading files
+##### Reading full file contents
+
+```go
+// content is of type []byte
+content, err := os.ReadFile("./sample.txt")
+if err != nil {
+	fmt.Printf("error: %s\n", err.Error())
+	return
+}
+```
+
+
 
 ```go
 package main
 
 import (
   "fmt"
-  "io/ioutil"
   "os"
 )
 
@@ -19,7 +29,7 @@ func main() {
   fileLocation := "./sample"
 
   // read entire file
-  data, err := ioutil.ReadFile(fileLocation)
+  data, err := os.ReadFile(fileLocation)
   check(err)
   fmt.Println(string(data))
 
@@ -51,7 +61,7 @@ func main() {
 ```go
 filePath := "./dir/sample2"
 data := []byte("This line will be written to file")
-err := ioutil.WriteFile(filePath, data, 0640)
+err := os.WriteFile(filePath, data, 0640)
 check(err)
 ```
 
@@ -91,14 +101,14 @@ func main() {
 
 
 ##### Files modes
-| Mode | Description |  
-| -------: | :------ |  
-| `O_RDONLY` | Read-only |  
-| `O_WRONLY` | Write-only |
-| `O_RDWR` | Read-write |
-| `O_APPEND` | Append data to end of File |
+|       Mode | Description                                 |
+| ---------: | :------------------------------------------ |
+| `O_RDONLY` | Read-only                                   |
+| `O_WRONLY` | Write-only                                  |
+|   `O_RDWR` | Read-write                                  |
+| `O_APPEND` | Append data to end of File                  |
 | `O_CREATE` | Create new File if it doesn’t already exist |
-| `O_SYNC` | Open File for Synchronous I/O |
+|   `O_SYNC` | Open File for Synchronous I/O               |
 
 
 ---
