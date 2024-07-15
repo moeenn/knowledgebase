@@ -6,18 +6,16 @@ func main() {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			/**
-			 * sending value into unbuffered channel will block until there is
-			 * an active receiver
-			 */
+			// sending value into unbuffered channel will block until there is
+			// an active receiver
 			valueChan <- i
 		}
 
-		/* channel must ALWAYS close the channel */
+		// channel must ALWAYS close the channel
 		close(valueChan)
 	}()
 
-	/* receive values until channel is closed */
+	// receive values until channel is closed
 	for value := range valueChan {
 		fmt.Printf("value: %d\n", value)
 	}
@@ -39,7 +37,7 @@ func iterate(n int) chan int {
       c <- i
     }
 
-	/* channel must be closed by the sender */
+	// channel must be closed by the sender
     close(c)
   }()
 
@@ -47,11 +45,9 @@ func iterate(n int) chan int {
 }
 
 func main() {
-  /** 
-   * ranging over channel requires that channel is eventually closed 
-   * if we don't closed the channel, this program will dead-lock because
-   * range will be expecting more messages to come in after iterate has exited.
-  */
+  // ranging over channel requires that channel is eventually closed 
+  // if we don't closed the channel, this program will dead-lock because
+  // range will be expecting more messages to come in after iterate has exited.
   for n := range iterate(1000) {
     fmt.Printf("%d\t", n)
   }
@@ -80,7 +76,7 @@ func main() {
 			time.Sleep(time.Second / 2)
 			chanOne <- i
 		}
-		/* Don't close the channel here */
+		// Don't close the channel here
 	}()
 
 	go func() {
@@ -88,17 +84,15 @@ func main() {
 			time.Sleep(time.Second)
 			chanTwo <- i
 		}
-		/* Don't close the channel here */
+		// Don't close the channel here
 	}()
 
-	/* we expect to receive only 20 messages total on both channels */
+	// we expect to receive 20 messages total on both channels
 	for i := 0; i < 20; i++ {
-		/**
-		 * select will wait for incoming messages on these two channels.
-		 * Select block exits after in two situations
-		 * - it receives the first message from any of the two channels.
-		 * - any of the two channels closes.
-		 */
+		// select will wait for incoming messages on these two channels.
+		//Select block exits after in two situations
+		// - it receives the first message from any of the two channels.
+		// - any of the two channels closes.
 		select {
 		case one := <-chanOne:
 			fmt.Printf("chanOne: %d\n", one)
@@ -145,6 +139,19 @@ func main() {
 **Tickers** can be used to perform an action every `n` duration.
 
 ```go
+// print time once a second for 5 seconds
+func main() {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for i := 0; i < 5; i++ {
+		v := <-ticker.C
+		fmt.Println(v)
+	}
+}
+```
+
+```go
 import (
 	"fmt"
 	"time"
@@ -152,7 +159,7 @@ import (
 
 func main() {
 	ticker := time.NewTicker(time.Millisecond * 250)
-	done := make(chan bool)
+	done := make(chan struct{})
 
 	defer func() {
 		fmt.Println("cleaning up...")
@@ -175,7 +182,7 @@ func main() {
 
 	/* we will receive 8 messages from ticker in 2 seconds */
 	time.Sleep(time.Second * 2)
-	done <- true
+	done <- struct{}{}
 
 	fmt.Println("Completed")
 }
@@ -208,7 +215,7 @@ func main() {
 	results := make(chan int, numJobs)
 	defer close(results)
 
-	/* spawn multiple workers to maximize efficiency */
+	// spawn multiple workers to maximize efficiency
 	for w := 0; w < 5; w++ {
 		go worker(jobs, results)
 	}
@@ -219,12 +226,12 @@ func main() {
 
 	close(jobs)
 
-	/* cannot range over channel because sender is not closing the channel */
+	// cannot range over channel because sender is not closing the channel
 	for i := 0; i < numJobs; i++ {
 		fmt.Printf("result: %d\n", <-results)
 	}
 
-	/* will take 1 second to complete */
+	// will take 1 second to complete
 	fmt.Printf("elapsed: %v\n", time.Since(start))
 }
 ```
@@ -269,11 +276,9 @@ func executor(entries []Entry, maxWorkers int, results chan<- Entry) {
 	sem := make(chan struct{}, maxWorkers)
 	for _, entry := range entries {
 		go func(entry Entry) {
-			/**
-			 * this will block if the semaphore channel buffer is already full
-			 * also, we don't care about the value being sent over the channel,
-			 * therefore we are using anonymous struct
-			 */
+			// this will block if the semaphore channel buffer is already full
+			// also, we don't care about the value being sent over the channel,
+			// therefore we are using am empty struct
 			sem <- struct{}{}
 			results <- processEntry(entry)
 			<-sem
@@ -300,7 +305,7 @@ func main() {
 
 ---
 
-#### Atomics
+#### Atomic variables
 
 ```go
 import (
@@ -315,9 +320,8 @@ func processCounter(counter *int) {
 }
 
 func main() {
-	/* WARNING: mutable state shared by many goroutines */ 
+	// WARNING: mutable state shared by many goroutines
 	counter := 0
-
 	var wg sync.WaitGroup
 
 	for i := 0; i < 50; i++ {
@@ -349,7 +353,7 @@ func processCounter(counter *atomic.Uint64) {
 }
 
 func main() {
-	/* atomics are thread-safe and don't incur race-conditions */
+	// atomics are thread-safe and don't incur race-conditions
 	var counter atomic.Uint64
 	var wg sync.WaitGroup
 
@@ -399,7 +403,7 @@ func processCounter(counter *MyAtomicCounter) {
 }
 
 func main() {
-	/* atomics are thread-safe and don't incur race-conditions */
+	// atomic variables are thread-safe and don't incur race-conditions
 	var counter MyAtomicCounter
 	var wg sync.WaitGroup
 
@@ -429,34 +433,41 @@ import (
 	"time"
 )
 
-func doWork(duration time.Duration, results chan<- string) {
+func processEntries(duration time.Duration, results chan<- string) {
 	id := rand.Intn(100)
 	fmt.Printf("starting: %d\n", id)
 	time.Sleep(duration)
 	fmt.Printf("complete: %d\n", id)
-	results <- fmt.Sprintf("work # %d", id)
+	results <- fmt.Sprintf("action #%d", id)
 }
 
 func main() {
 	start := time.Now()
+	defer func() {
+		fmt.Printf("elapsed: %v\n", time.Since(start))
+	}()
+
 	results := make(chan string)
+	defer close(results)
+
 	wg := sync.WaitGroup{}
 
-	waitSeconds := []time.Duration{
+	const MAX_ENTRIES = 3
+	waitSeconds := [MAX_ENTRIES]time.Duration{
 		time.Second * 2,
 		time.Second * 3,
 		time.Second * 4,
 	}
-	wg.Add(len(waitSeconds))
+	wg.Add(MAX_ENTRIES)
 
 	for _, wait := range waitSeconds {
 		go func(wait time.Duration) {
-			doWork(wait, results)
-			wg.Done()
+			defer wg.Done()
+			processEntries(wait, results)
 		}(wait)
 	}
 
-	/* range in background, to not block the main goroutine */
+	// range in background, to not block the main goroutine
 	go func() {
 		for result := range results {
 			fmt.Printf("result: %s\n", result)
@@ -464,9 +475,6 @@ func main() {
 	}()
 
 	wg.Wait()
-	close(results)
-
-	fmt.Printf("elapsed: %v\n", time.Since(start))
 }
 ```
 

@@ -439,7 +439,7 @@ if marks < 40 {
 /* A: Excellent */ 
 ```
 
-GoLang supports for-loop style preconditions in if statements as well. This can be helpful in making the code easier to understand. 
+Golang supports for-loop style preconditions in if statements as well. This can be helpful in making the code easier to understand. 
 
 ```go
 if i := 30; i < 100 {
@@ -757,8 +757,51 @@ func main() {
 }
 ```
 
+
 ---
 
+#### Sets
+
+Go doesn't have built-in `set` data-structure. However, we can use `map` as a `set`.
+
+```go
+import (
+	"fmt"
+	"golang.org/x/exp/constraints"
+)
+
+// constraints.Ordered is an interface which allows all types of numbers
+// and string types. Values in map are of type struct{} to prevent unnecessary 
+// memory usage.
+type Set[T constraints.Ordered] map[T]struct{}
+
+func (s Set[T]) Add(value T) {
+	s[value] = struct{}{}
+}
+
+func (s Set[T]) ToSlice() []T {
+	r := []T{}
+	for k := range s {
+		r = append(r, k)
+	}
+
+	return r
+}
+
+func main() {
+	intSet := Set[int]{}
+	intSet.Add(20)
+	intSet.Add(500)
+	fmt.Printf("%+v\n", intSet.ToSlice())
+
+	strSet := Set[string]{}
+	strSet.Add("hello")
+	fmt.Printf("%+v\n", strSet.ToSlice())
+}
+```
+
+
+---
 #### `make` vs `new`
 
 ```go
@@ -1430,6 +1473,21 @@ func OkResponseExample() {
 	okRes := NewOkResponse(HelloResponse{
 		Message: "hello world",
 	})
+---
+
+#### Time execution
+
+```go
+func main() {
+	start := time.Now()
+	defer func() {
+		fmt.Printf("elapsed: %v\n", time.Since(start))
+	}()
+
+	fmt.Println("doing some work...")
+	time.Sleep(time.Second * 3)
+}
+```
 
 	encoded, err := json.Marshal(okRes)
 	if err != nil {
@@ -1451,6 +1509,25 @@ func ErrorResponseExample() {
 ```
 
 
+---
+
+#### Time execution
+
+```go
+func main() {
+	start := time.Now()
+	defer func() {
+		fmt.Printf("elapsed: %v\n", time.Since(start))
+	}()
+
+	fmt.Println("doing some work...")
+	time.Sleep(time.Second * 3)
+}
+```
+
+
+---
+
 #### Context
 
 ##### Storing value in a context
@@ -1465,12 +1542,12 @@ import (
 	"os"
 )
 
+type MyContextKey struct{}
+
 func performAction(ctx context.Context) error {
-    /**
-     * by default, the returned value is of type 'any'. Here
-     * we cast it to an 'int' type.
-     */ 
-	value, ok := ctx.Value("key").(int)
+	// by default, the returned value is of type 'any'. Here
+	// we cast it to an 'int' type.
+	value, ok := ctx.Value(MyContextKey{}).(int)
 	if !ok {
 		return errors.New("invalid value in context")
 	}
@@ -1481,7 +1558,7 @@ func performAction(ctx context.Context) error {
 
 func main() {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "key", 300)
+	ctx = context.WithValue(ctx, MyContextKey{}, 300)
 
 	if err := performAction(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
@@ -1490,133 +1567,92 @@ func main() {
 }
 ```
 
+**Note**: Strings etc. can also be used as context keys. However, it is far more efficient to use empty structs as context keys.
+
 
 ##### Cancelling contexts
 
 ```go
-package main
-
 import (
-	"context"
-	"errors"
 	"fmt"
-	"log"
 	"time"
 )
 
 const (
-	REQUEST_DURATION = 250
-	REQUEST_TIMEOUT  = 500
+	API_DELAY       = time.Second * 3
+	REQUEST_TIMEOUT = time.Second * 5
 )
 
-/* simulate an external API call */
-func slowExternalRequest(userId int) (int, error) {
-	time.Sleep(time.Millisecond * REQUEST_DURATION)
-	return userId * 3, nil
+type User struct {
+	Id    int
+	Email string
 }
 
-type Response struct {
-	value int
-	err   error
+type UserWithError struct {
+	User
+	Error error
 }
 
-func fetchUserData(ctx context.Context, userId int) (int, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*REQUEST_TIMEOUT)
-	defer cancel()
+func fetchUser(id int) (User, error) {
+	time.Sleep(API_DELAY)
+	user := User{
+		Id:    id,
+		Email: "user@site.com",
+	}
 
-	respChan := make(chan Response)
+	return user, nil
+}
+
+func fetchUserWithTimeout(userId int, timeout time.Duration) (User, error) {
+	userChan := make(chan UserWithError)
+	defer close(userChan)
 
 	go func() {
-		result, err := slowExternalRequest(userId)
-		if err != nil {
-			respChan <- Response{-1, err}
-			return
-		}
-		respChan <- Response{result, nil}
+		user, err := fetchUser(userId)
+		userChan <- UserWithError{user, err}
 	}()
 
-	/**
-	 * channel synchronization: we return on the first channel
-	 * message i.e. either requests completes, or the context
-	 * times-out
-	 */
-	for {
-		select {
-		case <-ctx.Done():
-			return -1, errors.New("request timed-out")
+	select {
+	case <-time.After(timeout):
+		return User{}, fmt.Errorf("request timeout")
 
-		case resp := <-respChan:
-			return resp.value, resp.err
-		}
+	case result := <-userChan:
+		return result.User, result.Error
 	}
 }
 
 func main() {
 	start := time.Now()
-	userId := 10
-	ctx := context.Background()
+	defer func() {
+		fmt.Printf("elapsed: %v\n", time.Since(start))
+	}()
 
-	result, err := fetchUserData(ctx, userId)
+	userId := 50
+	user, err := fetchUserWithTimeout(userId, REQUEST_TIMEOUT)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("error: %s\n", err.Error())
 		return
 	}
 
-	fmt.Printf("result: %d\n", result)
-	fmt.Printf("Elapsed: %v\n", time.Since(start))
+	fmt.Printf("%+v\n", user)
 }
+
 ```
 
-**Note**: There is another simpler way of achieving the same thing.
+**Note**: We don't always need cancelling contexts. We can also achieve similar effect by doing the following.
 
 ```go
-package main
+select {
+case <-time.After(time.Second * time.Duration(timeoutSeconds)):
+	return User{}, fmt.Errorf("request timeout")
 
-import (
-	"fmt"
-	"time"
-)
-
-const (
-	API_DURATION     = 500
-	TIMEOUT_DURATION = 1000
-)
-
-func slowExternalRequest(userId int) (int, error) {
-	time.Sleep(time.Millisecond * API_DURATION)
-	return userId * 10, nil
-}
-
-type UserResponse struct {
-	result int
-	error  error
-}
-
-func main() {
-	userId := 300
-	resultChan := make(chan UserResponse)
-
-	go func() {
-		result, err := slowExternalRequest(userId)
-		if err != nil {
-			resultChan <- UserResponse{-1, err}
-		}
-
-		resultChan <- UserResponse{result, nil}
-	}()
-
-	select {
-	case <-time.After(time.Millisecond * TIMEOUT_DURATION):
-		fmt.Println("request timeout")
-
-	case result := <-resultChan:
-		fmt.Printf("result: %+v\n", result)
-	}
-
-	close(resultChan)
+case result := <-userChan:
+	return result.User, result.Error
 }
 ```
 
+
+---
 
 #### Conditional Compilation
 

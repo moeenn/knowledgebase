@@ -3,7 +3,7 @@
 
 #### Fix-sized stack
 
-```cpp
+```c
 #include <assert.h>
 #include <stdio.h>
 
