@@ -2,7 +2,8 @@
 #### Migrations
 
 ```bash
-npm i node-pg-migrate postgres dotenv-cli
+$ npm i postgres
+$ npm i -D node-pg-migrate dotenv-cli
 ```
 
 **Note**: Newer version of NodeJS support loading `.env` files without the `dotenv-cli` package. `package.json` scripts may be adjusted to remove the need for `dotenv-cli` which is an external package.

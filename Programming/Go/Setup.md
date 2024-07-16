@@ -10,7 +10,7 @@ $ go install github.com/nametake/golangci-lint-langserver@latest
 $ go install honnef.co/go/tools/cmd/staticcheck@latest
 $ go install github.com/kisielk/errcheck@latest
 
-# optional listers
+# optional linters
 $ go install github.com/jgautheron/goconst/cmd/goconst@latest
 
 # running linters 
@@ -31,4 +31,11 @@ When we run a project, Go detects all dependencies of the project. We can instal
 
 ```bash
 $ go mod tidy
+```
+
+
+##### Live reload 
+```bash
+# live reload on code changes
+$ go install github.com/air-verse/air@latest
 ```
