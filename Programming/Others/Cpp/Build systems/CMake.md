@@ -1,17 +1,33 @@
+##### `CMakeLists.txt` 
 
-`CMakeLists.txt` 
 ```txt
 cmake_minimum_required (VERSION 3.5)
 
-set (project_name "sandbox")
+set (PROJECT_NAME "sandbox")
+project (${PROJECT_NAME})
+set (CMAKE_CXX_STANDARD 20)
 
-project(${project_name})
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Wall -std=c++17")
+# Create symlink to compile_commands.json at project root for IDE to pick it up
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+if (PROJECT_IS_TOP_LEVEL AND UNIX)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+    )
+endif()
 
-set (source_dir "${PROJECT_SOURCE_DIR}/src")
-set(EXECUTABLE_OUTPUT_PATH "bin")
+# auto-detect source files in directory
+file (GLOB_RECURSE SRC_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+add_executable (${PROJECT_NAME} ${SRC_FILES})
 
+target_compile_options(${PROJECT_NAME} PUBLIC -Wextra -Werror -Wall -Wpedantic -O3)
+target_link_libraries (${PROJECT_NAME} m) # m means -lm i.e. math library
+```
+
+**Note**: Inside `add_executable` we call also list out all required source files.
+
+```txt
 add_executable(
   ${project_name}
   ${source_dir}/main.cpp
@@ -19,65 +35,45 @@ add_executable(
 )
 ```
 
-Prepare for compilation
+---
+
+#### Building projects
+
+##### Debug build
+
 ```bash
-$ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
+$ cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
+$ make -C ./build 
+$ ./build/[binary-name]
 ```
 
-Compile program
+
+##### Release build
+
 ```bash
-$ make
+$ cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
+$ make -C ./build 
+$ ./build/[binary-name]
 ```
 
-`Gitignore` file
-```gitignore
-CMakeFiles/*
-cmake_install.cmake
-CMakeCache.txt
-Makefile
+
+##### Alternate approach
+
+```bash
+$ mkdir -p build
+$ cd ./build
+$ cmake 
+$ ./[binary-name]
+```
+
+
+---
+
+#### `.gitignore` file
+
+```
+.cache
 compile_commands.json
-bin
+build/*
+.DS_Store
 ```
-
-
----
-
-#### Automatically detect `*.cpp` files
-
-```txt
-cmake_minimum_required(VERSION 3.5)
-
-set (project_name "sandbox")
-project (${project_name})
-
-set (CMAKE_BUILD_TYPE Debug)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Werror -Wall -std=c++17 -Wc++17-extensions")
-set (source_dir "${PROJECT_SOURCE_DIR}/src/")
-
-file (GLOB source_files "${source_dir}/*.cpp")
-add_executable(${project_name} ${source_files})
-
-set(EXECUTABLE_OUTPUT_PATH "bin")
-```
-
-
----
-
-#### Building C Programs
-
-```txt
-cmake_minimum_required(VERSION 2.6.0)
-
-set (project_name "sandbox")
-project (${project_name} C)
-
-set (CMAKE_BUILD_TYPE Debug)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Werror -Wall")
-
-set (source_dir "${PROJECT_SOURCE_DIR}/src/")
-set(EXECUTABLE_OUTPUT_PATH "bin")
-
-file (GLOB source_files "${source_dir}/*.c")
-add_executable(${project_name} ${source_files})
-```
-
