@@ -16,14 +16,14 @@ const (
 func main() {
 	mux := http.NewServeMux()
 
-	/* register all route handler here */
+	// register all route handler here
 	mux.HandleFunc("/", handlers.HomeHandler)
 
-	/* serve static files */
+	// serve static files: access at <server>/public/*
 	fs := http.FileServer(http.Dir("./public"))
 	mux.Handle("/public/", http.StripPrefix("/public", fs))
 
-	/* start the server process */
+	// start the server process
 	log.Printf("starting server on %s\n", ADDRESS)
 	http.ListenAndServe(ADDRESS, mux)
 }
