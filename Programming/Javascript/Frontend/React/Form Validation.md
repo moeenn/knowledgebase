@@ -17,7 +17,7 @@ export const InputError: FC<Props> = ({ message }) => {
 ```
 
 
-#### Basic example
+#### Basic example (Not recommended)
 
 ```tsx
 import { useForm } from "react-hook-form"
@@ -111,7 +111,8 @@ export function LoginForm(props: Props) {
     register,
     formState: { errors }
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(LoginFormSchema) // this line is important
+    resolver: zodResolver(LoginFormSchema), // this line is important
+    mode: "onBlur",
   })
 
   return (
