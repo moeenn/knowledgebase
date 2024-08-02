@@ -13,28 +13,6 @@
 - [ ] Money types [Link](https://www.youtube.com/watch?v=lxVzLAHnPOE&list=WL&index=6)
 
 
-```sql
--- aggregate relation into json array
-SELECT
-    u.id AS user_id,
-    u.name AS user_name,
-    jsonb_agg(
-        jsonb_build_object(
-            'post_id', p.id,
-            'post_title', p.title
-        )
-    ) AS posts
-FROM
-    "user" u
-LEFT JOIN
-    post p ON u.id = p.author_id
-GROUP BY
-    u.id, u.name
-ORDER BY
-    u.id;
-```
-
-
 ---
 
 #### Running through Docker
