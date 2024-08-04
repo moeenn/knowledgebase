@@ -1,6 +1,5 @@
 
 #### Todo
-
 - [ ] Delete cascades
 - [ ] Type casting
 - [ ] Regex checks [Link](https://stackoverflow.com/questions/24403085/validate-column-using-regular-expression-in-postgre-sql)
@@ -409,18 +408,22 @@ OFFSET 0;
 
 ##### One-to-one
 
+**Mandatory one-to-one**: Adding relationship field to the parent entity with `UNIQUE` constraint ensures that the a child entity will always exists for the parent. Do note that this does not prevent orphan child entities. 
+
+E.g. In the following SQL schema, all `users` will have `profiles` but it is not necessary that all `profiles` will have associated users.
+
 ```sql
 -- table schema
 CREATE TABLE
   profiles (
-    profile_id SERIAL,
+    profile_id BIGSERIAL,
     name VARCHAR(255),
     PRIMARY KEY (profile_id)
   );
 
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     email VARCHAR(255) UNIQUE NOT NULL,
     -- notice the unique constraint (1:1)
     profile_id SERIAL UNIQUE NOT NULL,
@@ -473,6 +476,75 @@ WHERE
   profiles.profile_id = 2;
 ```
 
+
+**Optional one-to-one**: Adding relationship field to the child entity with `UNIQUE` constraint ensures that all child entities will be associated with parent entities. However, this does not mean that all parent entities will necessarily have associated child entities.
+
+E.g. In the following SQL schema, it is ensured that all `profiles` will have associated `users`. However, it is possible that some `users` may not have associated `profile`.
+
+```sql
+CREATE TABLE
+  users (
+    user_id BIGSERIAL NOT NULL,
+    email text UNIQUE NOT NULL,
+    PRIMARY KEY (user_id)
+  );
+
+CREATE TABLE
+  profiles (
+    profile_id BIGSERIAL NOT NULL,
+    title TEXT NOT NULL,
+    -- notice the unique constraint (1:1)    
+    user_id BIGSERIAL UNIQUE NOT NULL,
+    PRIMARY KEY (profile_id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+  );
+
+-- insert dummy record
+WITH
+  user_insert AS (
+    INSERT INTO
+      users (email)
+    VALUES
+      ('user@site.com') RETURNING user_id
+  )
+INSERT INTO
+  profiles (profile_id, title)
+VALUES
+  (
+    (
+      SELECT
+        user_id
+      from
+        user_insert
+    ),
+    'Post one title'
+  );
+
+-- fetch from parent entity
+SELECT
+  users.user_id,
+  users.email,
+  profiles.title
+FROM
+  users
+  JOIN profiles ON users.user_id = profiles.user_id
+WHERE
+  users.user_id = 1;
+
+-- fetch from child entity
+SELECT
+  users.user_id,
+  users.email,
+  profiles.title
+FROM
+  profiles
+  JOIN users ON profiles.user_id = users.user_id
+WHERE
+  users.user_id = 1;
+```
+
+
+---
 
 ##### One-to-many
 
@@ -609,6 +681,51 @@ FROM
   INNER JOIN roles ON user_roles.role_id = roles.role_id
 WHERE
   roles.role_name = 'admin';
+```
+
+
+---
+
+#### JSON Aggregation
+
+We can use this trick to fetch records of relationships as JSON array. This will make it incredibly easier to serialise returned data into native language of our choosing.
+
+```sql
+CREATE TABLE
+  posts (
+    post_id UUID DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    PRIMARY KEY (post_id)
+  );
+
+CREATE TABLE
+  comments (
+    comment_id UUID DEFAULT gen_random_uuid(),
+    text VARCHAR(255) NOT NULL,
+    post_id UUID NOT NULL,
+    PRIMARY KEY (comment_id),
+    FOREIGN KEY (post_id) REFERENCES posts (post_id)
+  );
+```
+
+```sql
+SELECT
+  posts.post_id,
+  posts.title,
+  jsonb_agg (
+    jsonb_build_object (
+      'comment_id',
+      comments.comment_id,
+      'text',
+      comments.text
+    )
+  ) as comments
+FROM
+  posts
+  JOIN comments ON posts.post_id = comments.post_id
+GROUP BY
+  posts.post_id,
+  posts.title;
 ```
 
 

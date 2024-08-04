@@ -27,6 +27,8 @@ services:
       - ./docker-volume:/data/db
 ```
 
+**Note**: Currently there is no `alpine` variant of the MongoDB docker image.
+
 
 ---
 
