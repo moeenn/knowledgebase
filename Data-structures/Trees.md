@@ -9,7 +9,7 @@
 
 ---
 
-#### Binary tree
+#### Binary tree 
 
 ```cpp
 /** helper functions */
