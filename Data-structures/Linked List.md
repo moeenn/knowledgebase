@@ -135,6 +135,7 @@ public:
     return false;
   }
 
+  // TODO: this destructor is no-longer required because head is a shared_ptr
   ~LinkedList() {
     std::shared_ptr<Node<T>> next = nullptr;
     std::shared_ptr<Node<T>> current = m_head;

@@ -1,7 +1,7 @@
 
 #### To-do
 
-  - [ ] Binary tree
+  - [x] Binary tree
   - [ ] Binary search tree
   - [ ] AVL tree
   - [ ] B-Tree

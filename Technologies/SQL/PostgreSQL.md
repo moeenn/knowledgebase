@@ -136,13 +136,14 @@ CREATE SCHEMA public;
 |                          `PRIMARY KEY` | Set column and the primary key for the table                        |
 | `REFERENCES other_table(other_column)` | Add foreign key constraint                                          |
 |                                `CHECK` | Boolean checks                                                      |
+**Note**: If we provide proper names to our constraints, we will be able to catch errors properly when they are thrown by the database driver in case of constraint violations.
 
 ##### Example: Product price and discounted price
 
 ```sql
 CREATE TABLE
   products (
-    product_id SERIAL,
+    product_id BIGSERIAL,
     name TEXT NOT NULL,
     
     -- column level check
@@ -160,10 +161,21 @@ CREATE TABLE
 
 ```sql
 CREATE TABLE
-  user_profile (
-    user_id SERIAL,
-    profile_id SERIAL,
-    UNIQUE (user_id, profile_id)
+  users (
+    user_id UUID DEFAULT gen_random_uuid(),
+    email TEXT,
+    
+    PRIMARY KEY (user_id),
+    CONSTRAINT email_unique UNIQUE (email)
+  );
+```
+
+```sql
+CREATE TABLE
+  user_profiles (
+    user_id BIGSERIAL,
+    profile_id BIGSERIAL,
+    CONSTRAINT unique_user_id_profile_id UNIQUE (user_id, profile_id)
   );
 ```
 
@@ -181,7 +193,7 @@ In SQL it is a convention that table names should be snake-case plurals.
 -- create a new table within a database
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -248,7 +260,7 @@ In summary, use `UUID` where security / entropy matters, otherwise default to us
 -- table with array field
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone_numbers VARCHAR(255) ARRAY,
     PRIMARY KEY (user_id)
@@ -317,7 +329,7 @@ CREATE TYPE
 
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     email VARCHAR(255) UNIQUE NOT NULL,
     role user_role NOT NULL,
     password VARCHAR(255),
@@ -344,7 +356,7 @@ CREATE DOMAIN rating AS FLOAT4 CHECK (
 
 CREATE TABLE
   book (
-    book_id SERIAL,
+    book_id BIGSERIAL,
     name TEXT,
     rating rating,
     PRIMARY KEY (book_id)
@@ -426,7 +438,7 @@ CREATE TABLE
     user_id BIGSERIAL,
     email VARCHAR(255) UNIQUE NOT NULL,
     -- notice the unique constraint (1:1)
-    profile_id SERIAL UNIQUE NOT NULL,
+    profile_id BIGSERIAL UNIQUE NOT NULL,
     PRIMARY KEY (user_id),
     FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
   );
@@ -552,17 +564,17 @@ WHERE
 -- table schema
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     email VARCHAR(100),
     PRIMARY KEY (user_id)
   );
 
 CREATE TABLE
   posts (
-    post_id SERIAL,
+    post_id BIGSERIAL,
     title VARCHAR(100) UNIQUE,
     -- notice user_id has no unique constraint (1:M)
-    user_id SERIAL NOT NULL,
+    user_id BIGSERIAL NOT NULL,
     PRIMARY KEY (post_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id)
   );
@@ -623,14 +635,14 @@ WHERE
 -- schena definitions
 CREATE TABLE
   roles (
-    role_id SERIAL NOT NULL,
+    role_id BIGSERIAL NOT NULL,
     role_name VARCHAR (100) NOT NULL,
     PRIMARY KEY (role_id)
   );
 
 CREATE TABLE
   users (
-    user_id SERIAL NOT NULL,
+    user_id BIGSERIAL NOT NULL,
     email VARCHAR (255) UNIQUE NOT NULL,
     password VARCHAR (255),
     PRIMARY KEY (user_id)
@@ -638,9 +650,9 @@ CREATE TABLE
 
 CREATE TABLE
   user_roles (
-    user_role_id SERIAL NOT NULL,
-    user_id SERIAL NOT NULL,
-    role_id SERIAL NOT NULL,
+    user_role_id BIGSERIAL NOT NULL,
+    user_id BIGSERIAL NOT NULL,
+    role_id BIGSERIAL NOT NULL,
     PRIMARY KEY (user_role_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (role_id) REFERENCES roles (role_id)
@@ -748,7 +760,7 @@ ACID is an acronym that refers to the set of 4 key properties that define a tran
 -- table schema as some dummy data
 CREATE TABLE
   accounts (
-    account_id SERIAL,
+    account_id BIGSERIAL,
     balance BIGINT NOT NULL,
     PRIMARY KEY (account_id),
     CONSTRAINT balance_nonnegative CHECK (balance >= 0)
@@ -853,7 +865,7 @@ Procedures are reusable blocks of statements, which don't return a value.
 -- example table with some dummy data
 CREATE TABLE
   accounts (
-    account_id SERIAL,
+    account_id BIGSERIAL,
     balance BIGINT NOT NULL,
     PRIMARY KEY (account_id),
     CONSTRAINT balance_nonnegative CHECK (balance >= 0)
@@ -928,7 +940,7 @@ DROP PROCEDURE
 -- define schema
 CREATE TABLE
   profiles (
-    profile_id SERIAL,
+    profile_id BIGSERIAL,
     name TEXT,
     address TEXT,
     PRIMARY KEY (profile_id)
@@ -936,9 +948,9 @@ CREATE TABLE
 
 CREATE TABLE
   users (
-    user_id SERIAL,
+    user_id BIGSERIAL,
     email TEXT UNIQUE,
-    profile_id SERIAL UNIQUE, -- one-to-one relation  
+    profile_id BIGSERIAL UNIQUE, -- one-to-one relation  
     PRIMARY KEY (user_id),
     FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
   );
@@ -1034,22 +1046,22 @@ VALUES
 ```sql
 CREATE TABLE
   sites (
-    site_id SERIAL,
+    site_id BIGSERIAL,
     site_name TEXT,
     PRIMARY KEY (site_id)
   );
 
 CREATE TABLE
   orders (
-    order_id SERIAL,
+    order_id BIGSERIAL,
     amount DECIMAL,
     PRIMARY KEY (order_id)
   );
 
 CREATE TABLE
   site_orders (
-    site_id SERIAL,
-    order_id SERIAL,
+    site_id BIGSERIAL,
+    order_id BIGSERIAL,
     PRIMARY KEY (site_id, order_id),
     FOREIGN KEY (site_id) REFERENCES sites (site_id),
     FOREIGN KEY (order_id) REFERENCES orders (order_id)

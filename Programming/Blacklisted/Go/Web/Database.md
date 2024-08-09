@@ -266,3 +266,83 @@ func main() {
 	fmt.Printf("%+v\n", users)
 }
 ```
+
+
+#### Handling constraint violations
+
+```sql
+ create table
+  users (
+    user_id uuid default gen_random_uuid (),
+    email text,
+    primary key (user_id),
+    constraint email_unique unique (email) -- ensure constraints have names
+  );
+```
+
+```go
+import (
+	"errors"
+	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+)
+
+type UserEntity struct {
+	UserId string `db:"user_id"`
+	Email  string `db:"email"`
+}
+
+func CreateUser(db *sqlx.DB, user UserEntity) (UserEntity, error) {
+	stmt := `
+insert into
+  users (user_id, email)
+values
+  ($1, $2)		
+returning *
+	`
+
+	var u UserEntity
+	err := db.QueryRowx(stmt, user.UserId, user.Email).StructScan(&u)
+	var pgError error
+	if err != nil {
+		e := err.(*pq.Error)
+		switch e.Constraint {
+		case "email_unique":
+			pgError = errors.New("user with the provided email address already exists")
+
+		default:
+			pgError = errors.New("failed to create user")
+		}
+	}
+
+	return u, pgError
+}
+
+func run() error {
+	db, err := sqlx.Open("postgres", CONN_STRING)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		return fmt.Errorf("failed to ping database. Details: %s\n", err.Error())
+	}
+
+	newUserData := UserEntity{
+		UserId: uuid.New().String(),
+		Email:  "admin@site.com",
+	}
+
+	user, err := CreateUser(db, newUserData)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%+v\n", user)
+	return nil
+}
+```
