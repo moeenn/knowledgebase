@@ -470,6 +470,22 @@ end
 ```
 
 
+##### Function guards for type checking
+
+```elixir
+defmodule User do
+  defstruct [:id, :email, :password]
+
+  def new(id, email, password) when is_integer(id) and is_binary(email) and is_binary(password) do 
+    %User {
+      id: id,
+      email: email,
+      password: password,
+    }
+  end
+end
+```
+
 ---
 
 #### Recursion
