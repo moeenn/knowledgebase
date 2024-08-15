@@ -741,6 +741,45 @@ GROUP BY
 ```
 
 
+##### A better implementation
+
+```sql
+create table
+  users (
+    user_id uuid default gen_random_uuid (),
+    email text not null,
+    primary key (user_id),
+    constraint email_unique unique (email)
+  );
+
+create table
+  posts (
+    post_id uuid default gen_random_uuid (),
+    title text not null,
+    user_id uuid not null,
+    primary key (post_id),
+    foreign key (user_id) references users (user_id)
+  );
+```
+
+```sql
+select
+  users.user_id,
+  users.email,
+  coalesce(
+    jsonb_agg (posts) filter (where posts.user_id is not null),
+    to_jsonb('[]'::text)
+  ) as posts
+from
+  users
+  left join posts on users.user_id = posts.user_id
+group by
+  users.user_id
+```
+
+**Note**: `coalesce` is a variadic function which returns the first non-null value it is provided. In the above example, the first argument to `coalesce` will be `NULL` when no `posts` are found against the `user`. The second argument to `coalesce` will be a non-null value, therefore it will be returned instead of `NULL`.
+
+
 ---
 
 #### Transactions
