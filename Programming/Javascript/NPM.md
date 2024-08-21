@@ -6,6 +6,8 @@ $ npm config set prefix ~/.npm
 ```
 
 
+---
+
 #### Login
 
 ```bash
@@ -93,3 +95,7 @@ Aside from the above scripts, ensure that the following keys are set in the `pac
   ]
 }
 ```
+
+
+---
+
