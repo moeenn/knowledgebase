@@ -31,8 +31,6 @@ public:
     this->value = value;
     this->next = next;
   }
-
-  ~Node() { std::cout << "Destroying: " << value << "\n"; }
 };
 
 template <typename T, size_t N> class HashMap {

@@ -4,97 +4,145 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"sandbox/handlers"
+  "encoding/json"
+  "log/slog"
+  "net/http"
+  "os"
 )
 
 const (
-	ADDRESS = "0.0.0.0:3000"
+  ADDRESS = "0.0.0.0:5000"
 )
 
 func main() {
-	mux := http.NewServeMux()
+  logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+  mux := http.NewServeMux()
 
-	// register all route handler here
-	mux.HandleFunc("/", handlers.HomeHandler)
+  userController := UserController{Logger: logger}
+  userController.RegisterRoutes(mux)
 
-	// serve static files: access at <server>/public/*
-	fs := http.FileServer(http.Dir("./public"))
-	mux.Handle("/public/", http.StripPrefix("/public", fs))
-
-	// start the server process
-	log.Printf("starting server on %s\n", ADDRESS)
-	http.ListenAndServe(ADDRESS, mux)
+  logger.Info("starting web server", "address", ADDRESS)
+  if err := http.ListenAndServe(ADDRESS, mux); err != nil {
+    logger.Error("failed to start web server", "error", err.Error())
+    os.Exit(1)
+  }
 }
+
+type UserController struct {
+  Logger *slog.Logger
+}
+
+func (c *UserController) RegisterRoutes(mux *http.ServeMux) {
+  mux.HandleFunc("GET /api/v1/users", c.ListAllUsers())
+}
+
+type User struct {
+  Id       int    `json:"id"`
+  Email    string `json:"email"`
+  IsActive bool   `json:"is_active"`
+}
+
+type ListAllUsersResponse struct {
+  Users []User `json:"users"`
+}
+
+func (c *UserController) ListAllUsers() http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    c.Logger.Info("listing all users")
+
+    res := ListAllUsersResponse{
+      Users: []User{
+        {Id: 10, Email: "admin@site.com", IsActive: true},
+        {Id: 20, Email: "user@site.com", IsActive: false},
+      },
+    }
+
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(res); err != nil {
+      c.Logger.Warn("failed to convert response into json", "error", err.Error())
+    }
+  }
+}
+
 ```
 
+
+---
+
+#### Common HTTP types
+
+##### `http.HandlerFunc`
+
+This is the type of function which is responsible for processing the incoming HTTP request. It is defined as follows.
+
 ```go
-package handlers
-
-import (
-	"encoding/json"
-	"net/http"
-)
-
-type HomeResponse struct {
-	Message string `json:"message"`
-}
-
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	res := HomeResponse{
-		Message: "Hello world",
-	}
-
-	json.NewEncoder(w).Encode(res)
-}
+type HandlerFunc func(ResponseWriter, *Request)
 ```
 
-*Note*: Go has also introduced structured logging in version `1.20`. It appears to a better alternative to `log` package. Please use that instead.
-
-
-#### Managing templates
+An example of this type is as follows.
 
 ```go
-package templates
-
-import (
-	"html/template"
-	"io"
-	"sandbox/pkg/user"
-)
-
-var tmpl *template.Template
-
-/* templates will be parsed once at package first import */
-func init() {
-	if tmpl == nil {
-		var err error
-		tmpl, err = template.ParseGlob("./pkg/templates/views/**/*.html")
-		if err != nil {
-			panic("failed to load template: " + err.Error())
-		}
-	}
-}
-
-type UserTableRows struct {
-	Users []user.User
-}
-
-/* all pages and partials will have their own typed functions for execution */
-func UserRowPartialTemplate(w io.Writer, user user.User) {
-	tmpl.ExecuteTemplate(w, "user_row.partial.html", user)
-}
-
-func UserTableRowsPartialTemplate(w io.Writer, users []user.User) {
-	tmpl.ExecuteTemplate(w, "user_table_rows.partial.html", UserTableRows{
-		Users: users,
-	})
-}
-
-func HomePageTemplate(w io.Writer, users []user.User) {
-	tmpl.ExecuteTemplate(w, "home.page.html", UserTableRows{
-		Users: users,
+func GreetHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(GreetResponse{
+		Type: "greeting",
+		Name: "sample",
 	})
 }
 ```
+
+
+##### `http.Handler`
+
+This is an interface which is implemented by all routers which can be passed to `http.ListenAndServe`. It is defined as follows.
+
+```go
+type Handler interface {
+	ServeHTTP(ResponseWriter, *Request)
+}
+```
+
+We can implement our own router by satisfying this interface.
+
+```go
+func main() {
+	router := &CustomRouter{}
+	http.ListenAndServe("0.0.0.0:3000", router)
+}
+
+// implements: http.Handler
+type CustomRouter struct{}
+
+func (router *CustomRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet && r.URL.Path == "/" {
+		GreetHandler(w, r)
+	}
+}
+```
+
+
+##### `mux.HandlerFunc`
+
+This is a method on the `http.ServeMux` which allows us to register `http.HandlerFunc` functions. It can be used as follows.
+
+```go
+mux := http.NewServeMux()
+mux.HandleFunc("GET /{name}", GreetHandler)
+http.ListenAndServe("0.0.0.0:3000", mux)
+```
+
+
+---
+
+#### Serving static files
+
+```go
+// files will be accessed from: <server>/public/*
+fs := http.FileServer(http.Dir("./public"))
+mux.Handle("/public/", http.StripPrefix("/public", fs))
+```
+
+
+---
+
+

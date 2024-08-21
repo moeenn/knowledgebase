@@ -23,8 +23,6 @@ public:
     this->data = data;
     this->next = next;
   }
-
-  ~Node() { std::cout << "destroying: " << data << "\n"; }
 };
 
 template <typename T> class LinkedList {
