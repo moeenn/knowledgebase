@@ -23,8 +23,6 @@ public:
     this->data = data;
     this->next = next;
   }
-
-  ~Node() { std::cout << "destroying: " << data << "\n"; }
 };
 
 template <typename T> class LinkedList {
@@ -133,15 +131,6 @@ public:
     }
 
     return false;
-  }
-
-  // TODO: this destructor is no-longer required because head is a shared_ptr
-  ~LinkedList() {
-    std::shared_ptr<Node<T>> next = nullptr;
-    std::shared_ptr<Node<T>> current = m_head;
-    for (; current != nullptr; current = next) {
-      next = current->next;
-    }
   }
 };
 ```
