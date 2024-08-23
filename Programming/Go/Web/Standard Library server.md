@@ -33,7 +33,7 @@ type UserController struct {
 }
 
 func (c *UserController) RegisterRoutes(mux *http.ServeMux) {
-  mux.HandleFunc("GET /api/v1/users", c.ListAllUsers())
+  mux.HandleFunc("GET /api/v1/users", c.ListAllUsers)
 }
 
 type User struct {
@@ -46,24 +46,20 @@ type ListAllUsersResponse struct {
   Users []User `json:"users"`
 }
 
-func (c *UserController) ListAllUsers() http.HandlerFunc {
-  return func(w http.ResponseWriter, r *http.Request) {
-    c.Logger.Info("listing all users")
+// struct method satisfies http.HandlerFunc type
+func (c *UserController) ListAllUsers(w http.ResponseWriter, r *http.Request) {
+  res := ListAllUsersResponse{
+    Users: []User{
+      {Id: 10, Email: "admin@site.com", IsActive: true},
+      {Id: 20, Email: "user@site.com", IsActive: false},
+    },
+  }
 
-    res := ListAllUsersResponse{
-      Users: []User{
-        {Id: 10, Email: "admin@site.com", IsActive: true},
-        {Id: 20, Email: "user@site.com", IsActive: false},
-      },
-    }
-
-    w.WriteHeader(http.StatusOK)
-    if err := json.NewEncoder(w).Encode(res); err != nil {
-      c.Logger.Warn("failed to convert response into json", "error", err.Error())
-    }
+  w.WriteHeader(http.StatusOK)
+  if err := json.NewEncoder(w).Encode(res); err != nil {
+    c.Logger.Warn("failed to convert response into json", "error", err.Error())
   }
 }
-
 ```
 
 
@@ -145,4 +141,79 @@ mux.Handle("/public/", http.StripPrefix("/public", fs))
 
 ---
 
+#### Handling request-handler errors
 
+```go
+type ServerError struct {
+  StatusCode   int
+  ErrorMessage string
+  Details      any
+}
+
+func (e ServerError) Error() string {
+  return e.ErrorMessage
+}
+
+type HandlerFuncWithError func(http.ResponseWriter, *http.Request) error
+
+type ErrorResponse struct {
+  Success bool   `json:"success"`
+  Error   string `json:"error"`
+  Details any    `json:"details"`
+}
+
+func HandleError(handler HandlerFuncWithError) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    err := handler(w, r)
+    if err == nil {
+	  return
+    }
+
+    status := http.StatusInternalServerError
+    res := ErrorResponse{Success: false}
+
+    castedError, ok := err.(ServerError)
+    if ok {
+      status = castedError.StatusCode
+      res.Error = castedError.ErrorMessage
+      res.Details = castedError.Details
+    } else {
+      res.Error = "Internal server error"
+    }
+
+    w.WriteHeader(status)
+    json.NewEncoder(w).Encode(res)
+  }
+}
+```
+
+```go
+type UserController struct {
+  Logger         *slog.Logger
+  Templates      *template.Template
+  UserRepository *UserRepository
+}
+
+func (c *UserController) RegisterRoutes(mux *http.ServeMux) {
+  mux.HandleFunc("GET /users", HandleError(c.ListAllUsersPage))
+}
+
+// struct method satisfies our HandlerFuncWithError type
+func (c *UserController) ListAllUsersPage(w http.ResponseWriter, r *http.Request) error {
+  users, err := c.UserRepository.ListAllUsers()
+  if err != nil {
+    return err
+  }
+
+  res := ListAllUsersResponse{
+    Users: users,
+  }
+
+  if err := c.Templates.ExecuteTemplate(w, "users.page.html", res); err != nil {
+    c.Logger.Error("failed to execute template with data", "error", err.Error())
+    return err
+  }
+
+  return nil
+}
+```
