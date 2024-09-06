@@ -1,0 +1,5 @@
+- [ ] Factory
+- [ ] Builder
+- [ ] Adapter
+- [ ] Bridge
+- [ ] Command

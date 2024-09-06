@@ -11,6 +11,8 @@ async function main() {
 ```
 
 
+---
+
 #### Colored console output
 
 ```js

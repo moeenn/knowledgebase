@@ -1,5 +1,5 @@
 
-Type: Behavioral
+Type: Behavioural
 
 ```go
 type Location struct {
