@@ -2,7 +2,7 @@
 
 - Event sourcing
 - CQRS
-- Saga design pattern
+- Saga design pattern (for distributed transactions)
 - Transactional outbox pattern (for fault tolerance)
 - Circuit-breaker design-pattern
 
