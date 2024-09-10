@@ -111,3 +111,32 @@ Imagine that multiple instances of a microservice a running in a network, each w
 
 
 ---
+
+
+#### Saga Pattern
+
+Consider a scenario where a single business transaction spans multiple services. Because each service has their own isolated databases, it is not possible perform ACID transactions. This also means automatic database rollback options are not available and any rollback logic must be implemented manually.
+
+Saga pattern splits the overall transaction into a series of local transactions. There are two ways to coordinate sagas:
+
+1. **Choreography** - each local transaction publishes domain events that trigger local transactions in other services.
+2. **Orchestration** - an orchestrator (object) tells the participants what local transactions to execute.
+
+**Scenario**: Consider the following scenario: We have two services *Order service* and *Customer service*. *Order service* maintains the list of orders and *Customer service* maintains details about customers including their credit limit. 
+
+##### Using Choreography
+
+Following steps will be performed in their given order
+
+1. *Order service* receives the request to book a new order.
+2. Order is created in the *Order service* database with the status `PENDING`.
+3. A message is published on the *Order Events Channel* in the message-broker that a new order is created.
+4. *Customer service* listens for this event. On receiving the event the *Customer service* reverses the credit for the customer.
+5. The reserving of the customer's credit may succeed or fail. The result of this database action is published on the *Customer Events channel*.
+6. The *Order service* listens to this event. On receiving this event, the *Customer service* may do one of two things
+	- In case the customer credit reservation was successful, service will mark the status of the order as `CREDIT_CONFIRMED`.
+	- In case the customer credit reservation fails, service will mark the order status as `REJECTED`.
+
+
+##### Using Orchestration
+
