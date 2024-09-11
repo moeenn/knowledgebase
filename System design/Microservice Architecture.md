@@ -1,7 +1,7 @@
 #### TODO
 
 - Event sourcing
-- CQRS
+- Command-query responsibility segregation (CQRS)
 - Saga design pattern (for distributed transactions)
 - Transactional outbox pattern (for fault tolerance)
 - Circuit-breaker design-pattern
@@ -124,9 +124,9 @@ Saga pattern splits the overall transaction into a series of local transactions.
 
 **Scenario**: Consider the following scenario: We have two services *Order service* and *Customer service*. *Order service* maintains the list of orders and *Customer service* maintains details about customers including their credit limit. 
 
-##### Using Choreography
+##### Using Choreography technique (Async communication)
 
-Following steps will be performed in their given order
+The following steps will be performed in their given order
 
 1. *Order service* receives the request to book a new order.
 2. Order is created in the *Order service* database with the status `PENDING`.
@@ -138,5 +138,18 @@ Following steps will be performed in their given order
 	- In case the customer credit reservation fails, service will mark the order status as `REJECTED`.
 
 
-##### Using Orchestration
+##### Using Orchestration technique (Sync communication)
 
+In this technique, there is a single *Orchestrator service*. This service is responsible for sending commands to all other relevant services. If any of the services fail to perform the command, the orchestrator service will be responsible to sending compensation commands to the all the services which had successfully completed their command.
+
+In our example, the *Order service* is the *Orchestrator service*. It is responsible for sending `RESERVE_CREDIT` command, to the *Customer service*. If the *Customer service* fails to reserve credit for the customer, the *Order service* will need to perform compensation actions in its own data-store to revert the data it previously stored for the new order.  
+
+**Important Note**: The communication between services in orchestration will need to be synchronous. This is because the *Orchestrator service* must wait for a single command to complete before it sends the command to the next service in the chain. Remember that we should not use message-brokers for synchronous communication between services.
+
+
+##### Which technique to choose?
+
+For simpler workflows, choreography technique may be sufficient. However, if the workflows are more complex, i.e. require interaction between multiple services, the orchestration technique is preferred.
+
+
+---
