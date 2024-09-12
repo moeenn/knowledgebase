@@ -28,4 +28,4 @@ func main() {
 */
 ```
 
-Important: Encase REGEXP in Backticks instead of Double Quotes to minimize the number of escapes required.
+**Important**: Encase REGEXP in Backticks instead of Double Quotes to minimize the number of escapes required.

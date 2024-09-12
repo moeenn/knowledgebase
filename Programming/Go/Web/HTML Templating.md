@@ -66,9 +66,9 @@ func (c *UserController) ListAllUsersPage() http.HandlerFunc {
 </head>
 
 <body class="container">
-  {{ end }}
+{{ end }}
 
-  {{ define "base.layout.end" }}
+{{ define "base.layout.end" }}
 </body>
 
 </html>
