@@ -5,8 +5,8 @@
 
 
 ---
+### Hello world
 
-#### Hello world
 ```go
 package main
 
@@ -23,7 +23,8 @@ func main() {
 
 ---
 
-#### Importing Libraries
+### Importing Libraries
+
 A single library can be imported as it has been in the hello world program above. If we need to import multiple libraries we should use the Go convention
 
 ```go
@@ -43,8 +44,7 @@ import (
 
 ---
 
-#### Variables
-
+### Variables
 
 **Note**: The memory size of any variable can be found using the following method.
 
@@ -65,7 +65,8 @@ func main() {
 
 --- 
 
-#### Packages
+### Packages
+
 You may have noticed the first line in our Hello World program: Every program must have at least one main package. **We cannot have more than one package in a single directory**.
 
 ```
@@ -76,7 +77,7 @@ pkg/
 ```
 
 ```go
-/* user.go */
+// user.go 
 package user
 
 import (
@@ -99,6 +100,11 @@ func (user User) Serialize() (string, error) {
   return string(encoded), nil
 }
 
+// implement the Stringer interface
+func (u User) String() string {
+  return fmt.Sprintf("User(id=%d, name=%q, email=%q)", u.Id, u.Name, u.Email)
+}
+
 func New(name, email string) User {
   return User{
     Id:       300,
@@ -110,7 +116,7 @@ func New(name, email string) User {
 ```
 
 ```go
-/* main.go */
+// main.go
 package main
 
 import (
@@ -135,12 +141,13 @@ func main() {
 ---
 
 ##### Double quotes vs. Single Quotes
+
 In Go, double quotes are used to define strings and import modules. This is strictly enforced so using single-quotes in these cases will result in compilation errors.
 
 The names of Imported Libraries can also be Aliased
 
 ```go
-/* import strings as s */
+// import strings as s 
 import s "strings"
 ```
 
@@ -178,17 +185,17 @@ fmt.Println(!true)		    /* false */
 
 ##### Defining Variables
 ```go
-/* defining and initializing without specifying the data type */
+// defining and initializing without specifying the data type 
 a := 300         
 var b = 30.95    
 
-/* specifying the data type */
+// specifying the data type
 var c string = "This is a string"
 
-/* defining but not initializing */
+// defining but not initializing
 var d bool
 
-/* defining multiple variables at the same time */
+// defining multiple variables at the same time
 var e, f int = 32, 64 
 ```
 
@@ -218,7 +225,7 @@ func typeof(i interface{}) {
   fmt.Printf("%T\n", i)
 }
 
-/* string */ 
+// string 
 ```
 
 ```go
@@ -239,7 +246,7 @@ func main() {
   fmt.Printf("%v, %T\n", num, strconv.Itoa(num))
 }
 
-/* 30, string */ 
+// 30, string 
 ```
 
 
@@ -253,7 +260,7 @@ var num uint32 = 400
 num2, ok := int64(num)
 typeof(num2)
 
-/* int64 */ 
+// int64
 ```
 
 
@@ -285,7 +292,8 @@ func main() {
 
 ---
 
-#### Byte Slices
+### Byte Slices
+
 As mentioned earlier, Byte is simply an Alias for the Uint8 Primitive Data Type. Often functions return data in the form of Byte Slices. Here is what they look like
 
 ```go
@@ -313,7 +321,8 @@ fmt.Printf("%s\n", example)
 
 ---
 
-#### String Methods
+### String methods
+
 ```go
 package main
 
@@ -355,58 +364,50 @@ TrimSpace:  test
 */
 ```
 
-
-##### String interpolation
-```go
-func greet(name string) string {
-  return fmt.Sprintf("Hello %v, Welcome to our website!", name)
-}
-```
-
-
 ##### String Formatting
-| Placeholder | Description                                              |
-| ----------: | :------------------------------------------------------- |
-|        `%v` | Infer and Print any Data type                            |
-|       `%+v` | Print Struct with field names                            |
-|        `%d` | Decimal Number i.e. Base-10 representation               |
-|        `%b` | Binary Number i.e. Base-2 Representation                 |
-|        `%x` | Hexadecimal Number i.e. Base-16                          |
-|        `%c` | Character representation of Number                       |
-|        `%f` | Floating Point Number                                    |
-|        `%e` | Exponent Notation                                        |
-|        `%s` | Strings                                                  |
-|        `%p` | Pointers                                                 |
-|       `%6d` | Set Decimal Width to 6 characters, Right Aligned         |
-|    `%-5.2f` | Set Float width to 5 with 2 decimal places, Left Aligned |
-
+| Placeholder | Description                                                     |
+| ----------: | :-------------------------------------------------------------- |
+|        `%v` | Infer and Print any Data type                                   |
+|       `%+v` | Print Struct with field names                                   |
+|       `%#v` | Structs with field value and struct name / declaration location |
+|        `%d` | Decimal Number i.e. Base-10 representation                      |
+|        `%b` | Binary Number i.e. Base-2 Representation                        |
+|        `%x` | Hexadecimal Number i.e. Base-16                                 |
+|        `%c` | Character representation of Number                              |
+|  `%f`, `%g` | Floating Point Number                                           |
+|        `%s` | Strings                                                         |
+|        `%p` | Pointers                                                        |
+|       `%6d` | Set Decimal Width to 6 characters, Right Aligned                |
+|    `%-5.2f` | Set Float width to 5 with 2 decimal places, Left Aligned        |
+|        `%q` | Quoted strings                                                  |
+|        `%w` | Errors                                                          |
+|        `%T` | Type of variable                                                |
 
 ---
 
-#### Loops
-The only keyword related to Loops that exists in Go is `for`.
+### Loops
 
 ```go
-/* for loop */
+// for loop 
 for i:= 0; i <= 10; i++ {
     fmt.Println(i)
 }
 
-/* while loop */
+// while loop
 i := 0
 for i <= 10 {
   fmt.Println(i)
   i++
 }
 
-/* infinite loop*/
+// infinite loop
 for {
   fmt.Println("Infinite Loop")
 }
 
-/* looping through arrays, slices, maps */
+// looping through arrays, slices, maps 
 names := []string{"Batman", "Ironman", "Superman"}
-for _, name := range(names) {
+for _, name := range names {
   fmt.Println(name)
 }
 ```
@@ -414,7 +415,8 @@ for _, name := range(names) {
 
 ---
 
-#### Break and Continue
+### Break and Continue
+
 The `break` and `continue` keywords work exactly the same way as C / C++
 - `break` ends the loop immediately
 - `continue` skips over the rest of the code in the loop and goes to the next iteration of the loop
@@ -422,7 +424,8 @@ The `break` and `continue` keywords work exactly the same way as C / C++
 
 ---
 
-#### Control-flow
+### Control-flow
+
 ```go
 marks := 90
 
@@ -436,7 +439,7 @@ if marks < 40 {
   fmt.Println("Invalid Marks")
 }
 
-/* A: Excellent */ 
+// A: Excellent
 ```
 
 Golang supports for-loop style preconditions in if statements as well. This can be helpful in making the code easier to understand. 
@@ -468,7 +471,7 @@ switch option {
     fmt.Println("Invalid Input")
 }
 
-/* Four */ 
+// Four 
 ```
 
 One of the limitations of switch statements in C / C++ is that we cannot use conditions. In Go, any nested if statement can be written as a switch statement.
@@ -489,13 +492,15 @@ switch {
   default:
     fmt.Println("Invalid Marks")
 }
-/* B: Average*/ 
+
+// B: Average
 ```
 
 
 ---
 
-#### Arrays
+### Arrays
+
 ```go
 /* declare an empty array */
 var myArray [5]int
@@ -701,24 +706,24 @@ type wrappedFunc func (uint64) uint64
 
 ---
 
-#### Maps
+### Maps
 
 ```go
 nationality := make(map[string]string)
 
-/* initialize with specified length */
+// initialize with specified length 
 capitals := make(map[string]string, 10)
 
-/* add key values */
+// add key values
 nationality["Alice Eve"] = "British"
 nationality["George Clooney"] = "American"
 nationality["Trevor Noah"] = "South African"
 
 
-/* accessing a value using key */
+// accessing a value using key 
 fmt.Println(nationality["Alice Eve"])
 
-/* count number of KV pairs in map */
+// count number of KV pairs in map 
 len(nationality)
 ```
 
@@ -746,7 +751,7 @@ func main() {
 		"Britain":  "London",
 	}
 
-    /* access element from map, with error handling */
+    // access element from map, with error handling
 	pak, ok := capitals["Pakistan"]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Not found\n")
@@ -760,7 +765,7 @@ func main() {
 
 ---
 
-#### Sets
+### Sets
 
 Go doesn't have built-in `set` data-structure. However, we can use `map` as a `set`.
 
@@ -802,7 +807,7 @@ func main() {
 
 
 ---
-#### `make` vs `new`
+### `make` vs `new`
 
 ```go
 // make returns run-time initialised instance of the required type
@@ -824,10 +829,11 @@ user := &User{}
 
 ---
 
-#### Range
+### Range
+
 ```go
 myNumbers := []int{12, 23, 34, 45, 56, 67, 78}
-for index, num := range myNumbers{
+for index, num := range myNumbers {
   fmt.Printf("%d %d\n", index, num)
 }
 ```
@@ -841,7 +847,8 @@ for name, nation := range nationality {
 
 ---
 
-#### Pointers
+### Pointers
+
 ```go
 var a int = 30
 var b *int = &a                
@@ -859,7 +866,8 @@ fmt.Println("*b:", *b)  // 10
 
 ---
 
-#### Closures
+### Closures
+
 ```go
 func adder() func(int) int {
   sum := 0
