@@ -1,5 +1,5 @@
 ```go
-/* numbers.go */
+// numbers.go 
 package numbers
 
 func IsPrime(n int) bool {
@@ -18,7 +18,7 @@ func IsPrime(n int) bool {
 ```
 
 ```go
-/* numbers_test.go */
+// numbers_test.go 
 package numbers
 
 import (
@@ -48,11 +48,16 @@ func TestIsPrime(t *testing.T) {
 
 
 ##### Running the tests
+
 ```bash
-$ go test ./...
+$ go test -v ./...
 ```
 
 - The package name for the file and the main file must be the same
 - The name of the file containing tests should be `<package>_test.go`
 - The names of the test functions must start with `Test`
 
+
+##### Note on `-v` flag
+
+Sometimes we may rely on `printf-debugging` to check why our tests are failing. If the `-v` flag is not provided then none of the `fmt.Print` or `log.Print` related output will be displayed. It's almost always a good idea to pass the `-v` flag because it does print other useful information as well. 
