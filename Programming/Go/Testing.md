@@ -61,3 +61,13 @@ $ go test -v ./...
 ##### Note on `-v` flag
 
 Sometimes we may rely on `printf-debugging` to check why our tests are failing. If the `-v` flag is not provided then none of the `fmt.Print` or `log.Print` related output will be displayed. It's almost always a good idea to pass the `-v` flag because it does print other useful information as well. 
+
+
+#### Running specific tests
+
+Regular expressions can be used used to filter out the tests to run.
+
+```bash
+$ go test -run ^TestName$ ./...
+```
+
