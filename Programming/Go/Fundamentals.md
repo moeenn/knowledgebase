@@ -1067,8 +1067,8 @@ Go enforces the rule that the Data Type and all its methods must be defined in t
 type str string
 
 func (s str) ToUpperCase() string {
-  normal_string := string(s)
-  return strings.ToUpper(normal_string)
+  normalString := string(s)
+  return strings.ToUpper(normalString)
 }
 
 func main() {

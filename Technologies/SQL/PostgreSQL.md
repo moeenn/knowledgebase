@@ -273,7 +273,7 @@ VALUES
   (
     1,
     'admin@site.com',
-    '{"123123897", "39847928347", "53475934875"}'
+    '{"123123897", "39847928347", "53475934875"}'::text[]
   );
 ```
 
@@ -1132,3 +1132,16 @@ SELECT * FROM site_orders_view;
 #### N+1 query problem
 N+1 queries are a performance problem in which the application makes database queries in a loop, instead of making a single query that returns or modifies all the information at once. Each database connection takes some amount of time, so querying the database in a loop can be many times slower than doing it just once. This problem often occurs when you use an object-relational mapping (ORM) tool in web frameworks like Django or Ruby on Rails.
 
+
+---
+
+#### Optional filter parameters
+
+```sql
+SELECT * FROM people
+WHERE 
+	employed = TRUE
+	AND ($1 IS NULL OR age > $1)
+```
+
+In the above query, `$1` is a nullable value for `age`. If we pass in a non-null value, the condition `age > $1` will apply. Is we pass in a null value, only the first portion of the condition i.e. `$1 IS NULL` will evaluate and short-circuit the condition.

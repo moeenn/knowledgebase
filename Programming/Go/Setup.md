@@ -26,7 +26,6 @@ linters:
     - contextcheck
     - err113
     - gochecknoinits
-    - godot
     - godox
 ```
 

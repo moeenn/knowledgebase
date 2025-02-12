@@ -67,6 +67,11 @@ jar {
     }
 }
 
+// assertions are disabled by default, enable them here.
+run {
+    enableAssertions = true
+}
+
 testing {
     suites {
         test {

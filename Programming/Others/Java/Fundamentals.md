@@ -281,6 +281,26 @@ assert(a == b); // true
 
 ---
 
+#### Assertions
+Think of assertions as strictly enforced comments. They can be used to encode implicit assumptions about the code, directly inside the code. They should only be used to check programmer errors i.e. errors which are not expected to exist in production.
+
+```java
+// simple assertion.
+assert truthyCondition;
+
+// assertion with a cutom message.
+assert myObject != null : "object should not be null";
+```
+
+**Note**: Assertions are not enabled by default. They can be enabled when running the `jar` file as follows.
+
+```bash
+$ java -ea -jar /path/to/program.jar
+```
+
+
+---
+
 #### Access-control modifiers
 
 - `public` 
