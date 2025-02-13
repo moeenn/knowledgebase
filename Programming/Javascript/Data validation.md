@@ -1,3 +1,8 @@
+
+#### Assertions
+
+A custom function for assertions can be implemented as follows.
+
 ```js
 /**
  * Throw failed assertions as errors
@@ -11,6 +16,17 @@ function invariant(assertion, errorMessage) {
   }
 }
 ```
+
+**Note**: In NodeJS, you don't need to implement this function. It comes build-in.
+
+```js
+import assert from "node:assert/strict"
+```
+
+**Note**: Both the above implementation use type-narrowing
+
+---
+#### Custom data validation 
 
 ```js
 class Email {
@@ -59,7 +75,7 @@ class LoginRequest {
   #password
 
   /**
-   * @param {any} input
+   * @param {Object} input
    * @throws {Error}
    */
   constructor(input) {
@@ -85,7 +101,6 @@ class LoginRequest {
    * @typedef LoginRequestObject
    * @property {string} email
    * @property {string} password
-   *
    * @returns {LoginRequestObject}
    */
   asObject() {
@@ -120,7 +135,7 @@ In a scenario where is request is submitted to the server without performing cli
 
 ---
 
-#### Type-safe Objects using `zod`
+#### Type-safe objects using `zod`
 
 ```js
 import { z } from "zod"
@@ -209,3 +224,110 @@ async function main() {
 
 main().catch(console.error)
 ```
+
+
+---
+
+#### Using `class-validator`
+
+```ts
+import { validate, IsUUID, IsEmail, MinLength, IsString, IsEnum, ValidateNested } from "class-validator"
+import { randomUUID } from "crypto"
+
+enum UserRole {
+  ADMIN = "ADMIN",
+  USER = "USER",
+}
+
+class EmailAddress {
+  @IsString()
+  @IsEmail()
+  public readonly value: string
+
+  constructor(value: string) {
+    this.value = value
+  }
+
+  toJSON() {
+    return this.value
+  }
+}
+
+class User {
+  @IsString()
+  @IsUUID()
+  id: string
+
+  @ValidateNested()
+  email: EmailAddress
+
+  @IsString()
+  @MinLength(8)
+  password: string
+
+  @IsEnum(UserRole)
+  role: UserRole
+
+  constructor(email: EmailAddress, password: string, role: UserRole) {
+    this.id = randomUUID()
+    this.email = email
+    this.password = password
+    this.role = role
+  }
+
+  // override json encoding, hiding password field in the process.
+  toJSON() {
+    return {...this, password: undefined }
+  }
+}
+
+async function main(): Promise<void> {
+  const email = new EmailAddress("admin-steic.om")
+  const user = new User(email, "cansbkcjab23123ljn", UserRole.USER)
+  const errors = await validate(user, { validationError: { target: false }})
+  if (errors.length !== 0) {
+    console.error(errors)
+    return
+  }
+
+  const encoded = JSON.stringify(user)
+  console.log(encoded)
+}
+
+main().catch(console.error)
+```
+
+##### Automatically validate
+
+```ts
+import { ValidationError } from "class-validator"
+
+class ValidationException extends Error {
+  public readonly errors: ValidationError[]
+
+  constructor(errors: ValidationError[]) {
+    super("validation errors")
+    this.errors = errors
+  }
+}
+
+class User {
+  ...
+
+  constructor(email: string, password: string, role: UserRole) {
+    this.id = randomUUID()
+    this.email = email
+    this.password = password
+    this.role = role
+
+    const errors = validateSync(this, { validationError: { target: false }})
+    if (errors.length > 0) {
+      throw new ValidationException(errors)
+    }
+  }
+
+  ...
+}
+```
+
+**Note**: In the above example, class `User` properties will be automatically validated when a new instance is constructed.
