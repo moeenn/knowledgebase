@@ -156,3 +156,41 @@ UserEntity, error) {
 }
 ```
 
+Following as a more abstracted approach.
+
+```go
+func ProcessConstraintError(err error, constraints map[string]string) error {
+	if err == nil {
+		return nil
+	}
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		constraint := pgErr.ConstraintName
+		found, ok := constraints[constraint]
+		if !ok {
+			return err
+		}
+		return errors.New(found)
+	}
+
+	return nil
+}
+```
+
+```go
+var (
+	UserConstraints = map[string]string{
+		"email_unique": "email already exists",
+		"fk_profile_id": "invalid profile id",
+	}
+)
+```
+
+```go
+createdUser, err := db.UserCreate(ctx, input)
+err = constraints.ProcessConstraintError(err, constraints.UserConstraints)
+if err != nil {
+	return err
+}
+```
