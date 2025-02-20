@@ -2,30 +2,25 @@
 import { randomUUID } from "crypto"
 
 class Tag {
-  public readonly id: string
-  public readonly name: string
-  public readonly parentId: string | null 
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly parentId: string | null,
+  ) {}
 
-  constructor(id: string, name: string, parentId: string | null) {
-    this.id = id
-    this.name = name
-    this.parentId = parentId
-  }
-
+  // alternative constructor.
   public static createWithId(name: string, parentId: string | null) {
     return new Tag(randomUUID(), name, parentId)
   }
 } 
 
 class TagWithChildren {
-  public readonly tag: Tag
-  public readonly children: TagWithChildren[]
+  constructor(
+    public readonly tag: Tag,
+    public readonly children: TagWithChildren[] = [],
+  ) {}  
 
-  constructor(tag: Tag) {
-    this.tag = tag
-    this.children = []
-  }  
-
+  // automatically map to DTO.
   toJSON() {
     return {
       ...this.tag,
@@ -35,42 +30,45 @@ class TagWithChildren {
   }
 }
 
-function buildTagHierarchy(tags: Tag[]): TagWithChildren[] {
-  const tagsWithChildren = tags.map(tag => new TagWithChildren(tag))
-  const tagMap = new Map<string, TagWithChildren>()
-  tagsWithChildren.forEach(tag => tagMap.set(tag.tag.id, tag))
-
-  const result: TagWithChildren[] = []
-  for (const tag of tagsWithChildren) {
-    if (!tag.tag.parentId) {
-      result.push(tag)
-    } else {
-      const parent = tagMap.get(tag.tag.parentId)
-      if (parent) {
-        parent.children.push(tag)
-      } else {
+// functions namespace.
+const TagHierarchy = {
+  buildTagHierarchy(tags: Tag[]): TagWithChildren[] {
+    const tagsWithChildren = tags.map(tag => new TagWithChildren(tag))
+    const tagMap = new Map<string, TagWithChildren>()
+    tagsWithChildren.forEach(tag => tagMap.set(tag.tag.id, tag))
+  
+    const result: TagWithChildren[] = []
+    for (const tag of tagsWithChildren) {
+      if (!tag.tag.parentId) {
         result.push(tag)
+      } else {
+        const parent = tagMap.get(tag.tag.parentId)
+        if (parent) {
+          parent.children.push(tag)
+        } else {
+          result.push(tag)
+        }
       }
     }
-  }
-
-  return result
-}
-
-function flattenTagHierarchy(tags: TagWithChildren[]): Tag[] {
-  const flattened: Tag[] = []
-
-  function traverse(nodes: TagWithChildren[], parentId: string | null = null) {
-    for (const node of nodes) { 
-      flattened.push(new Tag(node.tag.id, node.tag.name, parentId))
-      if (node.children.length > 0) {
-        traverse(node.children, node.tag.id)
+  
+    return result
+  },
+  
+  flattenTagHierarchy(tags: TagWithChildren[]): Tag[] {
+    const flattened: Tag[] = []
+  
+    function traverse(nodes: TagWithChildren[], parentId: string | null = null) {
+      for (const node of nodes) { 
+        flattened.push(new Tag(node.tag.id, node.tag.name, parentId))
+        if (node.children.length > 0) {
+          traverse(node.children, node.tag.id)
+        }
       }
     }
+  
+    traverse(tags)
+    return flattened 
   }
-
-  traverse(tags)
-  return flattened 
 }
 
 function main(): void {
@@ -79,8 +77,8 @@ function main(): void {
   const levelTwo = Tag.createWithId("level two", levelOne.id)
   const tags: Tag[] = [root, levelOne, levelTwo]
 
-  const tagHierarchy = buildTagHierarchy(tags)
-  const flattened = flattenTagHierarchy(tagHierarchy)
+  const tagHierarchy = TagHierarchy.buildTagHierarchy(tags)
+  const flattened = TagHierarchy.flattenTagHierarchy(tagHierarchy)
   const encoded = JSON.stringify({ tagHierarchy, flattened })
   console.log(encoded)
 }
