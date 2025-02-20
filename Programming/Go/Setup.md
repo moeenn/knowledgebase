@@ -1,15 +1,14 @@
 
 ```bash
-$ sudo apt-get install golang
-
 # install common tools
 $ go install golang.org/x/tools/gopls@latest
-$ go install github.com/nametake/golangci-lint-langserver@latest
 $ go install github.com/go-delve/delve/cmd/dlv@latest
-
-# running linters 
-$ golangci-lint run ./...
+$ go install github.com/nametake/golangci-lint-langserver@latest
+$ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 ```
+
+
+---
 
 ##### Configuring linters
 
@@ -27,12 +26,20 @@ linters:
     - err113
     - gochecknoinits
     - godox
+
+issues:
+  exclude-dirs:
+    - some/generated/code
 ```
 
 **Note**: Run the following command to get a list of all supported linters.
 
 ```bash
+# list available linters
 $ golangci-lint linters
+
+# run linters
+$ golangci-lint run ./...
 ```
 
 
@@ -46,14 +53,15 @@ When we run a project, Go detects all dependencies of the project. We can instal
 $ go mod tidy
 ```
 
-##### Note on private dependencies
+##### Installing dependencies from private sources
 
 ```bash
 $ export GOPRIVATE=github.com/<repo-name>
 $ go get github.com/<repo-name>
 ```
 
-Ensure that `git` is configured and can access the private repo.
+**Note**: Ensure that `git` is configured and can access the private repo.
+
 
 ---
 
