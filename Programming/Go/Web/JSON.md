@@ -21,7 +21,7 @@ func main() {
     Age:   21,
   }
 
-  /* encodedBytes is a byte slice i.e. []byte */
+  // encodedBytes is a byte slice i.e. []byte
   encodedBytes, err := json.Marshal(user)
   if err != nil {
     fmt.Printf("error: %v\n", err)
@@ -52,6 +52,7 @@ type User struct {
 ---
 
 #### Unmarshal JSON
+
 ```go
 func main() {
   jsonString := `{"id":30,"name":"Sample","email":"sample@site.com","age":21}`

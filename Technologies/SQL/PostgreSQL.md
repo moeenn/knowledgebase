@@ -848,7 +848,7 @@ EXECUTE users_insert ('User one', 'user_one@site.com');
 A good rule of thumb is to create database indexes for everything that is referenced in the `WHERE`, `HAVING` and `ORDER BY` parts of your SQL queries.
 
 ```sql
--- create indexes on fields prequently used for querying tables
+-- create indexes on fields frequently used for querying tables
 CREATE INDEX users_index ON users (email, name);
 ```
 

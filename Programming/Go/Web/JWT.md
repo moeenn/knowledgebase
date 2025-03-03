@@ -1,117 +1,127 @@
 ```go
-package jwt
+package authToken
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JWTPayload struct {
-	UserId    string
-	UserRoles []string
+type TokenPayload struct {
+	Id    string
+	Email string
+	Role  string
 }
 
-type TokenResult struct {
-	Token  string
-	Expiry int64
+type JwtConfig struct {
+	Issuer string
+	Secret string
+	Expiry time.Duration
 }
 
-func GenerateToken(secret string, expMinutes uint, payload JWTPayload) (*TokenResult, error) {
-	expiry := time.Now().Add(time.Minute * time.Duration(expMinutes)).Unix()
-
-	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": payload.UserId,
-		"aud": payload.UserRoles,
-		"exp": expiry,
+func CreateToken(payload *TokenPayload, config *JwtConfig) (string, error) {
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": payload.Id,
+		"sub":    payload.Email,
+		"iss":    config.Issuer,
+		"aud":    payload.Role,
+		"exp":    time.Now().Add(config.Expiry).Unix(),
+		"iat":    time.Now().Unix(), // Issued at
 	})
 
-	s, err := t.SignedString([]byte(secret))
+	tokenString, err := claims.SignedString([]byte(config.Secret))
 	if err != nil {
-		return &TokenResult{}, err
+		return "", err
 	}
 
-	return &TokenResult{Token: s, Expiry: expiry}, nil
+	return tokenString, nil
 }
 
-func ValidateToken(secret string, token string) (*JWTPayload, error) {
-	errMessage := errors.New("invalid or expired JWT")
-	payload := &JWTPayload{}
-
-	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
+func VerifyToken(tokenString string, config *JwtConfig) (*TokenPayload, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.Secret), nil
 	})
 
-	if err != nil || !parsed.Valid {
-		return payload, errMessage
-	}
-
-	userId, err := parsed.Claims.GetSubject()
-	if err != nil || userId == "" {
-		return payload, errMessage
-	}
-
-	userRoles, err := parsed.Claims.GetAudience()
 	if err != nil {
-		return payload, errMessage
+		return nil, err
 	}
 
-	payload.UserId = userId
-	payload.UserRoles = userRoles
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
 
-	return payload, nil
+	email, err := token.Claims.GetSubject()
+	if err != nil {
+		return nil, err
+	}
+
+	role, err := token.Claims.GetAudience()
+	if err != nil || len(role) == 0 {
+		return nil, err
+	}
+
+	claimsMap, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	userId, ok := claimsMap["userId"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	expiry, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return nil, err
+	}
+
+	if time.Now().After(expiry.Time) {
+		return nil, fmt.Errorf("token expired")
+	}
+
+	tokenPayload := TokenPayload{
+		Id:    userId,
+		Email: email,
+		Role:  role[0],
+	}
+
+	return &tokenPayload, nil
 }
 ```
 
 ```go
-package jwt
+package authToken
 
 import (
-	"fmt"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateAndValidate(t *testing.T) {
-	key := "some_random_secret_key"
-	var expMinutes uint = 15
-
-	payload := JWTPayload{
-		UserId:    uuid.New().String(),
-		UserRoles: []string{"ADMIN"},
+func TestTokenCreateVerify(t *testing.T) {
+	testUser := TokenPayload{
+		Id:    uuid.NewString(),
+		Email: "some-test-user@site.com",
+		Role:  "ADMIN",
 	}
 
-	token, err := GenerateToken(key, expMinutes, payload)
-	if err != nil {
-		t.Errorf("failed to generate token")
+	config := JwtConfig{
+		Issuer: "sample.com",
+		Secret: "some-super-secret-token",
+		Expiry: time.Hour,
 	}
 
-	fmt.Printf("token: %v\n", token)
+	token, err := CreateToken(&testUser, &config)
+	assert.NoError(t, err)
+	assert.NotEqual(t, token, "")
 
-	decodedPayload, err := ValidateToken(key, token.Token)
-	if err != nil {
-		t.Errorf("failed to decode token")
-	}
-
-	if decodedPayload.UserId != payload.UserId {
-		t.Errorf("unexpected user id in payload. Expected: %s, Got: %s",
-			payload.UserId,
-			decodedPayload.UserId,
-		)
-	}
-
-	numRoles := len(decodedPayload.UserRoles)
-	if numRoles != 1 {
-		t.Errorf("invalid number of decoded userRoles. Expected: %d, Got: %d", 1, numRoles)
-	}
-
-	if decodedPayload.UserRoles[0] != payload.UserRoles[0] {
-		t.Errorf("unexpected user role in payload. Expected: %s, Got: %s",
-			payload.UserRoles,
-			decodedPayload.UserRoles,
-		)
-	}
+	payload, err := VerifyToken(token, &config)
+	assert.NoError(t, err)
+	assert.Equal(t, payload.Id, testUser.Id)
+	assert.Equal(t, payload.Email, testUser.Email)
+	assert.Equal(t, payload.Role, testUser.Role)
 }
 ```
