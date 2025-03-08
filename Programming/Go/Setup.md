@@ -26,6 +26,7 @@ linters:
     - err113
     - gochecknoinits
     - godox
+    - misspell
 
 issues:
   exclude-dirs:
