@@ -570,48 +570,6 @@ int main() {
 
 ---
 
-#### Random Numbers
-```cpp
-#include <iostream>
-#include <ctime>
-
-Int main() {
-  /* randomize seed: don’t randomize more than once */ 
-  std::srand{time(NULL)};
-  const int num = std::rand() % 50 + 10;
-
-  std::cout << num << "\n";
-}
-/* generate numbers in range [10,60) */
-```
-
-```cpp
-#include <iostream>
-#include <ctime>
-
-namespace Random {
-  bool m_seed_set{false};
-
-  int randInt(const int& floor, const int& ceil) {
-    if(!m_seed_set) {
-      std::srand(time(NULL));
-      m_seed_set = true;
-    }
-    return std::rand() % (ceil - floor) + floor;
-  }
-}
-
-int main() {
-  for(uint i = 0; i < 100; i++) {
-    std::cout << Random::randInt(50, 100) << "\t";
-    if ((i + 1) % 10 == 0) std::cout << '\n';
-  }
-}
-```
-
-
----
-
 #### Exception Handling
 ```cpp
 #include <iostream>

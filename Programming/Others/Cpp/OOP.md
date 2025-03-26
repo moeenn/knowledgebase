@@ -223,7 +223,7 @@ public:
 int main() { Utils::hello("My name is Jeff"); }
 ```
 
-**Remember**: Static attributes and methods should be called through the class namespace (i.e. through the scope resolution operator `::` ) and all other attributes and methods should be called through the dot operator.
+**Remember**: Static attributes and methods should be called through the class namespace (i.e. through the scope resolution operator `::`  and all other attributes and methods should be called through the dot operator.
 
 
 ---

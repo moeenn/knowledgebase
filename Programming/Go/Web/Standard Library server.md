@@ -80,7 +80,7 @@ An example of this type is as follows.
 ```go
 func GreetHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(GreetResponse{
+	_ := json.NewEncoder(w).Encode(GreetResponse{
 		Type: "greeting",
 		Name: "sample",
 	})
