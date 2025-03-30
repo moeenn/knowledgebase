@@ -35,7 +35,7 @@ func NewUser(email, password string) User {
 	}
 
 	return User{
-		Id:       uuid.New().String(),
+		Id:       uuid.NewString(),
 		Email:    email,
 		Password: pwd,
 	}

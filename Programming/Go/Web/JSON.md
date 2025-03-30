@@ -32,7 +32,7 @@ func main() {
 }
 ```
 
-**Note**: Any private strict field will not be included in the marshaled JSON.
+**Note**: Any private strict field will not be included in the encoded JSON.
 
 
 ##### Hide fields in Marshalled JSON
