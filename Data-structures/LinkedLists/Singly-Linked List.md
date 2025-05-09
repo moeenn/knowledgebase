@@ -1,3 +1,4 @@
+```cpp
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -28,7 +29,7 @@ private:
   size_t m_size;
 
 public:
-  LinkedList() noexcept
+  LinkedList()
   {
     m_size = 0;
     m_head = nullptr;
@@ -38,12 +39,12 @@ public:
   LinkedList(const LinkedList &) = delete;
   LinkedList &operator=(const LinkedList &) = delete;
 
-  size_t size() const noexcept
+  size_t size() const
   {
     return m_size;
   }
 
-  void append(const T &data) noexcept
+  void append(const T &data)
   {
     std::shared_ptr<Node<T>> new_node = std::make_shared<Node<T>>(data);
     if (m_head == nullptr)
@@ -62,14 +63,14 @@ public:
     m_size++;
   }
 
-  void prepend(const T &data) noexcept
+  void prepend(const T &data)
   {
     auto new_node = std::make_shared<Node<T>>(data, m_head);
     m_head = new_node;
     m_size++;
   }
 
-  void iter(std::function<void(const T &, const size_t)> callback) const noexcept
+  void iter(std::function<void(const T &, const size_t)> callback) const
   {
     std::shared_ptr<Node<T>> current = m_head;
     size_t i = 0;
@@ -81,7 +82,7 @@ public:
     }
   }
 
-  std::optional<const T> at(const size_t index) const noexcept
+  std::optional<const T> at(const size_t index) const
   {
     if (index >= m_size)
     {
@@ -99,7 +100,7 @@ public:
     return result;
   }
 
-  bool remove(const size_t index) noexcept
+  bool remove(const size_t index)
   {
     if (m_size == 0 || index >= m_size)
     {
@@ -135,7 +136,9 @@ public:
     return false;
   }
 };
+``` 
 
+```cpp
 void test_linked_list()
 {
   /* test basic operations */ {
@@ -201,4 +204,4 @@ void run_tests()
   }
   std::cout << "-- all tests pass --\n";
 }
-
+```
