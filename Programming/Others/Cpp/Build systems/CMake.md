@@ -1,13 +1,30 @@
+
+#### Sample project structure
+
+```
+CMakeLists.txt
+.gitignore
+build/
+src/
+	main.cpp
+	Game/
+		Game.cpp
+include/
+	Game/
+		Game.hpp
+		
+```
+
+
+---
+
 ##### `CMakeLists.txt` 
 
 ```txt
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
+project(sandbox VERSION 1.0.0 LANGUAGES CXX)
 
-set (PROJECT_NAME "sandbox")
-project (${PROJECT_NAME})
-set (CMAKE_CXX_STANDARD 20)
-
-# Create symlink to compile_commands.json at project root for IDE to pick it up
+# generate the compile_commands.json file.
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 if (PROJECT_IS_TOP_LEVEL AND UNIX)
     execute_process(
@@ -17,63 +34,68 @@ if (PROJECT_IS_TOP_LEVEL AND UNIX)
     )
 endif()
 
-# auto-detect source files in directory
-file (GLOB_RECURSE SRC_FILES "${PROJECT_SOURCE_DIR}/src/*.cpp")
-add_executable (${PROJECT_NAME} ${SRC_FILES})
-
-target_compile_options(${PROJECT_NAME} PUBLIC -Wextra -Werror -Wall -Wpedantic -O3)
-target_link_libraries (${PROJECT_NAME} m) # m means -lm i.e. math library
+file(GLOB_RECURSE SOURCES src/*.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE "include")
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)
+target_compile_options(${PROJECT_NAME} PUBLIC -Wextra -Werror -Wall -Wpedantic)
+target_link_libraries(${PROJECT_NAME} m) # m means -lm (link math)
 ```
 
-**Note**: Inside `add_executable` we call also list out all required source files.
+```hpp
+/// Game.hpp
 
-```txt
-add_executable(
-  ${project_name}
-  ${source_dir}/main.cpp
-  ${source_dir}/libs/colors/colors.cpp
-)
+#pragma once
+
+class Game {
+public:
+  Game();
+  ~Game();
+};
+```
+
+```cpp
+/// Game.cpp
+
+#include "Game/Game.hpp"
+#include <iostream>
+
+Game::Game() {
+  std::cout << "Running game ...\n";
+}
+
+Game::~Game() {
+  std::cout << "Exiting ...\n";
+}
+```
+
+```cpp
+/// main.cpp
+
+#include "Game/Game.hpp"
+
+int main() {
+  Game g;
+}
+```
+
+```gitignore
+build
+bin/*
+.cache
 ```
 
 ---
 
-#### Building projects
-
-##### Debug build
-
-```bash
-$ cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
-$ make -C ./build 
-$ ./build/[binary-name]
-```
-
-
-##### Release build
-
-```bash
-$ cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
-$ make -C ./build 
-$ ./build/[binary-name]
-```
-
-
-##### Alternate approach
+#### Building the projects
 
 ```bash
 $ mkdir -p build
 $ cd ./build
-$ cmake 
+$ cmake .. -D CMAKE_BUILD_TYPE=Debug
 $ ./[binary-name]
 ```
 
-
----
-
-#### `.gitignore` file
-
-```
-.cache
-compile_commands.json
-build/*
-.DS_Store
-```
+**Note**:
+- `-D CMAKE_BUILD_TYPE` is optional.  
+- To create a release build use `CMAKE_BUILD_TYPE=Release`.
