@@ -45,24 +45,41 @@ int main() {
 #### Random numbers in normal (gaussian) distribution
 
 ```cpp
+#include <cassert>
 #include <iostream>
 #include <random>
 
-int main() { 
-  /** 
-   * random_device is used to generate a random seed. This should not be used
-   * repeatedly.
-  */
-  std::random_device device;
-  std::mt19937 generator(device());
-  std::uniform_int_distribution<int> distribution(1, 10);
+class RandomDevice
+{
+  private:
+    std::mt19937 m_generator;
 
-  for (int i = 0; i < 100; i++) {
-    std::cout << distribution(generator) << " ";
-  }  
+  public:
+    RandomDevice()
+    {
+        /**
+         * random_device is used to generate a random seed. This should 
+         * not be used repeatedly.
+         */
+        std::random_device device;
+        m_generator = std::mt19937{device()};
+    }
 
-  std::cout << "\n";
-}
+    int generateInt(int min, int max)
+    {
+        assert(min < max);
+        std::uniform_int_distribution<int> dist(min, max);
+        return dist(m_generator);
+    }
+
+    float generateFloat(float min, float max)
+    {
+        assert(min < max);
+        std::uniform_real_distribution<float> dist(min, max);
+        return dist(m_generator);
+    }
+};
+
 ```
 
 **Note**: If we need to generate the same range on every execution, we can do something like this.
