@@ -1,10 +1,10 @@
 
-#### Todo
+#### To-do
 - [ ] Delete cascades
 - [ ] Type casting
 - [ ] Regex checks [Link](https://stackoverflow.com/questions/24403085/validate-column-using-regular-expression-in-postgre-sql)
 - [ ] Additional Features [Link](https://sive.rs/pg)
-- [ ] Normalisation 
+- [ ] Normalization 
 - [ ] Partial indexing
 - [ ] Volatile
 - [ ] Triggers / Listen / Notify
