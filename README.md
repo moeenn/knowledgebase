@@ -1,6 +1,4 @@
 # Knowledge-base
-My notes related to software, programming and computer science.
 
-## TODO
+My notes related to software engineering, programming and computer science.
 
-- [ ] Doubly-linked list.
