@@ -1,39 +1,10 @@
 
 #### To-do
-- [ ] Delete cascades
 - [ ] Type casting
-- [ ] Regex checks [Link](https://stackoverflow.com/questions/24403085/validate-column-using-regular-expression-in-postgre-sql)
-- [ ] Additional Features [Link](https://sive.rs/pg)
-- [ ] Normalization 
-- [ ] Partial indexing
+- [ ] Additional Features [Link](https://sive.rs/pg) 
 - [ ] Volatile
 - [ ] Triggers / Listen / Notify
-- [ ] `create index CONCURRENTLY`
 - [ ] Partitioning [Link](https://rasiksuhail.medium.com/guide-to-postgresql-table-partitioning-c0814b0fbd9b)
-- [ ] Money types [Link](https://www.youtube.com/watch?v=lxVzLAHnPOE&list=WL&index=6)
-
-
----
-
-#### Running through Docker
-
-```yml
-version: '3.3'
-
-services:
-  db:
-    image: postgres:16-alpine  
-    container_name: "postgres-db"
-    restart: always
-    environment:
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=devpass
-      - POSTGRES_DB=dev
-    ports:
-      - "5432:5432" 
-    volumes:
-      - ./docker-volume:/var/lib/postgresql/data
-```
 
 
 ---
@@ -100,28 +71,29 @@ CREATE SCHEMA public;
 
 #### Column Data types
 
-|            Type | Description                                                                                                |
-| --------------: | :--------------------------------------------------------------------------------------------------------- |
-|           `INT` | Signed four-byte integer                                                                                   |
-|        `BIGINT` | Signed 64-Bit (i.e. 8-Byte) integer. Can be used to store money values in cents.                           |
-|          `BOOL` | Logical Boolean (`TRUE` / `FALSE`)                                                                         |
-|      `CHAR (n)` | Fixed-length character string                                                                              |
-|   `VARCHAR (n)` | Variable-length character string                                                                           |
-|          `TEXT` | Variable-length character string                                                                           |
-|          `UUID` | Universally unique identifier. Takes up 128-Bits of storage.                                               |
-|          `DATE` | Calendar date (year, month, day)                                                                           |
-|        `FLOAT8` | Double precision floating-point number (8 bytes). Avoid using in production because has precision problems |
-| `DECIMAL(15,2)` | Store amount to exactly 2-decimal points. Used by most general ledger software                             |
-|          `INET` | IPv4 or IPv6 host address                                                                                  |
-|      `INTERVAL` | Time span                                                                                                  |
-|          `JSON` | Textual JSON data                                                                                          |
-|      `SMALLINT` | Signed 2-byte (16-bit) integer                                                                             |
-|        `SERIAL` | Auto Incrementing 4-byte (32-bit) integer. Should **not** be used as primary key.                          |
-|     `BIGSERIAL` | Auto Incrementing 8-byte (64-bit) integer. Can be used as primary keys.                                    |
-|          `TIME` | Time of day (no time zone)                                                                                 |
-|        `TIMETZ` | Time of day, including time zone                                                                           |
-|     `TIMESTAMP` | Date and time (no time zone)                                                                               |
-|   `TIMESTAMPTZ` | Date and time, including time zone                                                                         |
+|            Type | Description                                                                                                                                                        |
+| --------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|           `INT` | Signed four-byte integer                                                                                                                                           |
+|        `BIGINT` | Signed 64-Bit (i.e. 8-Byte) integer. Can be used to store money values in cents.                                                                                   |
+|       `NUMERIC` | A number type with very high precision, supporting floating point numbers without the hassle of rounding-off errors. **The best choice for storing money values**. |
+|          `BOOL` | Logical Boolean (`TRUE` / `FALSE`)                                                                                                                                 |
+|      `CHAR (n)` | Fixed-length character string                                                                                                                                      |
+|   `VARCHAR (n)` | Variable-length character string                                                                                                                                   |
+|          `TEXT` | Variable-length character string                                                                                                                                   |
+|          `UUID` | Universally unique identifier. Takes up 128-Bits of storage.                                                                                                       |
+|          `DATE` | Calendar date (year, month, day)                                                                                                                                   |
+|        `FLOAT8` | Double precision floating-point number (8 bytes). Avoid using in production because has precision problems                                                         |
+| `DECIMAL(15,2)` | Store amount to exactly 2-decimal points. Used by most general ledger software                                                                                     |
+|          `INET` | IPv4 or IPv6 host address                                                                                                                                          |
+|      `INTERVAL` | Time span                                                                                                                                                          |
+|          `JSON` | Textual JSON data                                                                                                                                                  |
+|      `SMALLINT` | Signed 2-byte (16-bit) integer                                                                                                                                     |
+|        `SERIAL` | Auto Incrementing 4-byte (32-bit) integer. Should **not** be used as primary key.                                                                                  |
+|     `BIGSERIAL` | Auto Incrementing 8-byte (64-bit) integer. Can be used as primary keys.                                                                                            |
+|          `TIME` | Time of day (no time zone)                                                                                                                                         |
+|        `TIMETZ` | Time of day, including time zone                                                                                                                                   |
+|     `TIMESTAMP` | Date and time (no time zone)                                                                                                                                       |
+|   `TIMESTAMPTZ` | Date and time, including time zone                                                                                                                                 |
 
 
 ---
@@ -340,6 +312,20 @@ INSERT INTO
   users (email, role)
 VALUES
   ('admin@site.com', user_role 'ADMIN');
+```
+
+##### Alternative approach
+
+```sql
+create table
+  "user" (
+    id uuid not null default gen_random_uuid (),
+    email varchar not null,
+    role varchar(10),
+    primary key (id),
+    constraint role_enum check (role in ('ADMIN', 'USER', 'EMPLOYEE')),
+    constraint email_unique unique (email)
+  )
 ```
 
 
@@ -698,6 +684,60 @@ WHERE
 
 ---
 
+#### Relationships and Delete cascades
+
+When creating relationships, always question yourself which table is the `parent` and which table is the `child`. This is because we will very likely have `delete cascade` in our foreign relationships. Consider the following schema.
+
+```sql
+create table "user" (
+  id uuid not null
+  , email varchar(255) not null
+  , password varchar(255) not null  
+  , created_at timestamp not null default now()
+  , updated_at timestamp not null default now()
+  , primary key (id)
+  , constraint email_unique unique(email)
+);
+
+create index user_email_idx on "user"(email);
+
+create table user_profile (
+  id uuid not null
+  , name varchar(255)  
+  , address text 
+  , city varchar(255)
+  , country varchar(255)  
+  , user_id uuid not null
+  , primary key (id)
+  , foreign key (user_id) references "user"(id) on delete cascade
+  , constraint user_id_unique unique(user_id)
+);
+
+create index user_profile_user_id_idx on user_profile(user_id);
+```
+
+In this schema, `user` is the parent and `user_profile` is the child table. This is an **optional one-to-one** relation because a `user` may not have any associated `user_profile`. 
+
+Notice the `user_id` field with `delete cascade` in the `user_profile` table. This ensures that when a `user` is deleted, the associated `user_profile` is also deleted.
+
+To sum up, is `delete cascade` is specified, the entry in child table will be deleted when the entry in the parent table is deleted.
+
+
+---
+
+#### Pagination
+
+```sql
+SELECT *, COUNT(*) OVER() AS total_count FROM "user" u
+WHERE u.deleted_at IS NULL
+LIMIT 10
+OFFSET 0;
+```
+
+**Note**: The above query will not take into account the `LIMIT` and `OFFSET` options when calculating the `total_count` value.
+
+
+---  
 #### JSON Aggregation
 
 We can use this trick to fetch records of relationships as JSON array. This will make it incredibly easier to serialise returned data into native language of our choosing.

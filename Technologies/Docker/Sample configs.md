@@ -2,8 +2,6 @@
 #### PostgreSQL
 
 ```yml
-version: '3.3'
-
 services:
   db:
     container_name: "postgres-db"
@@ -19,14 +17,18 @@ services:
       - "5432:5432"
 ```
 
+**Note**: The connection string will be as follows.
+
+```
+postgresql://user:pass@localhost:5432/dev?sslmode=disable
+```
+
 
 ---
 
 #### MongoDB
 
 ```yml
-version: '3.3'
-
 services:
   mongodb:
     image: mongo:7.0-jammy
