@@ -383,7 +383,7 @@ VALUES ('admin@site.com', 'Main street', 'Lahore', 5400);
 
 ---
 
-#### Pagination using `limit` and `offset`
+#### Pagination 
 
 ```sql
 SELECT
@@ -398,6 +398,18 @@ OFFSET 0;
 **Note**: `OFFSET 0` will return the first page of results.
 
 **Note**: The `LIMIT` keyword is supported by `MySQL`, `PostgreSQL` and `SQLite` but it may not be supported by other databases.
+
+
+##### Example
+
+```sql
+SELECT *, COUNT(*) OVER() AS total_count FROM users u
+WHERE u.deleted_at IS NULL
+LIMIT 10
+OFFSET 0;
+```
+
+**Note**: The above query will not take into account the `LIMIT` and `OFFSET` options when calculating the `total_count` value.
 
 
 ---
@@ -721,21 +733,6 @@ In this schema, `user` is the parent and `user_profile` is the child table. This
 Notice the `user_id` field with `delete cascade` in the `user_profile` table. This ensures that when a `user` is deleted, the associated `user_profile` is also deleted.
 
 To sum up, is `delete cascade` is specified, the entry in child table will be deleted when the entry in the parent table is deleted.
-
-
----
-
-#### Pagination
-
-```sql
-SELECT *, COUNT(*) OVER() AS total_count FROM "user" u
-WHERE u.deleted_at IS NULL
-LIMIT 10
-OFFSET 0;
-```
-
-**Note**: The above query will not take into account the `LIMIT` and `OFFSET` options when calculating the `total_count` value.
-
 
 ---  
 #### JSON Aggregation
