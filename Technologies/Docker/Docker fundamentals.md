@@ -73,6 +73,15 @@ $ docker container exec -it <container-name> sh
 
 ---
 
+#### Launch and enter a temporary container
+
+```bas
+$ docker run -i -t --rm alpine:latest sh
+```
+
+
+---
+
 #### Docker and Node
 
 ```bash
