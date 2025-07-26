@@ -131,3 +131,28 @@ eval $update_cmd
 ```
 
 
+#### Function
+
+```bash
+function greet() {
+  name=$1
+  echo "Hello, $name!"
+}
+
+greet 'admin'
+```
+
+```bash
+function combine() {
+  input=$@
+  result=""
+  for entry in $input; do
+    result+="$entry, "
+  done
+
+  echo $result
+}
+
+declare -a roles=('admin' 'customer' 'another')
+combine "${roles[@]}"
+```

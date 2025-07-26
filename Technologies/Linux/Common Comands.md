@@ -7,6 +7,21 @@ $ mkdir -p /some/nested/path
 
 # get size of a folder or folder.
 $ du -hs /path/to/folder
+
+# preview difference between two files
+$ diff <file_one> <file_two>
+
+# obfuscate a file (currupt without delete)
+$ shred <file>
+
+# view start of file
+$ head <file>
+
+# view end of file 
+$ tail <file>
+
+# view file one page at a time
+$ less <file>
 ```
 
 
@@ -89,23 +104,36 @@ $ ip addr | grep '<interface-name>'
 ```
 
 
+---
 
-#### Linux commands cheat-sheet
+#### SSH
 
 ```bash
+# simply connect using username and password.
+$ ssh <username>@<host>
+
 # connect to remote server using ssh key
 $ ssh -i <ssh_key.pem> <username>@<host>
 ```
 
-```bash
-# copy file to local machine through SSH
-$ scp -i <ssh_key.pem> -P <port> <username>@<ip_address>:/path/to/file ./<local_directory>
-```
+
+---
+
+#### Copy files on remote machine
 
 ```bash
-# obfuscate a file (currupt without delete)
-$ shred <file>
+# using scp (i.e. ssh copy). Additional args: -i <ssh_key.pem> -P <port>
+$ scp <username>@<ip_address>:/path/to/remote/file ./<local_directory>/file
+
+# using rsync.
+$ rsync -avz --progress ./local/file <user>@<host>:'/remote/path/'
 ```
+
+
+
+---
+
+#### Users 
 
 ```bash
 # add new user to the system
@@ -124,50 +152,5 @@ $ su <username>
 ```bash
 # set password for a user
 $ sudo passwd <username>
-```
-
-```bash
-# get quick description of a program
-$ whatis <program_name>
-```
-
-```bash
-# find where a program is (in $PATH)
-$ whereis <program_name>
-# Or
-$ which <program_name>
-```
-
-```bash
-# quickly view file
-# start of file
-$ head <file>
-
-# end of file 
-$ tail <file>
-
-# one page at a time
-$ less <file>
-```
-
-```bash
-# preview difference between two files
-$ diff <file_one> <file_two>
-```
-
-```bash
-# find files
-# find by name
-$ find <dir> -name <pattern>
-
-# find files
-$ find <dir> -type f -name <pattern>
-```
-
-```bash
-# get local IP (package: net-tools)
-$ ifconfig 
-# Or
-$ ip address
 ```
 
