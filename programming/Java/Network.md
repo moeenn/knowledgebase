@@ -1,6 +1,14 @@
 
 #### Making network requests
 
+```xml
+<dependency>
+  <groupId>com.fasterxml.jackson.core</groupId>
+  <artifactId>jackson-databind</artifactId>
+  <version>2.18.0</version>
+</dependency>
+```
+
 ```gradle
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
@@ -21,6 +29,7 @@ public record Todo (
 ```java
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -29,23 +38,21 @@ import java.time.Duration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TodoRespository {
-  ObjectMapper mapper = new ObjectMapper();
-  private final String baseURL = "https://jsonplaceholder.typicode.com/todos/%d";
+  private final String baseURL = "https://jsonplaceholder.typicode.com/todos/";
+  private ObjectMapper mapper = new ObjectMapper();
+  private HttpClient client = HttpClient.newHttpClient();
 
-  public Todo getTodoById(long id)
-      throws URISyntaxException, IOException, InterruptedException {
-    URI uri = new URI(String.format(baseURL, id));
+  public Todo getTodoById(long id) throws Exception {
+    URI uri = new URI(baseURL + id);
 
     HttpRequest req = HttpRequest.newBuilder()
         .uri(uri)
         .GET()
         .timeout(Duration.ofSeconds(10))
+        .header("Content-Type", "application/json")
         .build();
 
-    HttpResponse<String> res = HttpClient.newBuilder()
-        .build()
-        .send(req, HttpResponse.BodyHandlers.ofString());
-
+    HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
     return mapper.readValue(res.body(), Todo.class);
   }
 }
@@ -61,12 +68,8 @@ public class Main {
 		try {
 			Todo todo = repo.getTodoById(1);
 			System.out.println(todo);
-		} catch (URISyntaxException uriEx) {
-			System.out.printf("error: %s\n", uriEx.getMessage());
-		} catch (IOException ioEx) {
-			System.out.printf("error: %s\n", ioEx.getMessage());
-		} catch (InterruptedException intEx) {
-			System.out.printf("error: %s\n", intEx.getMessage());
+		} catch (Exception ex) {
+			System.out.printf("error: %s\n", ex.getMessage());
 		}
 	}
 }
