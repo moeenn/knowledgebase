@@ -1,5 +1,5 @@
 ```ts
-import { randomUUID } from "crypto"
+import { randomUUID } from "node:crypto"
 
 class Tag {
   constructor(

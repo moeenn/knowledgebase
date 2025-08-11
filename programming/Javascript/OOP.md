@@ -99,3 +99,29 @@ function main() {
   console.log(e.toString())
 }
 ```
+
+
+#### Destructors
+
+```ts
+class Resource {
+    #id: string
+
+    constructor() {
+        this.#id = crypto.randomUUID()
+    }
+
+    start() {
+        console.log("openging resource")
+    }
+
+    [Symbol.dispose]() {
+        console.log("closing resource #" + this.#id)
+    }
+}
+
+function main() {
+    using res = new Resource()
+    res.start()
+}
+```
