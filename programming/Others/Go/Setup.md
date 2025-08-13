@@ -25,6 +25,8 @@ $ go mod init <program_name>
 Create a `.golangci.yml` file at the root of the project. Sample content are as follows.
 
 ```yml
+version: "2"
+
 linters:
   enable:
     - exhaustive
@@ -33,14 +35,17 @@ linters:
     - nilnil
     - nilerr
     - contextcheck
-    - err113
     - gochecknoinits
     - godox
     - misspell
+    - sloglint
 
-issues:
-  exclude-dirs:
-    - some/generated/code
+  settings:
+    sloglint:
+      no-mixed-args: true
+      static-msg: true
+      key-naming-case: camel
+      args-on-sep-lines: true
 ```
 
 **Note**: Run the following command to get a list of all supported linters.
@@ -79,3 +84,51 @@ $ go get github.com/<repo-name>
     insteadOf = https://github.com/
 ```
 
+
+---
+
+#### Makefile
+
+```Makefile
+PROJECT = project
+MAIN_FILE = ./cmd/$(PROJECT)/main.go
+
+lint:
+	golangci-lint run ./...
+
+test:
+	go test ./...
+
+install:
+	go mod tidy
+
+run:
+	go run $(MAIN_FILE)
+
+build: lint test
+	go build -o ./bin/$(PROJECT) $(MAIN_FILE)
+
+.PHONY: lint install test run
+```
+
+
+---
+
+#### Executable tools
+
+```sh
+#! /bin/bash
+
+declare -a tools=(
+  "github.com/go-task/task/v3/cmd/task@latest"
+  "github.com/joho/godotenv/cmd/godotenv@latest"
+  "github.com/nametake/golangci-lint-langserver@latest"
+  "github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
+  "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"
+  "github.com/sqlc-dev/sqlc/cmd/sqlc@latest"
+)
+
+for tool in ${tools[@]}; do
+  eval "go install -v ${tool}"
+done
+```

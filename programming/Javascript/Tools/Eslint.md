@@ -6,10 +6,11 @@ $ npm install -D eslint typescript-eslint
 ```
 
 
+---
+
 #### Configuration 
 
-**Typescript project** config inside `package.json` file.
-`eslint.config.js` file:
+**Typescript project** config inside  `eslint.config.js` file.
 
 ```js
 import tseslint from "typescript-eslint"
@@ -45,25 +46,27 @@ export default [
 }
 ```
 
-**Plain JS project** config entry inside `package.json` file.
+**Plain Javascript project** config.
 
 ```json
 {
   "scripts": {
     "lint": "npx eslint --fix ./src/ --ext .mjs"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": "eslint:recommended",
-    "env": {
-      "node": true,
-      "es6": true
+  ...
+}
+```
+
+```js
+import jsdoc from "eslint-plugin-jsdoc"
+
+export default [
+  {
+    plugins: {
+      jsdoc: jsdoc
     },
-    "parserOptions": {
-      "sourceType": "module",
-      "ecmaVersion": "latest"
-    },
-    "rules": {
+    rules: {
+      "jsdoc/check-values": "error",
       "no-console": "warn",
       "quotes": [
         "warn",
@@ -76,7 +79,6 @@ export default [
       "semi": ["warn", "never"],
       "no-unused-vars": "warn"
     }
-  },
-  ...
-}
+  }
+]
 ```
