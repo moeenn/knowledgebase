@@ -50,43 +50,37 @@ val failure: Either[String, Int] = Left("Error occurred")
 #### Map
 
 ```scala
-@main def main() =
-	val capitals = Map(
-		"Pakistan" -> "Islamabad",
-		"China" -> "Beijing",
-		"USA" -> "Washington"
-	)
+val capitals = Map(
+	"Pakistan" -> "Islamabad",
+	"China" -> "Beijing",
+	"USA" -> "Washington"
+)
 
-	// loop over all key values.
-	for (country, capital) <- capitals do
-		println(s"$country capital is $capital")
-		
-	// add new element or update existing key.
-	val updatedMap = capitals + ("England" -> "London")
-	println(updatedMap)
-
-
-	val marvel = Map(
-		"Iron man" -> "Tony Stark",
-		"Captain America" -> "Steve Rogers"
-	)
+// loop over all key values.
+for (country, capital) <- capitals do
+	println(s"$country capital is $capital")
 	
-	val dc = Map(
-		"Batman" -> "Bruce Wayne",
-		"Superman" -> "Clark Kent"
-	)
+// add new element or update existing key.
+val updatedMap = capitals + ("England" -> "London")
 
-	// merge maps.	
-	val superHeroes = marvel ++ dc
-	println(superHeroes)
-  
-	// read value.
-	val batmanName: Option[String] = superHeroes.get("Batman")
-	println(batmanName) 
-	
-	// remove key.
-	val heroesWithoutIronMan = superHeroes - "Iron man"
-	println(heroesWithoutIronMan)
+val marvel = Map(
+	"Iron man" -> "Tony Stark",
+	"Captain America" -> "Steve Rogers"
+)
+
+val dc = Map(
+	"Batman" -> "Bruce Wayne",
+	"Superman" -> "Clark Kent"
+)
+
+// merge maps.	
+val superHeroes = marvel ++ dc
+
+// read value.
+val batmanName: Option[String] = superHeroes.get("Batman")
+
+// remove key.
+val heroesWithoutIronMan = superHeroes - "Iron man"
 ```
 
 
@@ -126,3 +120,18 @@ def dubiousFunction(n: Int): Int = {
 }
 ```
 
+
+---
+
+##### Passing functions as arguments
+
+```scala
+val nums = List(1,2,3,4,5,6)
+val timesTen = nums.map(n => n * 10)
+val timesTwo = nums.map { n => n * 2 }
+val timesFive = nums.map(_ * 5)
+
+timesFive.foreach {
+    println(_)
+}
+```

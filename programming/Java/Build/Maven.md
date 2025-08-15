@@ -11,6 +11,7 @@ $ sdk install maven
 
 ```bash
 # download and install dependencies
+$ mvn dependency:resolve
 $ mvn install
 
 # quick run
