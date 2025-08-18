@@ -7,18 +7,22 @@ The default boilerplate for the application can be generated using the `Spring-I
 - PostgreSQL Driver
 - Spring REST Docs (OpenAPI documentation)
 
-To download all the dependencies run the following command.
+
+---
+
+#### Commands
 
 ```bash
-# using maven
-$ mvn install
+# download dependencies.
+$ mvn dependency:resolve
 
-# running the generated file
-$ java -jar ./build/libs/{output}.jar
-```
-
-To start the application, use the following command.
-
-```bash
+# run the project in development mode.
 $ mvn clean spring-boot:run
+
+# build for production.
+$ mvn package
+
+# running in production.
+$ java -jar ./target/[app-name]-[version].jar
 ```
+
