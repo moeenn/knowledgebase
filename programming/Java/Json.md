@@ -46,7 +46,7 @@ public class UserResponse {
 	/** 0/1 in json will automatically be casted to boolean here. */
 	private boolean isAdmin;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Karachi")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
 	private Date createdAt;
 
     /** default constructor is required for read-in from Jackson */
