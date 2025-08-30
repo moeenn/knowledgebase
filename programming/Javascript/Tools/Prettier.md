@@ -15,7 +15,7 @@ Configuration inside `package.json` file.
   "prettier": {
     "singleQuote": false,
     "semi": false,
-    "tabWidth": 2,
+    "tabWidth": 4,
     "trailingComma": "all"
   },
   ...

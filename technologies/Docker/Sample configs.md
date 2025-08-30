@@ -31,14 +31,16 @@ postgresql://user:pass@localhost:5432/dev?sslmode=disable
 ```yml
 services:
   mongodb:
-    image: mongo:7.0-jammy
-    ports:
-      - '27017:27017'
+    image: mongodb/mongodb-community-server:6.0-ubi8
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=devuser
-      - MONGO_INITDB_ROOT_PASSWORD=devpass
-      - MONGO_INITDB_DATABASE=dev
+      - MONGODB_INITDB_ROOT_USERNAME=devuser
+      - MONGODB_INITDB_ROOT_PASSWORD=devpass
+      - MONGODB_INITDB_DATABASE=dev
     volumes:
-      - ./docker-volume:/data/db
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+    driver: local
 ```
 
