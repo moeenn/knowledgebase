@@ -16,7 +16,8 @@ Configuration inside `package.json` file.
     "singleQuote": false,
     "semi": false,
     "tabWidth": 4,
-    "trailingComma": "all"
+    "trailingComma": "all",
+	"printWidth": 120
   },
   ...
 }
