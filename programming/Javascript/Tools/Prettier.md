@@ -6,7 +6,10 @@ $ npm install -D prettier
 ```
 
 
+---
+
 #### Config
+
 Configuration inside `package.json` file.
 
 ```json
@@ -17,14 +20,11 @@ Configuration inside `package.json` file.
     "semi": false,
     "tabWidth": 4,
     "trailingComma": "all",
-	"printWidth": 120
+	"printWidth": 100
   },
   ...
 }
 ```
-
-
-#### Running `prettier`
 
 ```json
 {

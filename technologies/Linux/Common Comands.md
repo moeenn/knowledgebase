@@ -125,6 +125,9 @@ $ ssh -i <ssh_key.pem> <username>@<host>
 # using rsync. (RECOMMENDED)
 $ rsync -avz --progress ./local/file <user>@<host>:'/remote/path/'
 
+# copy file from remote machine.
+$ rsync -avz --progress <user>@<host>:'/remote/path/filename' ./local/file
+
 # using scp (i.e. ssh copy). Additional args: -i <ssh_key.pem> -P <port>
 $ scp <username>@<ip_address>:/path/to/remote/file ./<local_directory>/file
 ```
