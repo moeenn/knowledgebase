@@ -1,5 +1,5 @@
 
-Type: Behavioural
+Type: Behavioral
 
 ```go
 type Message string

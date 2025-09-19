@@ -571,7 +571,7 @@ CREATE TABLE
   posts (
     post_id BIGSERIAL,
     title VARCHAR(100) UNIQUE,
-    -- notice user_id has no unique constraint (1:M)
+    -- notice user_id has *no unique constraint* (1:M)
     user_id BIGSERIAL NOT NULL,
     PRIMARY KEY (post_id),
     FOREIGN KEY (user_id) REFERENCES users (user_id)
@@ -646,6 +646,7 @@ CREATE TABLE
     PRIMARY KEY (user_id)
   );
 
+-- TODO: update example to use compound ids, drop user_role_id column.
 CREATE TABLE
   user_roles (
     user_role_id BIGSERIAL NOT NULL,
