@@ -3,114 +3,231 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
-
-	"github.com/google/uuid"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-type User struct {
-	Id       string         `db:"user_id"`
-	Email    string         `db:"email"`
-	Password sql.NullString `db:"password"`
+// this interface is satisfied by both *sqlx.DB and *sqlx.Tx. It allows us to
+// use both of them interchangeably.
+type DBExec interface {
+	NamedExecContext(ctx context.Context, query string, args any) (sql.Result, error)
+	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
 }
 
-func NewUser(email, password string) User {
-	pwd := sql.NullString{
-		String: password,
-		Valid:  true,
+// sql column names must be in snake case. camel case with cause problems
+// because all column names are converted to lower case when being sent to the db.
+type Entity struct {
+	Id        string       `db:"id"`
+	Name      string       `db:"name"`
+	CreatedAt time.Time    `db:"created_at"`
+	DeletedAt sql.NullTime `db:"deleted_at"`
+}
+
+type EntityRepo struct {
+	db     *sqlx.DB
+	logger *slog.Logger
+}
+
+func NewEntityRepo(db *sqlx.DB, logger *slog.Logger) *EntityRepo {
+	return &EntityRepo{
+		logger: logger,
+		db:     db,
+	}
+}
+
+const createEntityQuery string = `
+	insert into entity (id, name, created_at, deleted_at)
+	values (:id, :name, :created_at, :deleted_at)
+`
+
+func (r *EntityRepo) CreateEntity(ctx context.Context, tx DBExec, entities []*Entity) error {
+	var db DBExec = r.db
+	if tx != nil {
+		db = tx
 	}
 
-	return User{
-		Id:       uuid.New().String(),
-		Email:    email,
-		Password: pwd,
-	}
-}
-
-type UserRespository struct {
-	db *sqlx.DB
-}
-
-func (r *UserRespository) CreateUser(user User) error {
-	stmt := "INSERT INTO users (user_id, email, password) VALUES ($1, $2, $3)"
-	_, err := r.db.Exec(stmt, user.Id, user.Email, user.Password)
-	return err
-}
-
-func (r *UserRespository) AllUsers() []User {
-	stmt := "SELECT * FROM users"
-	users := []User{}
-
-	if err := r.db.Select(&users, stmt); err != nil {
-		return []User{}
+	// this method allows multiple inserts, but doesn't allow batch updates.
+	_, err := db.NamedExecContext(ctx, createEntityQuery, entities)
+	if err != nil {
+		return fmt.Errorf("failed to save entities: %w", err)
 	}
 
-	return users
+	return nil
 }
 
-func (r *UserRespository) GetById(id string) (User, error) {
-	stmt := "SELECT * FROM users WHERE user_id = $1"
-	user := User{}
+const updateEntityQuery string = `
+	update entity
+	set name = :name,
+		deleted_at = :deleted_at
+	where id = :id
+`
 
-	if err := r.db.Get(&user, stmt, id); err != nil {
-		return User{}, fmt.Errorf("user with id '%s' not found", id)
+func (r *EntityRepo) UpdateEntities(ctx context.Context, tx DBExec, entities []*Entity) error {
+	var db DBExec = r.db
+	if tx != nil {
+		db = tx
 	}
 
-	return user, nil
+	params := make([]any, len(entities))
+	for i := range entities {
+		params[i] = entities[i]
+	}
+
+	// prepare once, multiple executions are faster.
+	stmt, err := db.PrepareNamedContext(ctx, updateEntityQuery)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, entity := range entities {
+		if _, err := stmt.ExecContext(ctx, entity); err != nil {
+			return fmt.Errorf("failed to update record: %w", err)
+		}
+	}
+
+	return nil
 }
 
-func (r *UserRespository) UpdateUser(user User) error {
-	stmt := "UPDATE users SET email = $2, password = $3 WHERE user_id = $1"
-	_, err := r.db.Exec(stmt, user.Id, user.Email, user.Password)
-	return err
+const listEntitiesQuery string = `
+	select *, count(*) over() as total_count from entity
+	where deleted_at is null
+	limit :limit
+	offset :offset
+`
+
+type LimitAndOffset struct {
+	Limit  int `db:"limit"`
+	Offset int `db:"offset"`
 }
 
-func (r *UserRespository) DeleteUser(id string) error {
-	stmt := "DELETE FROM users WHERE user_id = $1"
-	_, err := r.db.Exec(stmt, id)
-	return err
+type ListEntitiesQueryResult struct {
+	Entity
+	TotalCount int `db:"total_count"`
 }
 
-func exit(message string) {
-	fmt.Fprintf(os.Stderr, message+"\n")
-	os.Exit(1)
+func (r *EntityRepo) ListEntities(ctx context.Context, args *LimitAndOffset) ([]*Entity, int, error) {
+	rows, err := r.db.NamedQueryContext(ctx, listEntitiesQuery, args)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to query entities: %w", err)
+	}
+
+	defer rows.Close()
+	entities := []*Entity{}
+	totalCount := 0
+
+	for rows.Next() {
+		var result ListEntitiesQueryResult
+		if err := rows.StructScan(&result); err != nil {
+			return nil, 0, fmt.Errorf("failed to read entity record: %w", err)
+		}
+		totalCount = result.TotalCount
+		entities = append(entities, &result.Entity)
+	}
+
+	return entities, totalCount, nil
+}
+
+func run() error {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	db, err := sqlx.Open("postgres", "postgresql://devuser:devpass@localhost:5432/dev?sslmode=disable")
+	if err != nil {
+		return fmt.Errorf("failed to open database connection: %w", err)
+	}
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.Error("failed to close db connection", "error", err.Error())
+		}
+	}()
+
+	ctx := context.Background()
+	if err := db.PingContext(ctx); err != nil {
+		return fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	entityRepo := NewEntityRepo(db, logger)
+	dummyEntities := []*Entity{
+		{
+			Id:        "one",
+			Name:      "One",
+			CreatedAt: time.Now(),
+			DeletedAt: sql.NullTime{},
+		},
+		{
+			Id:        "two",
+			Name:      "Two",
+			CreatedAt: time.Now(),
+			DeletedAt: sql.NullTime{},
+		},
+	}
+
+	if err := entityRepo.CreateEntity(ctx, nil, dummyEntities); err != nil {
+		return err
+	}
+
+	entities, totalCount, err := entityRepo.ListEntities(ctx, &LimitAndOffset{
+		Limit:  10,
+		Offset: 0,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Total: %d\n", totalCount)
+	for _, e := range entities {
+		fmt.Printf("%+v\n", e)
+	}
+
+	updatedEntities := []*Entity{
+		{
+			Id:        "one",
+			Name:      "One (Updated)",
+			CreatedAt: time.Now(),
+			DeletedAt: sql.NullTime{},
+		},
+		{
+			Id:        "two",
+			Name:      "Two (Updated)",
+			CreatedAt: time.Now(),
+			DeletedAt: sql.NullTime{
+				Valid: true,
+				Time:  time.Now(),
+			},
+		},
+	}
+
+	tx, err := db.Beginx()
+	if err != nil {
+		return fmt.Errorf("failed to init transaction: %w", err)
+	}
+	defer tx.Rollback() // no-op when tx has already been commited.
+
+	err = entityRepo.UpdateEntities(ctx, tx, updatedEntities)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func main() {
-	// TODO: always read from env
-	connString := "postgresql://user:pass@localhost:5432/dev?sslmode=disable"
-	db, err := sqlx.Open("postgres", connString)
-	if err != nil {
-		exit("failed to open database connection")
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+		os.Exit(1)
 	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		exit("failed to communicate with the database")
-	}
-
-	userRepo := UserRespository{db}
-
-	user := NewUser("admin@site.com", "123_Apple")
-	if err := userRepo.CreateUser(user); err != nil {
-		exit("failed to create user: " + err.Error())
-	}
-
-	user.Email = "user@site.com"
-	if err = userRepo.UpdateUser(user); err != nil {
-		exit("failed to update user: " + err.Error())
-	}
-
-	users := userRepo.AllUsers()
-	fmt.Printf("%+v\n", users)
 }
 ```
 
+
+---
 
 #### Handling constraint violations
 
