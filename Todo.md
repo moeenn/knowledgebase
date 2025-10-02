@@ -1,0 +1,23 @@
+- [ ] Micro-services
+- [ ] Even-driven systems
+- [ ] Distributed systems / cloud-native
+- [ ] Apache Kafka, Redis Pub/Sub, RabbitMQ
+- [ ] AWS SQS / SNS, Fargate vs Lambda, EKS, ECS, CloudFormation
+- [ ] Elasticsearch, DynamoDB, Couchbase, Cassandra
+- [ ] Agile, Scrum, BDD
+- [ ] Kubernetes
+- [ ] CI / CD Pipeline options.
+- [ ] Prometheus, Grafana, ELK stack, CloudWatch, DataDog, NewRelic, SonarCube
+- [ ] OAuth 2.0
+- [ ] TDD 
+- [ ] CQRS, Event-sourcing, Sagas
+- [ ] gRPC
+- [ ] Jenkins, Github Actions, Helm, Ansible
+- [ ] Terraform
+- [ ] SSL / TLS
+- [ ] OpenID connect
+- [ ] DB Sharding (w/t context to NoSQL dbs)
+- [ ] Caching strategies
+- [ ] Design patterns
+- [ ] SOLID
+- [ ] SQL Query optimization

@@ -75,11 +75,6 @@ func (r *EntityRepo) UpdateEntities(ctx context.Context, tx DBExec, entities []*
 		db = tx
 	}
 
-	params := make([]any, len(entities))
-	for i := range entities {
-		params[i] = entities[i]
-	}
-
 	// prepare once, multiple executions are faster.
 	stmt, err := db.PrepareNamedContext(ctx, updateEntityQuery)
 	if err != nil {
