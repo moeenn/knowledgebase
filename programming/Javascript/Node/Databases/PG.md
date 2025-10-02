@@ -1,6 +1,53 @@
 ```bash
 $ npm i pg
-$ npm i -D @types/pg
+$ npm i -D @types/pg node-pg-migrate
+```
+
+```.env
+# dont change name; this is automatically picked up by node-pg-migrate
+DATABASE_URL=postgres://devuser:devpass@localhost:5432/dev
+```
+
+```json
+{
+  "scripts": {
+    "db:migrate": "node-pg-migrate --envPath=.env up",
+    "db:migration": "node-pg-migrate create -j sql"
+  }
+}
+```
+
+**Note**: By default, all migrations will be placed inside `migrations` directory.
+
+```bash
+# create file for a new migration
+npm run db:migration <migration_name>
+```
+
+```sql
+-- Up Migration
+create type user_role as enum('admin', 'user');
+
+create table
+  users (
+    user_id uuid,
+    email text unique not null,
+    password text not null,
+    role user_role not null default 'user',
+    is_active boolean not null default true,
+    created_at timestamp not null default now(),
+    deleted_at timestamp null,
+    primary key (user_id)
+  )
+
+-- Down Migration
+drop table users;
+drop type user_role;
+```
+
+```bash
+# apply the migration
+npm run db:migrate
 ```
 
 
@@ -224,74 +271,163 @@ main().catch(console.error)
 
 ---
 
-#### Migrations
+#### Named Arguments
 
 ```ts
-interface Migration {
-    up(): string
-    down(): string
+type NamedArgs = Record<string, Stringable | Date>
+type NamedResult = [string, string[]]
+
+interface Stringable {
+    toString(): string
 }
 
-class UserMigration implements Migration {
-    up(): string {
-        return `
-            create type user_role as enum('ADMIN', 'CLIENT');
-        
-            create table "user" (
-                id uuid not null
-                , email text not null
-                , password text not null
-                , role user_role default 'CLIENT'::user_role
-                , created_at timestamp default now()
-                , deleted_at timestamp null
-                , primary key (id)
-                , constraint email_unique unique(email)
-            );             
-        `
+export function named(query: string, args: NamedArgs): NamedResult {
+    const params = [...query.matchAll(/:([a-zA-Z_][a-zA-Z0-9_]*)/g)].map(
+        (match) => match[0].slice(1),
+    )
+
+    const paramsSet = new Set(params)
+    const paramArray: string[] = []
+    let idx = 1
+
+    for (const param of paramsSet) {
+        const paramValue = args[param]
+        if (!paramValue) {
+            throw new MissingArgumentError(param)
+        }
+
+        query = query.replaceAll(":" + param, "$" + idx)
+        if (paramValue instanceof Date) {
+            paramArray.push(paramValue.toISOString())
+        } else {
+            paramArray.push(paramValue.toString())
+        }
+
+        idx++
     }
 
-    down(): string {
-        return `
-            drop table "user";
-            drop type user_role;                
-            `
-    }
+    return [query.trim(), paramArray]
 }
 
-class MigrationManager {
-    db: Database
-    migrations: Migration[]
+export class MissingArgumentError extends Error {
+    public readonly arg: string
 
-    constructor(db: Database, migrations: Migration[]) {
-        this.db = db
-        this.migrations = migrations
-    }
-
-    async migrate() {
-        Logger.info("starting migrations")
-        await using tx = await this.db.tx()
-        for (const migration of this.migrations) {
-            Logger.info("running migration: " + migration.constructor.name)
-            await tx.tx!.query(migration.up())
-        }
-        Logger.info("migrations successful")
-    }
-
-    async rollback() {
-        Logger.info("starting rollback")
-        await using tx = await Transaction.begin(this.db)
-        for (let i = this.migrations.length - 1; i >= 0; i--) {
-            Logger.info(
-                "running migration: " + this.migrations[i].constructor.name,
-            )
-            await tx.tx!.query(this.migrations[i].down())
-        }
-        Logger.info("rollback successful")
+    constructor(arg: string) {
+        super("missing sql query argument: " + arg)
+        this.arg = arg
     }
 }
 ```
 
 ```ts
-const migrationManager = new MigrationManager(db, [new UserMigration()])
-await migrationManager.migrate()
+import test from "node:test"
+import assert from "node:assert/strict"
+import { MissingArgumentError, named } from "./named.js"
+
+test("basic scenario", () => {
+    const input = `
+	    insert into "user" (id, email, password, role, created_at)
+	    values (:id, :email, :password, :role, :created_at)
+	`
+
+    const expectedQuery = `
+	    insert into "user" (id, email, password, role, created_at)
+	    values ($1, $2, $3, $4, $5)
+	`.trim()
+
+    const inputParams = {
+        id: crypto.randomUUID(),
+        email: "admin@site.com",
+        password: "1knclskcnlc",
+        role: "ADMIN",
+        created_at: new Date(),
+    }
+
+    const expectedParams = [
+        inputParams.id,
+        inputParams.email,
+        inputParams.password,
+        inputParams.role,
+        inputParams.created_at.toISOString(),
+    ]
+
+    const got = named(input, inputParams)
+    assert.deepEqual(got, [expectedQuery, expectedParams])
+})
+
+test("repeated params", () => {
+    const input = `
+        insert into record (id, name, created_at, updated_at)
+        values (:id, :name, :created_at, :created_at)
+    `
+
+    const expectedQuery = `
+        insert into record (id, name, created_at, updated_at)
+        values ($1, $2, $3, $3)
+    `.trim()
+
+    const inputParams = {
+        id: 300,
+        name: "admin",
+        created_at: new Date(),
+    }
+
+    const expectedParams = [
+        inputParams.id.toString(),
+        inputParams.name,
+        inputParams.created_at.toISOString(),
+    ]
+
+    const got = named(input, inputParams)
+    assert.deepEqual(got, [expectedQuery, expectedParams])
+})
+
+test("missing argument", () => {
+    const input = `
+        select * from entity
+        limit :limit
+        offset :offset
+    `
+
+    const inputParms = {
+        limit: 20,
+    }
+
+    let missingErr: MissingArgumentError | null = null
+    try {
+        named(input, inputParms)
+    } catch (err) {
+        assert(err instanceof MissingArgumentError)
+        missingErr = err
+    }
+
+    assert(missingErr != null)
+    assert(missingErr.arg == "offset")
+})
+
+class Entity {
+    constructor(
+        public id: number,
+        public fullName: string,
+    ) {}
+}
+
+test("camelCase args", () => {
+    const inputQuery = `
+        insert into entity (id, full_name)
+        values (:id, :fullName)
+    `
+
+    const expectedQuery = `
+        insert into entity (id, full_name)
+        values ($1, $2)
+    `.trim()
+
+    const inputEntity = new Entity(300, "Something Random")
+    const expectedParams = [inputEntity.id.toString(), inputEntity.fullName]
+
+    const got = named(inputQuery, { ...inputEntity })
+    assert.deepEqual(got, [expectedQuery, expectedParams])
+})
 ```
+
