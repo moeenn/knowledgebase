@@ -1,5 +1,3 @@
-- [ ] Micro-services
-- [ ] Even-driven systems
 - [ ] Distributed systems / cloud-native
 - [ ] Apache Kafka, Redis Pub/Sub, RabbitMQ
 - [ ] AWS SQS / SNS, Fargate vs Lambda, EKS, ECS, CloudFormation
@@ -19,5 +17,4 @@
 - [ ] DB Sharding (w/t context to NoSQL dbs)
 - [ ] Caching strategies
 - [ ] Design patterns
-- [ ] SOLID
 - [ ] SQL Query optimization
