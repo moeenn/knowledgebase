@@ -1,7 +1,9 @@
 ```bash
 $ npm i pg
-$ npm i -D @types/pg node-pg-migrate
+$ npm i -D @types/pg node-pg-migrate dotenv
 ```
+
+**Note**: `dotenv` is an indirect dependency of `node-pg-migrate`. It is required because we will be loading database URL from `.env` file
 
 ```.env
 # dont change name; this is automatically picked up by node-pg-migrate
