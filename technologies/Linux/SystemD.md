@@ -11,7 +11,7 @@ Description=<service-name>
 After=network.target
 
 [Service]
-ExecStart=<path/to/binary/or/script>
+ExecStart=<relative/path/to/binary/or/script>
 WorkingDirectory=</path/to/directory/containing/binary/or/script>
 Type=simple
 Restart=always
@@ -19,3 +19,10 @@ Restart=always
 [Install]
 WantedBy=default.target
 ```
+
+**Note**: Any time the service file for any service changes, run the following command to reload.
+
+```bash
+$ systemctl daemon-reload
+```
+

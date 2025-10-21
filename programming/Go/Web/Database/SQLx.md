@@ -17,8 +17,8 @@ import (
 // this interface is satisfied by both *sqlx.DB and *sqlx.Tx. It allows us to
 // use both of them interchangeably.
 type DBExec interface {
-	NamedExecContext(ctx context.Context, query string, args any) (sql.Result, error)
-	PrepareNamedContext(ctx context.Context, query string) (*sqlx.NamedStmt, error)
+	NamedExec(query string, args any) (sql.Result, error)
+	PrepareNamed(query string) (*sqlx.NamedStmt, error)
 }
 
 // sql column names must be in snake case. camel case with cause problems
@@ -27,7 +27,7 @@ type Entity struct {
 	Id        string       `db:"id"`
 	Name      string       `db:"name"`
 	CreatedAt time.Time    `db:"created_at"`
-	DeletedAt sql.NullTime `db:"deleted_at"`
+	DeletedAt *time.Time   `db:"deleted_at"`
 }
 
 type EntityRepo struct {
@@ -47,15 +47,14 @@ const createEntityQuery string = `
 	values (:id, :name, :created_at, :deleted_at)
 `
 
-func (r *EntityRepo) CreateEntity(ctx context.Context, tx DBExec, entities []*Entity) error {
+func (r *EntityRepo) CreateEntity(tx DBExec, entities []*Entity) error {
 	var db DBExec = r.db
 	if tx != nil {
 		db = tx
 	}
 
 	// this method allows multiple inserts, but doesn't allow batch updates.
-	_, err := db.NamedExecContext(ctx, createEntityQuery, entities)
-	if err != nil {
+	if _, err := db.NamedExec(createEntityQuery, entities); err != nil {
 		return fmt.Errorf("failed to save entities: %w", err)
 	}
 
@@ -69,21 +68,21 @@ const updateEntityQuery string = `
 	where id = :id
 `
 
-func (r *EntityRepo) UpdateEntities(ctx context.Context, tx DBExec, entities []*Entity) error {
+func (r *EntityRepo) UpdateEntities(tx DBExec, entities []*Entity) error {
 	var db DBExec = r.db
 	if tx != nil {
 		db = tx
 	}
 
 	// prepare once, multiple executions are faster.
-	stmt, err := db.PrepareNamedContext(ctx, updateEntityQuery)
+	stmt, err := db.PrepareNamed(updateEntityQuery)
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)
 	}
 	defer stmt.Close()
 
 	for _, entity := range entities {
-		if _, err := stmt.ExecContext(ctx, entity); err != nil {
+		if _, err := stmt.Exec(entity); err != nil {
 			return fmt.Errorf("failed to update record: %w", err)
 		}
 	}
@@ -108,8 +107,8 @@ type ListEntitiesQueryResult struct {
 	TotalCount int `db:"total_count"`
 }
 
-func (r *EntityRepo) ListEntities(ctx context.Context, args *LimitAndOffset) ([]*Entity, int, error) {
-	rows, err := r.db.NamedQueryContext(ctx, listEntitiesQuery, args)
+func (r *EntityRepo) ListEntities(args *LimitAndOffset) ([]*Entity, int, error) {
+	rows, err := r.db.NamedQuery(listEntitiesQuery, args)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to query entities: %w", err)
 	}
@@ -130,9 +129,11 @@ func (r *EntityRepo) ListEntities(ctx context.Context, args *LimitAndOffset) ([]
 	return entities, totalCount, nil
 }
 
+const URI string = "postgresql://devuser:devpass@localhost:5432/dev?sslmode=disable"
+
 func run() error {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	db, err := sqlx.Open("postgres", "postgresql://devuser:devpass@localhost:5432/dev?sslmode=disable")
+	db, err := sqlx.Open("postgres", URI)
 	if err != nil {
 		return fmt.Errorf("failed to open database connection: %w", err)
 	}
@@ -143,8 +144,7 @@ func run() error {
 		}
 	}()
 
-	ctx := context.Background()
-	if err := db.PingContext(ctx); err != nil {
+	if err := db.Ping(); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
@@ -154,21 +154,21 @@ func run() error {
 			Id:        "one",
 			Name:      "One",
 			CreatedAt: time.Now(),
-			DeletedAt: sql.NullTime{},
+			DeletedAt: nil,
 		},
 		{
 			Id:        "two",
 			Name:      "Two",
 			CreatedAt: time.Now(),
-			DeletedAt: sql.NullTime{},
+			DeletedAt: nil,
 		},
 	}
 
-	if err := entityRepo.CreateEntity(ctx, nil, dummyEntities); err != nil {
+	if err := entityRepo.CreateEntity(nil, dummyEntities); err != nil {
 		return err
 	}
 
-	entities, totalCount, err := entityRepo.ListEntities(ctx, &LimitAndOffset{
+	entities, totalCount, err := entityRepo.ListEntities(&LimitAndOffset{
 		Limit:  10,
 		Offset: 0,
 	})
@@ -187,16 +187,13 @@ func run() error {
 			Id:        "one",
 			Name:      "One (Updated)",
 			CreatedAt: time.Now(),
-			DeletedAt: sql.NullTime{},
+			DeletedAt: nil,
 		},
 		{
 			Id:        "two",
 			Name:      "Two (Updated)",
 			CreatedAt: time.Now(),
-			DeletedAt: sql.NullTime{
-				Valid: true,
-				Time:  time.Now(),
-			},
+			DeletedAt: Ref(time.Now()),
 		},
 	}
 
@@ -206,7 +203,7 @@ func run() error {
 	}
 	defer tx.Rollback() // no-op when tx has already been commited.
 
-	err = entityRepo.UpdateEntities(ctx, tx, updatedEntities)
+	err = entityRepo.UpdateEntities(tx, updatedEntities)
 	if err != nil {
 		return err
 	}
@@ -289,7 +286,7 @@ func run() error {
 	}
 
 	newUserData := UserEntity{
-		UserId: uuid.New().String(),
+		UserId: uuid.NewString(),
 		Email:  "admin@site.com",
 	}
 
@@ -300,5 +297,96 @@ func run() error {
 
 	fmt.Printf("%+v\n", user)
 	return nil
+}
+```
+
+
+---
+
+#### Helpers 
+
+##### Quickly scan rows into struct
+
+```go
+func ScanRows[T any](rows *sqlx.Rows) ([]*T, error) {
+	var records []*T
+	for rows.Next() {
+		var record T
+		if err := rows.StructScan(&record); err != nil {
+			return nil, fmt.Errorf("failed to read db row into struct: %w", err)
+		}
+		records = append(records, &record)
+	}
+	return records, nil
+}
+```
+
+```go
+func listUsers(db *sqlx.DB, args *LimitOffset) ([]*User, error) {
+	rows, err := db.NamedQuery(listUsersQuery, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	users, err := ScanRows[User](rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+```
+
+
+##### Convert slices into PostgreSQL Arrays
+
+```go
+func ToPgArray[T any](items []T) string {
+	var sb strings.Builder
+	size := len(items)
+
+	sb.WriteString("{")
+	for i, item := range items {
+		sb.WriteString(fmt.Sprintf("%v", item))
+		if i != size-1 {
+			sb.WriteString(",")
+		}
+	}
+
+	sb.WriteString("}")
+	return sb.String()
+}
+```
+
+```go
+const findUsersByIdsQuery string = `
+	select u.* from "user" u
+	where id = any($1);
+`
+
+func findUsersByIds(db *sqlx.DB, ids []int) ([]*User, error) {
+	args := ToPgArray(ids)
+	rows, err := db.Queryx(findUsersByIdsQuery, args)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := ScanRows[User](rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+```
+
+
+##### Using `sqlx.DB` and `sqlx.Tx` interchangeably
+
+```go
+type DBExec interface {
+	NamedExec(query string, args any) (sql.Result, error)
+	PrepareNamed(query string) (*sqlx.NamedStmt, error)
 }
 ```
