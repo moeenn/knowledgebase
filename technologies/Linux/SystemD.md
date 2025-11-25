@@ -11,7 +11,7 @@ Description=<service-name>
 After=network.target
 
 [Service]
-ExecStart=<relative/path/to/binary/or/script>
+ExecStart=</full/path/to/binary/or/script>
 WorkingDirectory=</path/to/directory/containing/binary/or/script>
 Type=simple
 Restart=always

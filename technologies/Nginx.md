@@ -76,9 +76,24 @@ http {
 
 ##### The config file
 
-Assuming that we a setting up Nginx for domain `mysite.com`, we will create the 
+Assuming that we a setting up `nginx` for domain `mysite.com`, we will create the 
 following file `/etc/nginx/sites-available/mysite.com` and also create a symlink
 at `/etc/nginx/sites-enabled/mysite.com`. The content will be as follows.
+
+
+###### Basic config 
+
+```
+server{
+    server_name mysite.com;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+    }
+}
+```
+
+
+###### More involved example 
 
 ```
 server{
@@ -91,6 +106,10 @@ server{
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
+    
+    gzip on;
+    gzip_types text/css application/javascript image/png image/jpeg image/webp;
+    gzip_proxied any;
 }
 ```
 
@@ -105,11 +124,13 @@ Any time we modify the `nginx` config files we can verify the the configs are
 correct by running the following command.
 
 ```bash
+# check if all configs are ok.
 $ sudo nginx -t
-```
 
-If everything is correct, we can restart the `nginx` `systemd` service.
+# reload configs.
+$ sudo ngingx -s reload
 
-```bash
+# optional.
 $ sudo systemctl restart nginx
 ```
+
