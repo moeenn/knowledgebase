@@ -1,4 +1,5 @@
 ### Conventions
+
 - Types are named in snake case with following suffixes:
   - `_t` for structs.
   - `_e` for enums.
