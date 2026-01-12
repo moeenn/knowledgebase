@@ -1,3 +1,20 @@
+## Reading `.env` files
+
+The following dependency is required before environment variables can be read in the application.
+
+```xml
+<dependency>
+	<groupId>me.paulschwarz</groupId>
+	<artifactId>spring-dotenv</artifactId>
+	<version>4.0.0</version>
+</dependency>
+```
+
+**Note**: The `.env` file will be located at the root of the project (i.e. next to the `pom.xml`file).
+
+
+
+
 Add the following lines to the `resources/application.properties` file.
 
 #### Default server port
@@ -14,17 +31,7 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/dev
 spring.datasource.username=devuser
 spring.datasource.password=devpass
 spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.datasource.driver-class-name=org.postgresql.Driver
 ```
 
-
-#### Connect to `H2` in-memory database
-
-```
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=password
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-```
 
