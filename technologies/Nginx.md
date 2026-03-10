@@ -128,7 +128,7 @@ correct by running the following command.
 $ sudo nginx -t
 
 # reload configs.
-$ sudo ngingx -s reload
+$ sudo nginx -s reload
 
 # optional.
 $ sudo systemctl restart nginx

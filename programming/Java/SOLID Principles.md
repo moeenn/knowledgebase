@@ -1,4 +1,3 @@
-
 - Single-responsibility
 - Open-closed
 - Liskov substitution
