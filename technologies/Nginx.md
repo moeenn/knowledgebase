@@ -108,7 +108,7 @@ server{
     }
     
     gzip on;
-    gzip_types text/css application/javascript image/png image/jpeg image/webp;
+    gzip_types text/css application/javascript image/png image/jpeg image/svg+xml image/webp;
     gzip_proxied any;
 }
 ```
@@ -128,7 +128,7 @@ correct by running the following command.
 $ sudo nginx -t
 
 # reload configs.
-$ sudo ngingx -s reload
+$ sudo nginx -s reload
 
 # optional.
 $ sudo systemctl restart nginx
