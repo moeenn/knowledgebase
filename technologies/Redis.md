@@ -1,4 +1,0 @@
-
-- [ ] Redis streams
-- [ ] Consumer groups
-- [ ] 

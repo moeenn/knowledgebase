@@ -3,6 +3,7 @@
 
 **Command**: A command is request for an action to be performed. A response is expected in case of a command.
 
+**Time-to-live (TTL)**: Every message has a TTL assocaited with it. If a message is not acknoledged (i.e. processed) within this timeframe, the message is moved out of its queue and added to a dead-letter queue. This prevents the main queue from clogging up.
 
 ---
 
@@ -56,3 +57,5 @@ Orchestration refers to the request/response (i.e. Synchronous) model of communi
 Implement robust error handling mechanisms, including message retries and dead-letter queues, to ensure reliable event processing.
 
 **Dead-letter Queue (DLQ)**: Malformed messages which cannot be processed by the consumers can clog-up the queues. DLQs hold such messages so they can be later processed or discarded.
+
+**Note**: If messages are being processed in real time and cannot be queued for later processing, a DLQ may not be suitable.

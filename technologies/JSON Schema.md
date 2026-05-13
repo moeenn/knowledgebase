@@ -8,6 +8,7 @@
 - `object`
 - `array`
 
+---
 
 #### Basic nested objects
 
@@ -32,6 +33,8 @@
 }
 ```
 
+
+---
 
 #### Enumerated values
 
@@ -63,6 +66,8 @@
 ```
 
 
+---
+
 #### Array of objects
 
 ```json
@@ -81,6 +86,8 @@
 }
 ```
 
+
+---
 
 #### String constraints
 
@@ -115,6 +122,8 @@
 
 **Note**: `pattern` takes in a regular expression as value.
 
+
+---
 
 #### Number constraints
 
