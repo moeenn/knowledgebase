@@ -1,3 +1,8 @@
+- [ ] Java
+  - Completable Future
+  - Concurrent Map
+  - Jooby (web server)
+  - JDBI (db)
 - [ ] Distributed systems / cloud-native
 - [ ] Apache Kafka, Redis Pub/Sub, RabbitMQ
 - [ ] AWS SQS / SNS, Fargate vs Lambda, EKS, ECS, CloudFormation

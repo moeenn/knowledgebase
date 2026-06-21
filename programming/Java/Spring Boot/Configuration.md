@@ -10,28 +10,38 @@ The following dependency is required before environment variables can be read in
 </dependency>
 ```
 
-**Note**: The `.env` file will be located at the root of the project (i.e. next to the `pom.xml`file).
+```gradle
+implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+```
+
+**Note**: The `.env` file will be located at the root of the project.
+
+We will also need to add the following annotation on top of our entry-point class.
 
 
+```java
+import org.springframework.context.annotation.PropertySource;
 
+@SpringBootApplication
+@PropertySource(value = "file:.env", ignoreResourceNotFound = true)
+public class ApiApplication {
+	...
+}
+```
+
+## Common Condigurations
 
 Add the following lines to the `resources/application.properties` file.
 
-#### Default server port
-
 ```
+# server.
 server.port=5000
-```
 
-
-#### Connect to PostgreSQL
-
-```
+# database.
 spring.datasource.url=jdbc:postgresql://localhost:5432/dev
-spring.datasource.username=devuser
-spring.datasource.password=devpass
-spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.username=${DATABASE_USER}
+spring.datasource.password=${DABATABSE_PASS}
+spring.jpa.hibernate.ddl-auto=validate
 spring.datasource.driver-class-name=org.postgresql.Driver
 ```
-
 

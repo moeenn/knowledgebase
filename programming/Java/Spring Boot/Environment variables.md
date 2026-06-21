@@ -8,6 +8,10 @@ The following dependency is required before environment variables can be read in
 </dependency>
 ```
 
+```gradle
+implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+```
+
 The `.env` file will be located at the root of the project (i.e. next to the `pom.xml`file).
 
 

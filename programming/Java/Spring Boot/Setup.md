@@ -15,9 +15,13 @@ The default boilerplate for the application can be generated using the `Spring-I
 ```bash
 # download dependencies.
 $ mvn dependency:resolve
+# OR
+$ gradle build
 
 # run the project in development mode.
 $ mvn clean spring-boot:run
+# OR
+$ gradle bootRun
 
 # build for production.
 $ mvn package
