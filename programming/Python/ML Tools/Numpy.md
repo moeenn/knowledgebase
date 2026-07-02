@@ -51,6 +51,7 @@ b = np.full((3, 3), fill_value=True, dtype=bool)
 ---
 
 #### Array operations
+
 ```python
 a = np.array([1, 2, 3])
 b = np.array([2, 0, 2])
