@@ -1,12 +1,12 @@
 #### `Lvalue` and `Rvalues`
+
 Lvalues generally have some storage backing them i.e. they have an identifiable storage in memory. Everything which is not an Lvalue, is an Rvalue i.e. Rvalues are generally temporary values.
 
-
 Rules
+
 1. Nothing can be assigned to an Rvalue.
 2. We cannot take an Lvalue reference from an Rvalue i.e. we can only have an Lvalue reference for an Lvalue.
 3. Rule # 2 doesn’t apply, if the Lvalue reference is const.
-
 
 ---
 
@@ -17,7 +17,7 @@ Rules
 
 int calculate_lvalue() { return 10; }
 
-int &calculate_lvalue_reference() {
+int& calculate_lvalue_reference() {
   static int value = 10;
   return value;
 }
@@ -37,13 +37,12 @@ int main() {
   int c = calculate_lvalue();
 
   /**
-   *  the function calculate_lvalue_reference returns a modifiable l-value 
-   *  reference, this is why we can assign to it. 300 is the r-value   
+   *  the function calculate_lvalue_reference returns a modifiable l-value
+   *  reference, this is why we can assign to it. 300 is the r-value
    */
   calculate_lvalue_reference() = 300;
 }
 ```
-
 
 ---
 
@@ -116,7 +115,7 @@ int main() {
   /**
    *  'full_name' is lvalue, right hand side of statement is rvalue
    *  when we add two lvalues (first and last), it creates a new temporary
-   *  value (which is an rvalue) which is then assigned to 
+   *  value (which is an rvalue) which is then assigned to
    *  'full_name' i.e. lvalue
    */
   std::string full_name = first + last;
@@ -128,7 +127,6 @@ int main() {
   print_name(first + last);
 }
 ```
-
 
 ---
 
@@ -151,7 +149,7 @@ auto print_value(int &&value) -> void {
 }
 
 auto main() -> int {
-  /* prints lvalue */ 
+  /* prints lvalue */
   int n = 10;
   print_value(n);
 
@@ -159,7 +157,6 @@ auto main() -> int {
   print_value(10);
 }
 ```
-
 
 ---
 
@@ -197,13 +194,13 @@ public:
   EntityManager(const Entity& entity) : m_entity(entity) {}
 };
 
-int main() { 
+int main() {
   /**
   *  implicit construction of Entity and pass to EntityManager constructor
   *  same as following:
-  *  EntityManager em{Entity{"Someone"}} 
+  *  EntityManager em{Entity{"Someone"}}
   */
-  EntityManager em{"Someone"}; 
+  EntityManager em{"Someone"};
 }
 
 /**
@@ -215,4 +212,3 @@ int main() {
 ```
 
 Reference: [Link](https://www.youtube.com/watch?v=ehMg6zvXuMY&t=34s)
-
